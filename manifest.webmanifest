@@ -1,0 +1,17 @@
+{
+  "name": "LoopTalk — inglés con IA sin internet",
+  "short_name": "LoopTalk",
+  "description": "Practica inglés conversando con una IA que corre en tu teléfono, con el método de input comprensible de Krashen.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e8483b",
+  "theme_color": "#e8483b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

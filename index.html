@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e8483b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LoopTalk">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>LoopTalk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: cálido, paciente, sin presión — filtro afectivo bajo (Krashen), con correcciones claras cuando se piden
+   IDEA: un pasaporte de viajero: cada lugar es un sello que visitas para conversar
+   PICTURE: la cuadrícula de lugares con personajes ilustrados ES la portada
+   COLOUR and TYPE: tomate #e8483b dominante, ciruela #3b1f4a de apoyo, girasol #ffc83d acento; Fredoka + Nunito
+   LAYOUT: app móvil a pantalla completa; barra superior, contenido, compositor fijo abajo */
+:root{color-scheme:light dark;
+ --red:#e8483b;--plum:#3b1f4a;--sun:#ffc83d;--ok:#1f9d63;
+ --bg:light-dark(#ffffff,#1b1424);--bg2:light-dark(#f6f1f7,#271d33);--ink:light-dark(#22172b,#f4eef8);
+ --mute:light-dark(#6b5d75,#b9aac6);--line:light-dark(#e6dcea,#3a2d48);
+ --me:light-dark(#3b1f4a,#ffc83d);--meink:light-dark(#fff,#2a1630);--ai:light-dark(#f6f1f7,#2c2139)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;font-weight:600;margin:0;line-height:1.1;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input[type=range],input[type=checkbox]{accent-color:var(--red)}input[type=checkbox]{width:20px;height:20px;vertical-align:-4px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.screen{display:none;min-height:100%;flex-direction:column}
+.screen.on{display:flex}
+.top{background:var(--red);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) max(16px,env(safe-area-inset-right)) 18px max(16px,env(safe-area-inset-left))}
+.wrap{width:100%;max-width:760px;margin:0 auto}
+.row{display:flex;align-items:center;gap:10px}
+.sp{flex:1}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ib svg{width:24px;height:24px}
+.top .ib{background:rgba(255,255,255,.16)}
+.btn{min-height:48px;padding:0 20px;border-radius:999px;background:var(--plum);color:#fff;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.sun{background:var(--sun);color:#2a1630}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.5}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18)}
+.dot{width:8px;height:8px;border-radius:50%;background:#bbb}.dot.ok{background:#7dffa8}.dot.busy{background:var(--sun);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.main{flex:1;padding:18px max(16px,env(safe-area-inset-left)) calc(28px + env(safe-area-inset-bottom))}
+.hello{font-size:clamp(30px,8vw,44px)}
+.sub{opacity:.92;margin:8px 0 0;max-width:34em}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.stat{background:rgba(0,0,0,.16);border-radius:16px;padding:10px 12px}
+.stat b{display:block;font:600 24px Fredoka,sans-serif;white-space:nowrap}.stat span{font-size:13px;opacity:.9}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 12px}
+.sec h2{font-size:22px}.sec small{color:var(--mute);font-size:13px}
+.packs{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;margin:-4px 0 14px}
+.packs button{flex:none;scroll-snap-align:start;min-height:42px;padding:0 16px;border-radius:999px;background:var(--bg2);font-weight:800;white-space:nowrap}
+.packs button.sel{background:var(--plum);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.place{position:relative;text-align:left;border-radius:22px;padding:12px;min-height:168px;color:#fff;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.place .av{position:absolute;right:-6px;top:-4px;width:96px;height:96px}
+.place .ico{position:absolute;left:12px;top:12px;width:34px;height:34px;border-radius:12px;background:rgba(255,255,255,.22);display:grid;place-items:center}
+.place .ico svg{width:20px;height:20px}
+.place h3{font-size:18px}.place p{margin:2px 0 0;font-size:13px;opacity:.92;line-height:1.3}
+.place .done{position:absolute;right:10px;bottom:10px;font-size:12px;font-weight:800;background:rgba(0,0,0,.22);padding:2px 8px;border-radius:999px}
+.place.add{background:var(--bg2);color:var(--ink);border:2px dashed var(--line);box-shadow:none;align-items:flex-start}
+.place.add .ico{background:var(--plum);color:#fff}
+.wide{display:flex;gap:12px;align-items:center;text-align:left;width:100%;padding:14px;border-radius:20px;background:var(--bg2);margin-bottom:10px}
+.wide .ico{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--plum);color:#fff;flex:none}
+.wide .ico svg{width:24px;height:24px}
+.wide b{display:block;font-family:Fredoka,sans-serif;font-weight:600;font-size:18px}.wide span{font-size:14px;color:var(--mute)}
+.krashen{margin-top:18px;padding:14px 16px;border-radius:18px;border:2px dashed var(--line);font-size:14px;color:var(--mute)}
+.krashen b{color:var(--ink)}
+.models{display:grid;gap:10px;margin:14px 0}
+.model{display:flex;gap:12px;align-items:flex-start;text-align:left;padding:14px;border-radius:18px;border:2px solid var(--line);width:100%}
+.model.sel{border-color:var(--red);background:color-mix(in srgb,var(--red) 8%,transparent)}
+.model b{font-family:Fredoka,sans-serif;font-size:18px;font-weight:600}.model small{display:block;color:var(--mute);font-size:14px}
+.model>span:nth-child(2){flex:1}
+.model .sz{flex:none;font-weight:800;white-space:nowrap;font-size:14px;padding-left:4px}
+.radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:2px}
+.model.sel .radio{border:7px solid var(--red)}
+.bar{height:12px;border-radius:999px;background:var(--bg2);overflow:hidden;margin:12px 0 6px}
+.bar i{display:block;height:100%;width:0;background:var(--red);transition:width .3s}
+.note{font-size:14px;color:var(--mute)}
+.warn{padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--sun) 25%,transparent);font-size:14px;margin:10px 0}
+#chat .top{padding-bottom:12px}
+.who{display:flex;align-items:center;gap:10px}
+.who .av{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.2);flex:none}
+#cRole{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who b{font-family:Fredoka,sans-serif;font-weight:600;font-size:18px;display:block;line-height:1.1}.who span{font-size:13px;opacity:.9}
+.msgs{flex:1;overflow-y:auto;padding:16px max(14px,env(safe-area-inset-left)) 8px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:86%;align-self:flex-start}
+.m .b{background:var(--ai);padding:11px 14px;border-radius:20px 20px 20px 6px;font-size:17px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.m.me{align-self:flex-end}.m.me .b{background:var(--me);color:var(--meink);border-radius:20px 20px 6px 20px}
+.w{border-radius:4px;cursor:pointer}.w:hover,.w:active{background:color-mix(in srgb,var(--sun) 45%,transparent)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.acts button{font-size:13px;font-weight:700;padding:6px 10px;min-height:34px;border-radius:999px;background:var(--bg2);color:var(--mute);display:inline-flex;align-items:center;gap:5px}
+.acts svg{width:15px;height:15px}
+.m.me .acts{justify-content:flex-end}
+.extra{margin-top:6px;font-size:15px;padding:10px 12px;border-radius:14px;border-left:4px solid var(--sun);background:var(--bg2);white-space:pre-wrap;text-align:left}
+.extra.fix{border-left-color:var(--red)}
+.extra b{color:var(--red)}
+.okmark{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;color:var(--ok);margin-top:4px}
+.okmark svg{width:15px;height:15px}
+.typing{display:inline-flex;gap:4px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--mute);animation:pulse 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+.sugs{display:flex;gap:8px;overflow-x:auto;padding:0 max(14px,env(safe-area-inset-left)) 8px}
+.sugs button{flex:none;max-width:80%;text-align:left;font-size:15px;padding:8px 12px;border-radius:16px;border:2px solid var(--sun);background:var(--bg)}
+.comp{border-top:1px solid var(--line);padding:10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:flex;gap:8px;align-items:flex-end;background:var(--bg)}
+.comp textarea{flex:1;resize:none;max-height:120px;min-height:48px;border-radius:24px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);padding:11px 16px;font:16px/1.4 Nunito,sans-serif}
+.comp .ib{background:var(--bg2)}
+.comp .ib.send{background:var(--red);color:#fff}
+.comp .ib.mic.rec{background:var(--sun);color:#2a1630;animation:pulse 1s infinite}
+.tools{display:flex;gap:8px;padding:0 max(12px,env(safe-area-inset-left)) 6px;overflow-x:auto}
+.tools button{flex:none;font-size:14px;font-weight:700;min-height:38px;padding:0 12px;border-radius:999px;background:var(--bg2);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tools button.hfb{background:var(--plum);color:#fff}
+.tools svg{width:16px;height:16px}
+/* manos libres */
+.hf{position:fixed;inset:0;z-index:15;background:var(--plum);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:calc(env(safe-area-inset-top) + 20px) 22px calc(env(safe-area-inset-bottom) + 24px)}
+.hf.on{display:flex}
+.hf .orb{width:min(56vw,240px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;position:relative;margin:10px auto}
+.hf .orb::before{content:"";position:absolute;inset:-14px;border-radius:50%;border:6px solid var(--sun);opacity:0;transition:opacity .3s}
+.hf[data-s=listen] .orb::before{opacity:1;animation:ring 1.4s ease-in-out infinite}
+.hf[data-s=speak] .orb::before{opacity:.8;border-color:#fff;animation:ring .9s ease-in-out infinite}
+.hf[data-s=think] .orb::before{opacity:.5;border-style:dashed;animation:spin 3s linear infinite}
+@keyframes ring{50%{transform:scale(1.06)}}@keyframes spin{to{transform:rotate(1turn)}}
+.hf .orb .av{width:78%;height:78%}
+.hf h2{font-size:28px}
+.hf .st{font-size:18px;font-weight:800;color:var(--sun);margin-top:6px}
+.hf .said{font-size:19px;line-height:1.4;max-width:30em;min-height:3em;margin:8px auto 0}
+.hf .heard{font-size:16px;opacity:.8;font-style:italic;min-height:1.5em}
+.hf .cmds{font-size:13px;opacity:.75;max-width:28em}
+.hf .row{justify-content:center;flex-wrap:wrap}
+.hf .btn.ghost{color:#fff;border-color:rgba(255,255,255,.35)}
+.shade{position:fixed;inset:0;background:rgba(20,10,25,.45);display:none;z-index:20}
+.shade.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--bg);border-radius:24px 24px 0 0;padding:18px max(18px,env(safe-area-inset-left)) calc(22px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;transform:translateY(105%);transition:transform .25s ease}
+.sheet.on{transform:none}
+.sheet h3{font-size:24px;margin-bottom:6px}
+.field{margin:14px 0}.field label{display:block;font-weight:800;margin-bottom:6px}
+.field select,.field input[type=text],.field textarea{width:100%;min-height:48px;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);padding:0 12px;font:16px Nunito,sans-serif}
+.field textarea{padding:10px 12px;min-height:90px;resize:vertical}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.seg button{min-height:46px;border-radius:14px;border:2px solid var(--line);font-weight:800;font-size:14px;padding:4px}
+.seg button.sel{border-color:var(--red);background:var(--red);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:42px;padding:0 14px;border-radius:999px;background:var(--bg2);font-weight:700}
+.chips button.sel{background:var(--plum);color:#fff}
+.vlist{display:grid;gap:8px}
+.vi{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:16px;background:var(--bg2)}
+.vi b{font-family:Fredoka,sans-serif;font-weight:600;font-size:19px}.vi p{margin:2px 0 0;font-size:15px;color:var(--mute);white-space:pre-wrap}
+.empty{color:var(--mute);text-align:center;padding:30px 10px}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--plum);color:#fff;padding:10px 16px;border-radius:18px;font-weight:700;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- CONFIGURACIÓN INICIAL -->
+<section class="screen" id="setup">
+ <div class="top"><div class="wrap">
+  <h1 class="hello">LoopTalk</h1>
+  <p class="sub">Aprende inglés conversando con una IA que vive dentro de tu teléfono. Se descarga una sola vez y después funciona sin internet.</p>
+ </div></div>
+ <div class="main"><div class="wrap">
+  <div id="gpuWarn"></div>
+  <h2 style="font-size:22px">Cuéntale al tutor sobre ti</h2>
+  <div class="field"><label for="pfJob">¿A qué te dedicas?</label><input type="text" id="pfJob" placeholder="p. ej. médico, camionero, contador, estudiante"></div>
+  <div class="field"><label for="pfLike">¿Qué temas te gustan?</label><input type="text" id="pfLike" placeholder="p. ej. fútbol, cocina, viajes, tecnología"></div>
+  <h2 style="font-size:22px;margin-top:22px">Elige el cerebro de tu tutor</h2>
+  <div class="models" id="modelList"></div>
+  <p class="note">Usa wifi para la descarga. El modelo queda guardado en el teléfono; no se envía nada a ningún servidor.</p>
+  <div id="dl" hidden>
+   <div class="bar"><i id="dlBar"></i></div>
+   <p class="note" id="dlTxt">Preparando…</p>
+  </div>
+  <div class="row" style="margin-top:14px;flex-wrap:wrap">
+   <button class="btn" id="dlBtn">Descargar y empezar</button>
+   <button class="btn ghost" id="skipBtn" hidden>Volver</button>
+  </div>
+ </div></div>
+</section>
+
+<!-- INICIO -->
+<section class="screen" id="home">
+ <div class="top"><div class="wrap">
+  <div class="row"><span class="pill"><i class="dot" id="engDot"></i><span id="engTxt">Tutor apagado</span></span><span class="sp"></span>
+   <button class="ib" id="setBtn" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+  <h1 class="hello" style="margin-top:12px">Where to today?</h1>
+  <p class="sub">Escoge un lugar y conversa. Escucha mucho, entiende el sentido; las correcciones llegan sin cortar la charla.</p>
+  <div class="stats">
+   <div class="stat"><b id="stToday">0 min</b><span>input hoy</span></div>
+   <div class="stat"><b id="stTotal">0 h</b><span>input total</span></div>
+   <div class="stat"><b id="stStreak">0</b><span>días seguidos</span></div>
+  </div>
+ </div></div>
+ <div class="main"><div class="wrap">
+  <div class="sec"><h2>Lugares</h2><small>Juego de roles</small></div>
+  <div class="packs" id="packs"></div>
+  <div class="grid" id="places"></div>
+  <div class="sec"><h2>Más práctica</h2></div>
+  <button class="wide" id="storyBtn"><span class="ico" id="icoBook"></span><span><b>Historias por capítulos</b><span>Lee y escucha un cuento a tu nivel, sobre tu tema, con las mismas palabras que vuelven.</span></span></button>
+  <button class="wide" id="freeBtn"><span class="ico" id="icoChat"></span><span><b>Charla libre con Sam</b><span>Habla de lo que quieras: tu día, tu trabajo, tus planes.</span></span></button>
+  <button class="wide" id="vocBtn"><span class="ico" id="icoStar"></span><span><b>Mis palabras y correcciones</b><span id="vocCount">Toca cualquier palabra en un mensaje para guardarla.</span></span></button>
+  <div class="krashen"><b>Cómo funciona:</b> adquieres un idioma al <b>entender</b> mensajes un poquito por encima de tu nivel (i+1). El personaje nunca interrumpe la charla para corregirte; las correcciones aparecen aparte, bajo tu mensaje, y al final recibes un <b>resumen de tus errores</b>. Puedes cambiarlo en Ajustes. Con <b>Manos libres</b> conversas solo con la voz mientras haces otra cosa.</div>
+ </div></div>
+</section>
+
+<!-- CHAT -->
+<section class="screen" id="chat" style="height:100%">
+ <div class="top"><div class="wrap row">
+  <button class="ib" id="backBtn" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="who sp"><span class="av" id="cAv"></span><span><b id="cName"></b><span id="cRole"></span></span></div>
+  <button class="ib" id="resetBtn" aria-label="Opciones de la conversación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></button>
+ </div></div>
+ <div class="msgs" id="msgs"></div>
+ <div class="sugs" id="sugs"></div>
+ <div class="tools" id="tools"></div>
+ <form class="comp" id="comp">
+  <button type="button" class="ib mic" id="micBtn" aria-label="Hablar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+  <textarea id="inp" rows="1" placeholder="Write or speak in English…" enterkeyhint="send"></textarea>
+  <button type="submit" class="ib send" id="sendBtn" aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2-7z"/></svg></button>
+ </form>
+</section>
+
+<!-- MANOS LIBRES -->
+<div class="hf" id="hf" data-s="">
+ <div><h2 id="hfName"></h2><div class="st" id="hfSt">Listo</div></div>
+ <div style="width:100%">
+  <div class="orb"><span class="av" id="hfAv"></span></div>
+  <p class="said" id="hfSaid"></p>
+  <p class="heard" id="hfHeard"></p>
+ </div>
+ <div>
+  <p class="cmds">Di <b>«repeat»</b> para repetir, <b>«slower»</b> para más despacio, <b>«translate»</b> para oírlo en español, <b>«help»</b> para ideas y <b>«stop»</b> para salir.</p>
+  <div class="row" style="margin-top:12px"><button class="btn sun" id="hfTap">Pausar</button><button class="btn ghost" id="hfExit">Salir</button></div>
+ </div>
+</div>
+
+<div class="shade" id="shade"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { CreateWebWorkerMLCEngine, hasModelInCache } from "./webllm.js";
+{
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const I = {
+ cup: "M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8zM16 9h2a2 2 0 0 1 0 4h-2M7 3v2M10 3v2M13 3v2",
+ cross: "M9 3h6v6h6v6h-6v6H9v-6H3V9h6z",
+ plane: "M3 12l18-8-5 17-4-7-9-2zM12 14l9-10",
+ cart: "M3 4h2l2.5 11h11L21 8H7M9 20h.01M18 20h.01",
+ case: "M4 8h16v11H4zM9 8V5h6v3M4 13h16",
+ house: "M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6",
+ pill: "M8.5 15.5l7-7a3.5 3.5 0 0 0-5-5l-7 7a3.5 3.5 0 0 0 5 5zM7 7l5 5",
+ fork: "M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 3-3 6s1 4 3 4v8",
+ book: "M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21h15",
+ chat: "M4 5h16v11H9l-5 4z",
+ star: "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z",
+ spk: "M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11",
+ tr: "M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-3 7-6 8M13 21l4-9 4 9M14.5 18h5",
+ easy: "M5 12h14M12 5l-7 7 7 7",
+ spark: "M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6",
+ check: "M4 12l5 5L20 6",
+ stop: "M7 7h10v10H7z",
+ next: "M5 12h14M13 6l6 6-6 6",
+ q: "M9 9a3 3 0 1 1 4 2.8c-.6.3-1 .9-1 1.6V14M12 18h.01",
+ x: "M6 6l12 12M18 6L6 18",
+ steth: "M6 3v6a4 4 0 0 0 8 0V3M10 13v3a5 5 0 0 0 10 0v-2M20 14a2 2 0 1 0 0-.1",
+ truck: "M2 6h11v10H2zM13 9h5l3 4v3h-8M6 19a2 2 0 1 0 0-.1M17 19a2 2 0 1 0 0-.1",
+ calc: "M6 3h12v18H6zM9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01",
+ school: "M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5M22 9v6",
+ flag: "M5 21V4M5 4h12l-2 4 2 4H5",
+ wrench: "M14 6a4 4 0 0 0 5 5l-9 9-3-3 9-9a4 4 0 0 0-2-2z",
+ bank: "M3 9l9-5 9 5M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18",
+ key: "M14 10a4 4 0 1 0-3 3.9V21h3v-2h2v-2h2v-3l-3-3",
+ church: "M12 2v4M10 4h4M6 21V11l6-5 6 5v10M10 21v-5h4v5",
+ card: "M3 6h18v12H3zM3 10h18M7 15h4",
+ plus: "M12 5v14M5 12h14",
+ head: "M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H4zM17 14h3v6h-3z",
+ list: "M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"
+};
+const ic = (k, sw = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"><path d="${I[k]}"/></svg>`;
+const avatar = (skin, hair, shirt, bg, style = 0) => `<svg viewBox="0 0 64 64">${bg ? `<circle cx="32" cy="32" r="32" fill="${bg}"/>` : ""}
+ <path d="M10 64c2-13 11-19 22-19s20 6 22 19z" fill="${shirt}"/><path d="M27 41h10v7a5 5 0 0 1-10 0z" fill="${skin}" opacity=".85"/>
+ <circle cx="32" cy="28" r="14" fill="${skin}"/>
+ ${style === 1 ? `<path d="M17 30c-2-14 8-19 15-19s17 5 15 19c-2-6-6-10-15-10s-13 4-15 10zM17 30c0 9-2 14-5 16 4 1 8-2 9-8zM47 30c0 9 2 14 5 16-4 1-8-2-9-8z" fill="${hair}"/>`
+  : style === 2 ? `<path d="M18 26c0-9 6-14 14-14s14 5 14 14c-3-4-8-6-14-6s-11 2-14 6z" fill="${hair}"/><path d="M24 37c3 4 13 4 16 0" stroke="${hair}" stroke-width="4" fill="none" stroke-linecap="round"/>`
+  : style === 3 ? `<path d="M17 23c0-9 6-13 15-13s15 4 15 13c-4-1-9-1.5-15-1.5s-11 .5-15 1.5z" fill="${hair}"/><path d="M15 23.5h34" stroke="${hair}" stroke-width="3" stroke-linecap="round"/>`
+  : `<path d="M18 27c0-10 6-15 14-15s14 5 14 15c-2-5-7-8-14-8s-12 3-14 8z" fill="${hair}"/>`}
+ <circle cx="27" cy="29" r="1.8" fill="#2a1630"/><circle cx="37" cy="29" r="1.8" fill="#2a1630"/>
+ <path d="M27.5 34.5c2.5 2.5 6.5 2.5 9 0" stroke="#2a1630" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+ <circle cx="23" cy="33" r="2.4" fill="#ff7a6b" opacity=".35"/><circle cx="41" cy="33" r="2.4" fill="#ff7a6b" opacity=".35"/></svg>`;
+
+/* escenas: k, título, frase en español, icono, color, nombre, rol (para la IA), avatar [piel, pelo, ropa, estilo], primera línea */
+const sc = (k, t, es, ico, c, n, r, av, o) => ({ k, t, es, ico, c, n, r, av, o });
+const PACKS = [
+ { k: "daily", name: "Día a día", stories: ["A day in Chicago", "A lost dog", "A mystery at the hotel", "Two friends on a road trip", "Cooking for a family party"], scenes: [
+  sc("cafe", "Coffee shop", "Pide tu café", "cup", "#c2410c", "Mia", "barista in a busy Chicago coffee shop", ["#f2c7a5", "#6b3a1e", "#2f6f6a", 1], "Hi there! Welcome in. What can I get started for you today?"),
+  sc("airport", "Airport", "Haz el check-in", "plane", "#1d4ed8", "Tom", "check-in agent at O'Hare airport", ["#c68a62", "#2b1a12", "#1e3a8a", 0], "Good afternoon! Where are you flying today?"),
+  sc("grocery", "Grocery store", "En la caja", "cart", "#7c3aed", "Rosa", "cashier at a neighborhood grocery store", ["#d9a27a", "#1f1410", "#c2410c", 1], "Hi! Did you find everything you were looking for?"),
+  sc("interview", "Job interview", "Entrevista de trabajo", "case", "#334155", "Ms. Carter", "hiring manager interviewing the learner for a job", ["#8d5a3b", "#1a1a1a", "#64748b", 1], "Thanks for coming in today. So, tell me a little about yourself."),
+  sc("neighbor", "Neighbor", "Charla con el vecino", "house", "#a16207", "Mike", "friendly neighbor who loves small talk", ["#f0c9a8", "#8a5a2b", "#b91c1c", 2], "Hey neighbor! Beautiful day, huh? How's it going?"),
+  sc("pharmacy", "Pharmacy", "Recoge una receta", "pill", "#0e7490", "Ana", "pharmacist at a drugstore counter", ["#e2ad86", "#3b2416", "#f8fafc", 1], "Hi! Are you picking up or dropping off a prescription today?"),
+  sc("restaurant", "Restaurant", "Pide la cena", "fork", "#9d174d", "Chris", "server at a casual American restaurant", ["#f3d0b4", "#d97706", "#111827", 0], "Hi, how are we doing tonight? Can I start you off with something to drink?")
+ ]},
+ { k: "med", name: "Medicina", stories: ["A new doctor's first month in a US hospital", "A night shift in the emergency room", "A factory worker's health check-up"], scenes: [
+  sc("clinic", "First day", "Tu primer día como médico", "cross", "#be123c", "Karen", "friendly nurse at a US clinic; the learner is a new doctor on their first day", ["#e7b48f", "#c9a14a", "#3b82c4", 1], "Good morning, Doctor! Welcome to your first day. Can I show you around?"),
+  sc("rounds", "Hospital rounds", "Presenta a tu paciente", "steth", "#0f766e", "Dr. Patel", "attending physician leading morning rounds; the learner is a doctor presenting a patient", ["#b07a55", "#1f1410", "#e2e8f0", 0], "Morning, everyone. Let's start rounds. Can you present your first patient?"),
+  sc("results", "Explain results", "Explica un diagnóstico", "q", "#b45309", "Mr. Johnson", "worried patient who got a call about his blood test; the learner is his doctor", ["#f0c9a8", "#9ca3af", "#2563eb", 3], "Doc, I got a call about my blood test. Is something wrong?"),
+  sc("occ", "Work physical", "Examen ocupacional", "case", "#4338ca", "Luis", "warehouse worker coming for a pre-employment physical exam; the learner is the occupational doctor", ["#c68a62", "#1a1a1a", "#f97316", 0], "Hi, Doctor. I'm here for my pre-employment physical. How long will it take?")
+ ]},
+ { k: "truck", name: "Camiones", stories: ["A truck driver crossing America", "A long night at the truck stop", "A new driver's first solo trip"], scenes: [
+  sc("weigh", "Weigh station", "Inspección en la báscula", "truck", "#1e40af", "Officer Davis", "DOT officer at a weigh station inspecting a truck driver", ["#8d5a3b", "#1a1a1a", "#1e3a8a", 3], "Good morning, driver. Can I see your license, your logbook and your medical card?"),
+  sc("dispatch", "Dispatcher", "Llamada del despachador", "head", "#7c2d12", "Linda", "truck dispatcher on the phone assigning a new load", ["#f2c7a5", "#b45309", "#7c3aed", 1], "Hey, it's Linda from dispatch. Where are you right now? I've got a new load for you."),
+  sc("breakdown", "Breakdown", "Reporta una avería", "wrench", "#b91c1c", "Joe", "roadside assistance mechanic helping a driver whose truck broke down", ["#e9b995", "#6b7280", "#334155", 2], "Hi, this is roadside assistance. What's going on with your truck?"),
+  sc("truckstop", "Truck stop", "Cena en el truck stop", "fork", "#a16207", "Bev", "waitress at a truck stop diner", ["#f3d0b4", "#dc2626", "#0f766e", 1], "Hey, hon. Long day on the road? What can I get you?")
+ ]},
+ { k: "acct", name: "Contabilidad", stories: ["An accountant who finds a mystery in the numbers", "A small bakery trying to save money", "Tax season at a busy office"], scenes: [
+  sc("client", "New client", "Cliente con recibos", "calc", "#065f46", "Mr. Brooks", "small business owner who needs help organizing his books; the learner is his accountant", ["#f0c9a8", "#4b5563", "#1d4ed8", 0], "Hi, I need help with my books. Honestly, my receipts are a mess."),
+  sc("irs", "Tax letter", "Clienta con carta del IRS", "card", "#7e22ce", "Jennifer", "nervous client who received a letter from the IRS; the learner is her accountant", ["#d9a27a", "#1f1410", "#db2777", 1], "Hi! I got a letter from the IRS and I'm a little nervous. Can you help me?"),
+  sc("close", "Month-end close", "Reunión con tu jefe", "list", "#334155", "Mark", "finance manager asking about the month-end close; the learner is an accountant on his team", ["#c68a62", "#111827", "#475569", 3], "Morning. Where are we with the month-end close? Any issues with the numbers?")
+ ]},
+ { k: "school", name: "Escuela", stories: ["A kid's first year at an American school", "A science fair project", "A student who wants to join the soccer team"], scenes: [
+  sc("firstday", "First day", "Nuevo en clase", "school", "#2563eb", "Emma", "friendly high school student talking to a new classmate", ["#f2c7a5", "#d97706", "#ec4899", 1], "Hi! Are you new here? I'm Emma. What class do you have first?"),
+  sc("teacher", "Talk to the teacher", "Habla con el profesor", "book", "#9a3412", "Mr. Ruiz", "teacher talking with a student after class", ["#c68a62", "#1a1a1a", "#65a30d", 2], "Hi, thanks for staying after class. What did you want to talk about?"),
+  sc("parents", "Parent meeting", "Reunión de padres", "chat", "#be185d", "Mrs. Green", "elementary school teacher in a parent-teacher meeting; the learner is the parent", ["#8d5a3b", "#111827", "#f59e0b", 1], "Hello, thank you for coming. Your child is doing well. Do you have any questions for me?")
+ ]},
+ { k: "us", name: "Vida en EE. UU.", stories: ["A family that just moved to Illinois", "Getting ready for a first American winter", "Buying a used car"], scenes: [
+  sc("bank", "Bank", "Abre una cuenta", "bank", "#155e75", "David", "bank employee helping a customer open an account", ["#e7b48f", "#3b2416", "#0f172a", 0], "Hi, welcome to Prairie Bank. How can I help you today?"),
+  sc("mechanic", "Mechanic", "Tu carro hace un ruido", "wrench", "#78350f", "Ray", "auto mechanic at a small repair shop", ["#f0c9a8", "#6b7280", "#1e3a8a", 2], "Hey there. What seems to be the problem with your car?"),
+  sc("landlord", "Landlord", "Pregunta por un apartamento", "key", "#6d28d9", "Mrs. Wilson", "landlord showing an apartment for rent", ["#f3d0b4", "#e5e7eb", "#be123c", 1], "Hi, you called about the apartment? What questions do you have?"),
+  sc("church", "After service", "Saluda en la iglesia", "church", "#a21caf", "Grace", "friendly church member greeting a newcomer after the Sunday service", ["#8d5a3b", "#1a1a1a", "#eab308", 1], "Hi! I don't think we've met. Is this your first time here?"),
+  sc("dmv", "DMV", "Trámite de licencia", "card", "#0f172a", "Clerk", "busy but polite clerk at the DMV (driver's license office)", ["#d9a27a", "#4b5563", "#64748b", 3], "Next! Hi. What are you here for today?")
+ ]}
+];
+const SPECIAL = {
+ free: { k: "free", t: "Free talk", n: "Sam", r: "an easygoing American friend who is curious about the learner's life", av: ["#e9b995", "#4a2c1a", "#3b1f4a", 2], o: "Hey! Good to see you. So, how was your day?" },
+ story: { k: "story", t: "Stories", n: "Storyteller", r: "storyteller", av: ["#f1c6a1", "#9ca3af", "#7c3aed", 2] }
+};
+const CUSTOM_COLORS = ["#0e7490", "#9d174d", "#4338ca", "#b45309", "#065f46", "#7c2d12"];
+const CUSTOM_AV = [["#f2c7a5", "#3b2416", "#2563eb", 1], ["#c68a62", "#111827", "#16a34a", 0], ["#e7b48f", "#b45309", "#7c3aed", 2], ["#8d5a3b", "#1a1a1a", "#dc2626", 3]];
+const MODELS = [
+ { id: "Llama-3.2-1B-Instruct", name: "Ligero", size: "≈ 0.9 GB", note: "El más rápido. Recomendado para iPhone o teléfonos con 6 GB de RAM." },
+ { id: "Qwen2.5-1.5B-Instruct", name: "Equilibrado", size: "≈ 1.3 GB", note: "Mejor conversación y correcciones, aún ágil. Para teléfonos con 8 GB de RAM." },
+ { id: "Llama-3.2-3B-Instruct", name: "Más natural", size: "≈ 2.3 GB", note: "El inglés más fluido y las mejores correcciones. Solo teléfonos potentes (8–12 GB de RAM)." }
+];
+const LEVELS = {
+ A2: "Use very simple, common words and short sentences (under 10 words). Mostly present and past tense.",
+ B1: "Use everyday words and clear sentences (under 15 words). Avoid rare idioms.",
+ B2: "Use natural everyday American English. You may use common idioms and phrasal verbs."
+};
+const CORR = { always: "Siempre", summary: "Solo resumen", off: "No corregir" };
+
+/* ---------- almacenamiento ---------- */
+const store = {
+ get(k, d) { try { const v = localStorage.getItem("lt_" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+ set(k, v) { try { localStorage.setItem("lt_" + k, JSON.stringify(v)); } catch {} }
+};
+const S = Object.assign({ model: null, level: "B1", rate: 0.9, auto: true, voice: "", f16: null, corr: "always", pack: "daily", job: "", likes: "" }, store.get("settings", {}));
+const saveS = () => store.set("settings", S);
+let chats = store.get("chats", {});
+let vocab = store.get("vocab", []);
+let fixes = store.get("fixes", []);
+let customs = store.get("customs", []);
+let stats = Object.assign({ days: {}, total: 0 }, store.get("stats", {}));
+const today = () => new Date().toISOString().slice(0, 10);
+function addInput(text) {
+ const w = (text.match(/[A-Za-z']+/g) || []).length;
+ stats.days[today()] = (stats.days[today()] || 0) + w; stats.total += w; store.set("stats", stats); renderStats();
+}
+function renderStats() {
+ const wpm = 130, t = stats.days[today()] || 0;
+ $("#stToday").textContent = Math.round(t / wpm) + " min";
+ const h = stats.total / wpm / 60; $("#stTotal").textContent = (h < 10 ? h.toFixed(1) : Math.round(h)) + " h";
+ let n = 0, d = new Date(); if (!stats.days[today()]) d.setDate(d.getDate() - 1);
+ while (stats.days[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); }
+ $("#stStreak").textContent = n;
+ const parts = [];
+ if (vocab.length) parts.push(`${vocab.length} palabra${vocab.length > 1 ? "s" : ""}`);
+ if (fixes.length) parts.push(`${fixes.length} corrección${fixes.length > 1 ? "es" : ""}`);
+ $("#vocCount").textContent = parts.length ? parts.join(" · ") + " guardadas. Repásalas escuchándolas." : "Toca cualquier palabra en un mensaje para guardarla.";
+}
+
+/* ---------- UI general ---------- */
+function show(id) { document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id)); window.scrollTo(0, 0); }
+let toastT; function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 2800); }
+function openSheet(html) { $("#sheet").onclick = null; $("#sheet").innerHTML = html; $("#sheet").classList.add("on"); $("#shade").classList.add("on"); }
+function closeSheet() { $("#sheet").classList.remove("on"); $("#shade").classList.remove("on"); }
+$("#shade").onclick = closeSheet;
+const loadingDots = `<span class="typing"><i></i><i></i><i></i></span>`;
+
+/* ---------- motor de IA ---------- */
+let engine = null, loading = null, busy = false;
+const fullId = (id) => `${id}-${S.f16 ? "q4f16_1" : "q4f32_1"}-MLC`;
+function setEng(state, txt) { $("#engDot").className = "dot " + (state || ""); $("#engTxt").textContent = txt; }
+async function checkGPU() {
+ if (!("gpu" in navigator)) return "Este navegador no tiene WebGPU. Usa Chrome actualizado en Android, o Safari en iPhone con iOS 26 o superior.";
+ try { const a = await navigator.gpu.requestAdapter(); if (!a) return "Tu teléfono no expone la GPU al navegador. Prueba con Chrome actualizado."; S.f16 = a.features.has("shader-f16"); saveS(); return ""; }
+ catch (e) { return "No se pudo acceder a la GPU: " + e.message; }
+}
+async function loadEngine(onProg) {
+ if (engine) return engine; if (loading) return loading;
+ setEng("busy", "Cargando tutor…");
+ loading = (async () => {
+  const err = await checkGPU(); if (err) throw new Error(err);
+  try { await navigator.storage?.persist?.(); } catch {}
+  const e = await CreateWebWorkerMLCEngine(new Worker("./worker.js", { type: "module" }), fullId(S.model), {
+   initProgressCallback: (r) => { onProg && onProg(r); if (r.progress < 1) setEng("busy", "Cargando " + Math.round(r.progress * 100) + "%"); }
+  }, { context_window_size: 4096 });
+  engine = e; setEng("ok", "Tutor listo · sin internet"); return e;
+ })();
+ try { return await loading; } catch (e) { loading = null; setEng("", "Tutor apagado"); throw e; }
+}
+async function ask(messages, opts = {}, onTok) {
+ const e = await loadEngine();
+ busy = true; updTools();
+ try {
+  const stream = await e.chat.completions.create({ messages, stream: true, temperature: opts.temp ?? 0.7, max_tokens: opts.max ?? 180, top_p: 0.9 });
+  let out = "";
+  for await (const ch of stream) { const d = ch.choices[0]?.delta?.content || ""; if (d) { out += d; onTok && onTok(out); } }
+  return out.trim();
+ } finally { busy = false; updTools(); }
+}
+async function oneShot(prompt, max = 120) {
+ return ask([{ role: "system", content: "You are a precise, kind English teacher for a native Spanish speaker. Follow the requested format exactly. No markdown." }, { role: "user", content: prompt }], { temp: 0.2, max });
+}
+
+/* ---------- voz ---------- */
+let voices = [], esVoices = [];
+function loadVoices() { const all = window.speechSynthesis?.getVoices() || []; voices = all.filter((v) => /^en[-_]/i.test(v.lang)); esVoices = all.filter((v) => /^es[-_]/i.test(v.lang)); }
+if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function pickVoice() { return voices.find((v) => v.name === S.voice) || voices.find((v) => /en[-_]US/i.test(v.lang) && v.localService) || voices.find((v) => v.localService) || voices[0]; }
+function speak(text, lang = "en") {
+ return new Promise((res) => {
+  if (!window.speechSynthesis) { toast("Tu navegador no puede leer en voz alta"); return res(); }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(String(text).replace(/[*_#]/g, ""));
+  const v = lang === "es" ? (esVoices.find((x) => x.localService) || esVoices[0]) : pickVoice();
+  if (v) u.voice = v; u.lang = v?.lang || (lang === "es" ? "es-US" : "en-US"); u.rate = S.rate;
+  let done = false; const fin = () => { if (!done) { done = true; res(); } };
+  u.onend = fin; u.onerror = fin;
+  setTimeout(fin, 2000 + text.length * 110 / S.rate); // por si el navegador no avisa al terminar
+  speechSynthesis.speak(u);
+ });
+}
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let localSR = false;
+(async () => { try { if (SR?.available) localSR = (await SR.available({ langs: ["en-US"], processLocally: true })) === "available"; } catch {} })();
+function newRec() { const r = new SR(); r.lang = "en-US"; r.interimResults = true; r.continuous = false; try { if (localSR && "processLocally" in r) r.processLocally = true; } catch {} return r; }
+const srErr = (e) => e === "network" ? "El reconocimiento de voz necesita internet en este teléfono. En Ajustes puedes descargar el paquete de voz, o usa el dictado del teclado." : e === "not-allowed" || e === "service-not-allowed" ? "Permite el uso del micrófono para hablar" : e === "language-not-supported" ? "Descarga el paquete de voz en Ajustes" : "No te escuché bien, intenta otra vez";
+let rec = null;
+function toggleMic() {
+ if (!SR) return toast("Tu navegador no reconoce voz. Usa el micrófono del teclado.");
+ if (rec) { rec.stop(); return; }
+ rec = newRec();
+ const base = $("#inp").value ? $("#inp").value + " " : "";
+ rec.onresult = (ev) => { let t = ""; for (const r of ev.results) t += r[0].transcript; $("#inp").value = base + t; grow(); };
+ rec.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
+ rec.onend = () => { $("#micBtn").classList.remove("rec"); rec = null; };
+ $("#micBtn").classList.add("rec"); speechSynthesis?.cancel();
+ try { rec.start(); } catch { rec = null; $("#micBtn").classList.remove("rec"); }
+}
+
+/* ---------- configuración inicial ---------- */
+let pick = S.model || MODELS[0].id;
+function renderModels() {
+ $("#modelList").innerHTML = MODELS.map((m) => `<button class="model ${m.id === pick ? "sel" : ""}" data-id="${m.id}"><span class="radio"></span><span><b>${m.name}</b><small>${m.note}</small></span><span class="sz">${m.size}</span></button>`).join("");
+}
+$("#modelList").onclick = (e) => { const b = e.target.closest(".model"); if (b) { pick = b.dataset.id; renderModels(); } };
+$("#pfJob").oninput = (e) => { S.job = e.target.value.trim(); saveS(); };
+$("#pfLike").oninput = (e) => { S.likes = e.target.value.trim(); saveS(); };
+$("#dlBtn").onclick = async () => {
+ const prevModel = S.model;
+ if (engine && prevModel !== pick) { try { await engine.unload(); } catch {} engine = null; loading = null; }
+ S.model = pick; saveS();
+ $("#dl").hidden = false; $("#dlBtn").disabled = true;
+ try {
+  await loadEngine((r) => { $("#dlBar").style.width = Math.round(r.progress * 100) + "%"; $("#dlTxt").textContent = r.progress < 1 ? `Descargando ${Math.round(r.progress * 100)}% · no cierres la app` : "¡Listo! Ya funciona sin internet."; });
+  goHome();
+ } catch (e) {
+  $("#dlTxt").textContent = "No se pudo cargar: " + e.message; S.model = prevModel; saveS();
+ } finally { $("#dlBtn").disabled = false; }
+};
+$("#skipBtn").onclick = goHome;
+async function goSetup() {
+ renderModels(); $("#pfJob").value = S.job; $("#pfLike").value = S.likes; show("setup");
+ const err = await checkGPU();
+ $("#gpuWarn").innerHTML = err ? `<div class="warn">${esc(err)}</div>` : "";
+ $("#skipBtn").hidden = !S.model;
+ $("#dlBtn").textContent = S.model ? "Usar este modelo" : "Descargar y empezar";
+}
+
+/* ---------- inicio ---------- */
+const allScenes = () => [...PACKS.flatMap((p) => p.scenes), ...customs];
+const charOf = (k) => allScenes().find((p) => p.k === k) || SPECIAL[k];
+function goHome() {
+ const packs = [...PACKS.map((p) => [p.k, p.name]), ["mine", "Mis escenas"]];
+ if (!packs.some((p) => p[0] === S.pack)) S.pack = "daily";
+ $("#packs").innerHTML = packs.map(([k, n]) => `<button data-p="${k}" class="${k === S.pack ? "sel" : ""}">${esc(n)}</button>`).join("");
+ const scenes = S.pack === "mine" ? customs : PACKS.find((p) => p.k === S.pack).scenes;
+ $("#places").innerHTML = scenes.map((p) => {
+  const n = (chats[p.k]?.msgs || []).filter((m) => m.r === "user").length;
+  return `<button class="place" data-k="${esc(p.k)}" style="background:${p.c}"><span class="ico">${ic(p.ico)}</span><span class="av">${avatar(...p.av.slice(0, 3), "", p.av[3])}</span><h3>${esc(p.t)}</h3><p>${esc(p.es)} · con ${esc(p.n)}</p>${n ? `<span class="done">${n} turnos</span>` : ""}</button>`;
+ }).join("") + (S.pack === "mine" ? `<button class="place add" id="addScene"><span class="ico">${ic("plus")}</span><h3>Crear escena</h3><p style="opacity:1;color:var(--mute)">Describe cualquier situación que quieras practicar.</p></button>` : "");
+ renderStats(); show("home");
+}
+$("#packs").onclick = (e) => { const b = e.target.closest("button"); if (b) { S.pack = b.dataset.p; saveS(); goHome(); b.scrollIntoView?.({ inline: "nearest", block: "nearest" }); } };
+$("#places").onclick = (e) => { if (e.target.closest("#addScene")) return sceneSheet(); const b = e.target.closest(".place"); if (b) openChat(b.dataset.k); };
+$("#icoBook").innerHTML = ic("book"); $("#icoChat").innerHTML = ic("chat"); $("#icoStar").innerHTML = ic("star");
+$("#freeBtn").onclick = () => openChat("free");
+$("#storyBtn").onclick = storyPicker;
+$("#vocBtn").onclick = () => vocabSheet("w");
+$("#setBtn").onclick = settingsSheet;
+
+/* ---------- chat ---------- */
+let cur = null, sessionStart = 0;
+function learnerLine() {
+ const bits = [];
+ if (S.job) bits.push(`works as: ${S.job}`); if (S.likes) bits.push(`likes: ${S.likes}`);
+ return bits.length ? `\nAbout the learner (${bits.join("; ")}). Bring this up naturally only when it fits the conversation.` : "";
+}
+function sysPrompt(k) {
+ const c = charOf(k), lv = LEVELS[S.level];
+ if (k === "story") return `You are a warm storyteller for an English learner whose native language is Spanish (level ${S.level}). ${lv}
+Tell stories in short parts of 100-160 words. Keep the same characters and repeat key words often so the learner can pick them up from context. Make the story interesting and easy to follow. When the learner answers or comments, reply kindly in 1-3 sentences, using the correct form of anything they got wrong. No lists, no emojis, no markdown.${learnerLine()}`;
+ const role = c.custom ? `the other person in this scene, which the learner described (maybe in Spanish): "${c.r}". Your name is ${c.n}` : `${c.n}, a ${c.r}`;
+ return `You are ${role}. You are having a spoken conversation with an English learner whose native language is Spanish (level ${S.level}).
+Rules:
+- Stay in character and keep the scene realistic. Always speak English.
+- Reply in 1 to 3 short sentences, then ask one easy question to keep talking.
+- ${lv}
+- Do not stop the conversation to correct the learner (a separate teacher does that). If they make an error, simply use the correct form naturally in your reply.
+- If the learner writes in Spanish, answer in simple English and help them say it.
+- Be warm and encouraging. No lists, no emojis, no markdown.${learnerLine()}`;
+}
+function openChat(k, storyTopic) {
+ cur = k; const c = charOf(k);
+ if (!c) return goHome();
+ if (!chats[k] || storyTopic) chats[k] = { msgs: [], topic: storyTopic || "" };
+ const ch = chats[k];
+ if (!ch.msgs.length && c.o) ch.msgs.push({ r: "assistant", t: c.o });
+ sessionStart = ch.msgs.length;
+ $("#cAv").innerHTML = avatar(...c.av.slice(0, 3), "", c.av[3]);
+ $("#cName").textContent = k === "story" ? "Historia" : c.n;
+ $("#cRole").textContent = k === "story" ? (ch.topic || "Cuento") : (c.t || "Free talk") + " · nivel " + S.level;
+ $("#sugs").innerHTML = ""; renderMsgs(); show("chat"); updTools();
+ if (!S.model) { toast("Primero descarga un modelo en Ajustes"); return; }
+ loadEngine().catch((e) => toast(e.message));
+ if (k === "story" && storyTopic) continueStory(true);
+ else if (!ch.msgs.length && c.custom) { ch.msgs.push({ r: "user", hidden: true, t: "Start the scene now. Say your first line to me, in character, and ask me something." }); generate(); }
+ else if (ch.msgs.length === 1 && ch.msgs[0].r === "assistant") addInput(ch.msgs[0].t);
+}
+function saveChats() { store.set("chats", chats); }
+const wordsHTML = (t) => esc(t).replace(/[A-Za-z][A-Za-z'’-]*/g, (w) => `<span class="w">${w}</span>`);
+function fbHTML(m) {
+ if (m.ok) return `<div class="okmark">${ic("check", 3)}Bien dicho</div>`;
+ if (!m.fix) return "";
+ return `<div class="extra fix"><b>Mejor:</b> ${esc(m.fix)}${m.tip ? `\n${esc(m.tip)}` : ""}</div>`;
+}
+function msgHTML(m, i) {
+ if (m.hidden) return "";
+ const me = m.r === "user";
+ const acts = me
+  ? (m.ok || m.fix ? `<button data-a="sayfix" data-i="${i}">${ic("spk")}Escuchar</button>` : `<button data-a="fb" data-i="${i}">${ic("check")}¿Está bien?</button>`)
+  : `<button data-a="say" data-i="${i}">${ic("spk")}Escuchar</button><button data-a="easy" data-i="${i}">${ic("easy")}Más simple</button><button data-a="tr" data-i="${i}">${ic("tr")}Español</button>`;
+ return `<div class="m ${me ? "me" : ""}" data-i="${i}"><div class="b">${me ? esc(m.t) : wordsHTML(m.t)}</div>${me ? fbHTML(m) : ""}${m.x ? `<div class="extra">${esc(m.x)}</div>` : ""}<div class="acts">${acts}</div></div>`;
+}
+function renderMsgs() {
+ if (!cur) return;
+ $("#msgs").innerHTML = chats[cur].msgs.map(msgHTML).join("");
+ $("#msgs").scrollTop = $("#msgs").scrollHeight;
+}
+function updTools() {
+ if (!cur) return;
+ const t = cur === "story"
+  ? `<button data-t="next">${ic("next")}Continuar historia</button><button data-t="qs">${ic("q")}Hazme preguntas</button>`
+  : `<button data-t="help">${ic("spark")}¿Qué digo?</button>`;
+ $("#tools").innerHTML = (busy ? `<button data-t="stop">${ic("stop")}Detener</button>` : "") + `<button data-t="hf" class="hfb">${ic("head")}Manos libres</button>` + t + `<button data-t="sum">${ic("list")}Mis errores</button>`;
+}
+async function generate(speakIt = true) {
+ const ch = chats[cur], key = cur;
+ const hist = ch.msgs.slice(-14).map((m) => ({ role: m.r, content: m.t }));
+ const msgs = [{ role: "system", content: sysPrompt(key) }, ...hist];
+ const m = { r: "assistant", t: "" }; ch.msgs.push(m);
+ const el = document.createElement("div"); el.className = "m"; el.innerHTML = `<div class="b">${loadingDots}</div>`;
+ $("#msgs").appendChild(el); $("#msgs").scrollTop = $("#msgs").scrollHeight;
+ try {
+  m.t = await ask(msgs, { max: key === "story" ? 320 : 150 }, (t) => { el.firstChild.textContent = t; $("#msgs").scrollTop = $("#msgs").scrollHeight; if (hf) $("#hfSaid").textContent = t; });
+  if (!m.t) m.t = "Sorry, could you say that again?";
+ } catch (e) { ch.msgs.pop(); saveChats(); el.remove(); toast(e.message); return null; }
+ saveChats(); if (cur === key) renderMsgs(); addInput(m.t);
+ if (speakIt && S.auto && !hf) speak(m.t);
+ return m;
+}
+/* corrección de una frase del alumno */
+async function checkLine(m) {
+ const ctx = [...chats[cur].msgs].slice(0, chats[cur].msgs.indexOf(m)).reverse().find((x) => x.r === "assistant" && !x.hidden);
+ const out = await oneShot(`Context: the other person said "${(ctx?.t || "").slice(0, 200)}".
+The English learner answered: "${m.t}"
+Check grammar, word choice and naturalness. Small capitalization or punctuation issues do not count.
+If the answer is correct and natural, reply with only: OK
+Otherwise reply with exactly two lines:
+Better: <the corrected, natural sentence>
+Por qué: <short explanation in Spanish, max 20 words>`, 110);
+ const better = out.match(/Better:\s*(.+)/i)?.[1]?.trim();
+ const why = out.match(/Por qu[eé]:\s*(.+)/i)?.[1]?.trim();
+ const same = better && better.toLowerCase().replace(/[^a-z ]/g, "").trim() === m.t.toLowerCase().replace(/[^a-z ]/g, "").trim();
+ if (!better || same || /^\s*OK\b/i.test(out)) { m.ok = true; m.fix = ""; m.tip = ""; }
+ else { m.ok = false; m.fix = better.replace(/^"|"$/g, ""); m.tip = why ? "Por qué: " + why : ""; }
+ saveChats(); renderMsgs();
+ return m;
+}
+async function send(text) {
+ text = text.trim(); if (!text) return;
+ if (busy) return toast("Espera a que termine de responder");
+ if (!S.model) return toast("Primero descarga un modelo en Ajustes");
+ if (rec) rec.stop();
+ const um = { r: "user", t: text };
+ chats[cur].msgs.push(um); $("#inp").value = ""; grow(); $("#sugs").innerHTML = "";
+ renderMsgs(); saveChats();
+ const reply = await generate();
+ if (reply && S.corr === "always" && cur !== "story") { try { await checkLine(um); } catch {} }
+}
+function continueStory(first) {
+ const t = chats.story.topic || "daily life";
+ chats.story.msgs.push({ r: "user", hidden: true, t: first ? `Tell me part 1 of a new story about: ${t}. Start with a short title on its own line.` : "Please continue the story with the next part. Same characters, 100-160 words." });
+ renderMsgs(); return generate();
+}
+$("#msgs").onclick = async (e) => {
+ const w = e.target.closest(".w"); if (w) return wordSheet(w.textContent, w.closest(".b").textContent);
+ const b = e.target.closest("button[data-a]"); if (!b) return;
+ const m = chats[cur].msgs[+b.dataset.i], a = b.dataset.a;
+ if (a === "say") return speak(m.t);
+ if (a === "sayfix") return speak(m.fix || m.t);
+ if (busy) return toast("Espera un momento…");
+ const old = b.innerHTML; b.innerHTML = loadingDots;
+ try {
+  if (a === "tr") m.x = await oneShot(`Translate into natural Latin American Spanish. Output only the translation.\n\n${m.t}`, 220);
+  if (a === "easy") { m.x = await oneShot(`Rewrite this in much simpler English (A1-A2 level, very short sentences). Output only the rewrite.\n\n${m.t}`, 200); addInput(m.x); }
+  if (a === "fb") { await checkLine(m); return; }
+  saveChats(); renderMsgs();
+ } catch (er) { b.innerHTML = old; toast(er.message); }
+};
+async function suggestReplies() {
+ const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant");
+ const out = await oneShot(`In a conversation, ${charOf(cur).n} just said: "${last?.t || ""}"\nWrite 3 short, natural replies an English learner (level ${S.level}) could say next. One per line. No numbers, no quotes.`, 120);
+ return out.split("\n").map((s) => s.replace(/^[\s\-•\d.)"]+|"$/g, "").trim()).filter(Boolean).slice(0, 3);
+}
+$("#tools").onclick = async (e) => {
+ const b = e.target.closest("button[data-t]"); if (!b) return; const t = b.dataset.t;
+ if (t === "stop") { try { await engine?.interruptGenerate(); } catch {} return; }
+ if (t === "sum") return summarySheet(true);
+ if (busy) return toast("Espera un momento…");
+ if (!S.model) return toast("Primero descarga un modelo en Ajustes");
+ if (t === "hf") return hfStart();
+ if (t === "next") return continueStory(false);
+ if (t === "qs") { chats.story.msgs.push({ r: "user", hidden: true, t: "Ask me 2 short, easy questions about the story so far, one at a time. Ask only the first one now." }); renderMsgs(); return generate(); }
+ if (t === "help") {
+  $("#sugs").innerHTML = `<button disabled>${loadingDots}</button>`;
+  try { $("#sugs").innerHTML = (await suggestReplies()).map((o) => `<button>${esc(o)}</button>`).join(""); }
+  catch (er) { $("#sugs").innerHTML = ""; toast(er.message); }
+ }
+};
+$("#sugs").onclick = (e) => { const b = e.target.closest("button"); if (b && !b.disabled) { $("#inp").value = b.textContent; grow(); speak(b.textContent); $("#inp").focus(); } };
+$("#comp").onsubmit = (e) => { e.preventDefault(); send($("#inp").value); };
+const grow = () => { const t = $("#inp"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 120) + "px"; };
+$("#inp").oninput = grow;
+$("#inp").onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !matchMedia("(pointer:coarse)").matches) { e.preventDefault(); send($("#inp").value); } };
+$("#micBtn").onclick = toggleMic;
+function leaveChat() {
+ speechSynthesis?.cancel(); if (rec) rec.stop();
+ const k = cur, said = chats[k] ? chats[k].msgs.slice(sessionStart).filter((m) => m.r === "user" && !m.hidden).length : 0;
+ goHome(); cur = k;
+ if (S.corr !== "off" && said >= 3 && S.model) summarySheet(false);
+ else cur = null;
+}
+$("#backBtn").onclick = leaveChat;
+$("#resetBtn").onclick = () => {
+ const c = charOf(cur);
+ openSheet(`<h3>Esta conversación</h3><p class="note">Empezar de nuevo borra los mensajes. Tus estadísticas, palabras y correcciones se mantienen.</p>
+ <div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn" id="rsYes">Empezar de nuevo</button>${c?.custom ? `<button class="btn ghost" id="rsDel">Borrar escena</button>` : ""}<button class="btn ghost" id="rsNo">Cancelar</button></div>`);
+ $("#rsNo").onclick = closeSheet;
+ $("#rsYes").onclick = () => { closeSheet(); const k = cur, tp = chats[k]?.topic; delete chats[k]; saveChats(); k === "story" ? openChat("story", tp || "daily life") : openChat(k); };
+ if ($("#rsDel")) $("#rsDel").onclick = () => { const k = cur; customs = customs.filter((x) => x.k !== k); store.set("customs", customs); delete chats[k]; saveChats(); closeSheet(); cur = null; goHome(); };
+};
+
+/* ---------- resumen de errores ---------- */
+async function summarySheet(fromTools) {
+ const k = cur; if (!k || !chats[k]) return;
+ const src = fromTools ? chats[k].msgs : chats[k].msgs.slice(sessionStart);
+ const lines = src.filter((m) => m.r === "user" && !m.hidden).map((m) => m.t).slice(-12);
+ if (!lines.length) return toast("Aún no has dicho nada en esta conversación");
+ openSheet(`<h3>Tus errores de esta charla</h3><p class="note">Los más importantes para practicar. Toca el altavoz para escuchar la versión correcta.</p><div id="sumBody" style="margin-top:12px">${loadingDots}</div><div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn sun" id="sumSave" disabled>Guardar en mis correcciones</button><button class="btn ghost" id="sumClose">Cerrar</button></div>`);
+ $("#sumClose").onclick = () => { closeSheet(); if (!$("#chat").classList.contains("on")) cur = null; };
+ let items = [];
+ const rend = () => {
+  $("#sumBody").innerHTML = items.length ? `<div class="vlist">${items.map((f, i) => `<div class="vi"><div class="sp"><p style="text-decoration:line-through">${esc(f.said)}</p><b>${esc(f.better)}</b>${f.why ? `<p>${esc(f.why)}</p>` : ""}</div><button class="ib" data-sf="${i}" aria-label="Escuchar">${ic("spk")}</button></div>`).join("")}</div>`
+   : `<p class="empty">¡No encontré errores importantes! Sigue así.</p>`;
+  $("#sumSave").disabled = !items.length;
+ };
+ $("#sheet").onclick = (e) => { const s = e.target.closest("[data-sf]"); if (s) speak(items[+s.dataset.sf].better); };
+ $("#sumSave").onclick = () => { fixes = [...items.map((f) => ({ ...f, d: today() })), ...fixes].slice(0, 300); store.set("fixes", fixes); renderStats(); $("#sumSave").disabled = true; $("#sumSave").textContent = "Guardadas"; };
+ // primero usa las correcciones que ya se hicieron frase por frase
+ const done = chats[k].msgs.filter((m) => m.r === "user" && m.fix && lines.includes(m.t));
+ if (done.length >= Math.min(3, lines.length) || (S.corr === "always" && chats[k].msgs.filter((m) => lines.includes(m.t)).every((m) => m.ok || m.fix))) {
+  items = done.slice(-5).map((m) => ({ said: m.t, better: m.fix, why: (m.tip || "").replace(/^Por qué:\s*/, "") }));
+  return rend();
+ }
+ if (busy) { $("#sumBody").innerHTML = `<p class="note">El tutor está ocupado; abre «Mis errores» en un momento.</p>`; return; }
+ try {
+  const out = await oneShot(`These are sentences an English learner (native Spanish speaker) said in a conversation:
+${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}
+Find up to 4 of the most important real mistakes (grammar, word choice, unnatural phrasing). Ignore capitalization and punctuation.
+For each mistake write exactly three lines:
+Said: <the learner's sentence>
+Better: <natural corrected sentence>
+Por qué: <short explanation in Spanish, max 18 words>
+Leave a blank line between mistakes. If there are no real mistakes, write only: NONE`, 420);
+  items = out.split(/\n\s*\n/).map((b) => ({ said: b.match(/Said:\s*(.+)/i)?.[1]?.trim(), better: b.match(/Better:\s*(.+)/i)?.[1]?.trim(), why: b.match(/Por qu[eé]:\s*(.+)/i)?.[1]?.trim() || "" }))
+   .filter((f) => f.said && f.better && f.said.toLowerCase() !== f.better.toLowerCase());
+ } catch (e) { items = []; toast(e.message); }
+ if ($("#sumBody")) rend();
+}
+
+/* ---------- manos libres ---------- */
+let hf = false, hfPaused = false, hfRec = null, wake = null, actx = null, silent = 0;
+function beep(f = 880) { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0.08, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.18); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.2); } catch {} }
+function hfState(s, txt) { $("#hf").dataset.s = s; $("#hfSt").textContent = txt; }
+async function keepAwake() { try { wake = await navigator.wakeLock?.request("screen"); } catch {} }
+document.addEventListener("visibilitychange", () => { if (hf && document.visibilityState === "visible") keepAwake(); });
+async function hfStart() {
+ if (!SR) return toast("Este navegador no reconoce voz, así que manos libres no está disponible. En Android usa Chrome.");
+ const c = charOf(cur);
+ hf = true; hfPaused = false; silent = 0; beep(660);
+ $("#hfName").textContent = cur === "story" ? "Historia" : c.n; $("#hfAv").innerHTML = avatar(...c.av.slice(0, 3), "", c.av[3]);
+ $("#hfHeard").textContent = ""; $("#hfTap").textContent = "Pausar"; $("#hf").classList.add("on");
+ keepAwake();
+ const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant");
+ if (last) { $("#hfSaid").textContent = last.t; hfState("speak", "Hablando…"); await speak(last.t); }
+ hfListen();
+}
+function hfStop() {
+ hf = false; try { hfRec?.abort(); } catch {} hfRec = null; speechSynthesis?.cancel();
+ try { wake?.release(); } catch {} wake = null;
+ $("#hf").classList.remove("on"); renderMsgs();
+}
+function hfListen() {
+ if (!hf || hfPaused) return;
+ hfState("listen", "Te escucho…"); beep();
+ let text = "", gotFinal = false;
+ const r = hfRec = newRec();
+ r.onresult = (ev) => { text = ""; for (const x of ev.results) { text += x[0].transcript; if (x.isFinal) gotFinal = true; } $("#hfHeard").textContent = text; };
+ r.onerror = (ev) => {
+  if (ev.error === "no-speech" || ev.error === "aborted") return;
+  hfPaused = true; hfState("", "En pausa"); $("#hfTap").textContent = "Seguir"; $("#hfHeard").textContent = srErr(ev.error);
+ };
+ r.onend = () => {
+  hfRec = null; if (!hf || hfPaused) return;
+  if (text.trim()) { silent = 0; hfHandle(text.trim()); }
+  else if (++silent >= 4) { hfPaused = true; hfState("", "En pausa"); $("#hfTap").textContent = "Seguir"; $("#hfHeard").textContent = "No escuché nada en un rato. Toca «Seguir» cuando quieras."; }
+  else setTimeout(hfListen, 250);
+ };
+ try { r.start(); } catch { setTimeout(hfListen, 600); }
+}
+const CMD = {
+ stop: /^(stop|exit|quit|salir|para|pausa|terminar)\.?$/i,
+ repeat: /^(repeat|repeat that|say that again|again|repite|otra vez)\.?$/i,
+ slower: /^(slower|slow down|more slowly|más despacio|mas despacio|despacio)\.?$/i,
+ translate: /^(translate|translation|traduce|tradúcelo|en español|in spanish|what does that mean)\.?$/i,
+ help: /^(help|help me|ayuda|what can i say|qué digo|que digo)\??\.?$/i
+};
+async function hfHandle(text) {
+ const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant" && !m.hidden);
+ if (CMD.stop.test(text)) return hfStop();
+ if (CMD.repeat.test(text)) { hfState("speak", "Repitiendo…"); await speak(last?.t || ""); return hfListen(); }
+ if (CMD.slower.test(text)) { S.rate = Math.max(0.6, +(S.rate - 0.1).toFixed(2)); saveS(); hfState("speak", "Más despacio…"); await speak(last?.t || ""); return hfListen(); }
+ if (CMD.translate.test(text)) {
+  hfState("think", "Traduciendo…");
+  try { const es = await oneShot(`Translate into natural Latin American Spanish. Output only the translation.\n\n${last?.t || ""}`, 200); hfState("speak", "En español…"); await speak(es, "es"); } catch {}
+  hfState("speak", "Otra vez en inglés…"); await speak(last?.t || ""); return hfListen();
+ }
+ if (CMD.help.test(text)) {
+  hfState("think", "Buscando ideas…");
+  try { const o = await suggestReplies(); hfState("speak", "Ideas para responder…"); $("#hfSaid").textContent = o.join("\n"); await speak("You could say: " + o.join(". Or: ")); } catch {}
+  return hfListen();
+ }
+ if (cur === "story" && /^(continue|next|go on|sigue|continúa|continua)\.?$/i.test(text)) {
+  hfState("think", "Pensando…"); const m = await continueStory(false); if (!hf) return;
+  if (m) { hfState("speak", "Contando…"); await speak(m.t); } return hfListen();
+ }
+ const um = { r: "user", t: text };
+ chats[cur].msgs.push(um); renderMsgs(); saveChats();
+ hfState("think", "Pensando…");
+ if (S.corr === "always" && cur !== "story") { try { await checkLine(um); } catch {} }
+ if (!hf) return;
+ const m = await generate(false);
+ if (!hf) return;
+ if (um.fix) { hfState("speak", "Corrección…"); $("#hfSaid").textContent = "Mejor: " + um.fix; await speak("Quick tip. You can say: " + um.fix); if (!hf) return; }
+ if (m) { $("#hfSaid").textContent = m.t; hfState("speak", "Hablando…"); await speak(m.t); }
+ hfListen();
+}
+$("#hfExit").onclick = hfStop;
+$("#hfTap").onclick = () => {
+ if (hfPaused) { hfPaused = false; silent = 0; $("#hfTap").textContent = "Pausar"; $("#hfHeard").textContent = ""; hfListen(); }
+ else { hfPaused = true; try { hfRec?.abort(); } catch {} speechSynthesis?.cancel(); hfState("", "En pausa"); $("#hfTap").textContent = "Seguir"; }
+};
+
+/* ---------- hojas: palabra, vocabulario, historias, escenas, ajustes ---------- */
+async function wordSheet(word, sentence) {
+ word = word.replace(/[’']s$/, "").replace(/^[-']+|[-']+$/g, "");
+ const saved = vocab.find((v) => v.w.toLowerCase() === word.toLowerCase());
+ openSheet(`<div class="row"><h3 class="sp">${esc(word)}</h3><button class="ib" id="wSay" style="background:var(--bg2)">${ic("spk")}</button></div><p class="note" id="wDef">${saved ? esc(saved.d) : loadingDots}</p><div class="row" style="margin-top:14px"><button class="btn sun" id="wSave" ${saved ? "disabled" : ""}>${saved ? "Ya está guardada" : "Guardar palabra"}</button><button class="btn ghost" id="wClose">Cerrar</button></div>`);
+ $("#wSay").onclick = () => speak(word); $("#wClose").onclick = closeSheet; speak(word);
+ let def = saved?.d || "";
+ $("#wSave").onclick = () => { if (!def) return toast("Espera la explicación"); vocab.unshift({ w: word, d: def, s: sentence.slice(0, 200) }); store.set("vocab", vocab); renderStats(); $("#wSave").disabled = true; $("#wSave").textContent = "Guardada"; };
+ if (saved) return;
+ if (!S.model || busy) { $("#wDef").textContent = busy ? "El tutor está ocupado; vuelve a tocar la palabra en un momento." : "Descarga un modelo para ver explicaciones."; return; }
+ try {
+  def = await oneShot(`Word: "${word}"\nSentence: "${sentence.slice(0, 300)}"\nWrite two lines:\n1) A very simple English definition of the word as used here (max 14 words).\n2) ES: the Spanish translation (1-3 words).`, 70);
+  def = def.replace(/^\s*1\)\s*/m, "").replace(/^\s*2\)\s*/m, "");
+  if ($("#wDef")) $("#wDef").textContent = def;
+ } catch (e) { if ($("#wDef")) $("#wDef").textContent = e.message; }
+}
+function vocabSheet(tab) {
+ const wl = vocab.length ? vocab.map((v, i) => `<div class="vi"><div class="sp"><b>${esc(v.w)}</b><p>${esc(v.d)}</p>${v.s ? `<p style="font-style:italic">“${esc(v.s)}”</p>` : ""}</div><button class="ib" data-say="${i}" aria-label="Escuchar">${ic("spk")}</button><button class="ib" data-del="${i}" aria-label="Borrar">${ic("x")}</button></div>`).join("")
+  : `<p class="empty">Aún no guardas palabras. En cualquier conversación, toca una palabra que no entiendas.</p>`;
+ const fl = fixes.length ? fixes.map((f, i) => `<div class="vi"><div class="sp"><p style="text-decoration:line-through">${esc(f.said)}</p><b>${esc(f.better)}</b>${f.why ? `<p>${esc(f.why)}</p>` : ""}</div><button class="ib" data-fsay="${i}" aria-label="Escuchar">${ic("spk")}</button><button class="ib" data-fdel="${i}" aria-label="Borrar">${ic("x")}</button></div>`).join("")
+  : `<p class="empty">Al salir de una conversación verás el resumen de tus errores; guárdalo y aparecerá aquí.</p>`;
+ openSheet(`<h3>Mis palabras y correcciones</h3><div class="seg" style="grid-template-columns:1fr 1fr;margin:10px 0 14px" id="vTabs"><button data-tab="w" class="${tab === "w" ? "sel" : ""}">Palabras (${vocab.length})</button><button data-tab="f" class="${tab === "f" ? "sel" : ""}">Correcciones (${fixes.length})</button></div><div class="vlist">${tab === "w" ? wl : fl}</div>`);
+ $("#sheet").onclick = (e) => {
+  const t = e.target.closest("[data-tab]"); if (t) return vocabSheet(t.dataset.tab);
+  const s = e.target.closest("[data-say]"), d = e.target.closest("[data-del]"), fs = e.target.closest("[data-fsay]"), fd = e.target.closest("[data-fdel]");
+  if (s) { const v = vocab[+s.dataset.say]; speak(v.s || v.w); }
+  if (fs) speak(fixes[+fs.dataset.fsay].better);
+  if (d) { vocab.splice(+d.dataset.del, 1); store.set("vocab", vocab); renderStats(); vocabSheet("w"); }
+  if (fd) { fixes.splice(+fd.dataset.fdel, 1); store.set("fixes", fixes); renderStats(); vocabSheet("f"); }
+ };
+}
+function storyPicker() {
+ const pack = PACKS.find((p) => p.k === S.pack) || PACKS[0];
+ const topics = [...(S.job ? [`Someone who works as ${S.job}`] : []), ...pack.stories, ...PACKS.filter((p) => p !== pack).map((p) => p.stories[0])];
+ const has = chats.story?.msgs?.length;
+ openSheet(`<h3>Historias por capítulos</h3><p class="note">Krashen recomienda la «lectura estrecha»: muchos capítulos sobre el mismo tema y personajes, para que el vocabulario se repita.</p>
+ ${has ? `<button class="btn sun" id="stCont" style="width:100%;margin-top:12px">Seguir mi historia: ${esc(chats.story.topic)}</button>` : ""}
+ <div class="field"><label>Nueva historia sobre…</label><div class="chips" id="stChips">${topics.map((t) => `<button>${esc(t)}</button>`).join("")}</div></div>
+ <div class="field"><label for="stOwn">O escribe tu tema (en inglés o español)</label><input type="text" id="stOwn" placeholder="p. ej. un partido de béisbol"></div>
+ <button class="btn" id="stGo" style="width:100%">Empezar historia</button>`);
+ if (has) $("#stCont").onclick = () => { closeSheet(); openChat("story"); };
+ $("#stChips").onclick = (e) => { const b = e.target.closest("button"); if (b) { closeSheet(); openChat("story", b.textContent); } };
+ $("#stGo").onclick = () => { const t = $("#stOwn").value.trim(); if (!t) return toast("Escribe un tema o elige uno"); closeSheet(); openChat("story", t); };
+}
+function sceneSheet() {
+ openSheet(`<h3>Crear escena</h3><p class="note">Describe la situación que quieres practicar. El tutor hará el papel de la otra persona.</p>
+ <div class="field"><label for="scDesc">Situación</label><textarea id="scDesc" placeholder="p. ej. Hablo con mi supervisor para pedir un aumento de sueldo"></textarea></div>
+ <div class="field"><label for="scTitle">Título corto (opcional)</label><input type="text" id="scTitle" placeholder="p. ej. Pedir un aumento"></div>
+ <div class="field"><label for="scName">Nombre del personaje (opcional)</label><input type="text" id="scName" placeholder="p. ej. Mr. Brown"></div>
+ <div class="field"><label>Ideas</label><div class="chips" id="scIdeas"><button>Llamo al seguro médico para preguntar por una factura</button><button>Explico a un trabajador los resultados de su examen ocupacional</button><button>Hablo con mi supervisor para pedir un aumento</button><button>Devuelvo un producto en la tienda</button></div></div>
+ <button class="btn" id="scGo" style="width:100%">Crear y empezar</button>`);
+ $("#scIdeas").onclick = (e) => { const b = e.target.closest("button"); if (b) $("#scDesc").value = b.textContent; };
+ $("#scGo").onclick = () => {
+  const d = $("#scDesc").value.trim(); if (!d) return toast("Describe la situación");
+  const i = customs.length, k = "c" + Date.now().toString(36);
+  const t = $("#scTitle").value.trim() || d.split(/\s+/).slice(0, 4).join(" ");
+  customs.push({ k, t, es: d.length > 60 ? d.slice(0, 57) + "…" : d, ico: "chat", c: CUSTOM_COLORS[i % CUSTOM_COLORS.length], n: $("#scName").value.trim() || ["Alex", "Jordan", "Taylor", "Morgan"][i % 4], r: d, av: CUSTOM_AV[i % CUSTOM_AV.length], custom: true });
+  store.set("customs", customs); closeSheet(); S.pack = "mine"; saveS(); openChat(k);
+ };
+}
+function settingsSheet() {
+ loadVoices();
+ const cm = MODELS.find((m) => m.id === S.model);
+ openSheet(`<h3>Ajustes</h3>
+ <div class="field"><label>Correcciones</label><div class="seg" id="corrSeg">${Object.entries(CORR).map(([k, n]) => `<button data-c="${k}" class="${k === S.corr ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">«Siempre»: corrige cada frase bajo tu mensaje (y en manos libres te dice el tip en voz alta). «Solo resumen»: te muestra tus errores al salir de la charla.</p></div>
+ <div class="field"><label>Tu nivel de inglés</label><div class="seg" id="lvSeg">${Object.keys(LEVELS).map((l) => `<button class="${l === S.level ? "sel" : ""}">${l}</button>`).join("")}</div><p class="note">A2 básico · B1 intermedio · B2 intermedio alto.</p></div>
+ <div class="field"><label for="sJob">A qué te dedicas</label><input type="text" id="sJob" value="${esc(S.job)}" placeholder="p. ej. médico, camionero, contador"></div>
+ <div class="field"><label for="sLike">Temas que te gustan</label><input type="text" id="sLike" value="${esc(S.likes)}" placeholder="p. ej. fútbol, cocina, viajes"></div>
+ <div class="field"><label for="rate">Velocidad de la voz: <span id="rateV">${S.rate}</span>×</label><input type="range" id="rate" min="0.6" max="1.2" step="0.05" value="${S.rate}" style="width:100%"></div>
+ <div class="field"><label for="voiceSel">Voz</label><select id="voiceSel"><option value="">Automática</option>${voices.map((v) => `<option ${v.name === S.voice ? "selected" : ""} value="${esc(v.name)}">${esc(v.name)} (${esc(v.lang)})${v.localService ? "" : " · necesita internet"}</option>`).join("")}</select></div>
+ <div class="field"><label><input type="checkbox" id="autoChk" ${S.auto ? "checked" : ""}> Leer en voz alta cada respuesta</label></div>
+ <div class="field"><label>Modelo de IA</label><p class="note">${cm ? `${cm.name} (${cm.size}) · ${S.f16 ? "precisión f16" : "precisión f32"}` : "Ninguno descargado"}</p><button class="btn ghost" id="chgModel">Cambiar o descargar modelo</button></div>
+ ${SR && SR.install ? `<div class="field"><label>Reconocimiento de voz sin internet</label><p class="note">Chrome puede descargar el paquete de inglés para reconocer tu voz sin conexión (necesario para manos libres sin internet).</p><button class="btn ghost" id="srInst">Descargar paquete de voz</button></div>` : ""}
+ <button class="btn" id="setOk" style="width:100%;margin-top:8px">Listo</button>`);
+ $("#corrSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.corr = b.dataset.c; saveS(); [...$("#corrSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
+ $("#lvSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.level = b.textContent; saveS(); [...$("#lvSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
+ $("#sJob").oninput = (e) => { S.job = e.target.value.trim(); saveS(); };
+ $("#sLike").oninput = (e) => { S.likes = e.target.value.trim(); saveS(); };
+ $("#rate").oninput = (e) => { S.rate = +e.target.value; $("#rateV").textContent = S.rate; saveS(); };
+ $("#rate").onchange = () => speak("This is how fast I will speak.");
+ $("#voiceSel").onchange = (e) => { S.voice = e.target.value; saveS(); speak("Hi! This is my voice."); };
+ $("#autoChk").onchange = (e) => { S.auto = e.target.checked; saveS(); };
+ $("#chgModel").onclick = () => { closeSheet(); goSetup(); };
+ $("#setOk").onclick = closeSheet;
+ if ($("#srInst")) $("#srInst").onclick = async () => { try { const ok = await SR.install({ langs: ["en-US"], processLocally: true }); if (ok) localSR = true; toast(ok ? "Paquete de voz instalado" : "Este teléfono no permitió instalarlo"); } catch (e) { toast("No disponible: " + e.message); } };
+}
+
+/* ---------- arranque ---------- */
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+renderStats();
+if (!S.model) goSetup();
+else {
+ goHome();
+ hasModelInCache(fullId(S.model)).then((ok) => { if (ok) loadEngine().catch((e) => setEng("", "Error: " + e.message)); else setEng("", "Modelo no descargado"); }).catch(() => {});
+}
+}
+</script>
+</body>
+</html>
