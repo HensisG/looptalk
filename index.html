@@ -352,6 +352,34 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
 .xtext{width:100%;min-height:180px;border-radius:14px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:10px 12px;font:16px Nunito,sans-serif}
 .lesson.exam{background:linear-gradient(90deg,rgba(255,200,61,.22),rgba(255,255,255,.08));border:1px solid rgba(255,200,61,.45)}
 #xWords button:disabled{opacity:.3}
+/* tarjeta de respuesta limpia */
+.wcard .ctx{text-align:center;font-size:clamp(20px,5.4vw,24px)!important;margin:10px 0 8px!important}
+.wcard .acts{align-items:center}
+.wcard .acts .sp{flex:1}
+.wcard .acts button.round{width:40px;height:40px;min-height:40px;padding:0;justify-content:center;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.wcard .acts button.pill{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.wcard{position:relative}
+.wcard .acts button.nextarrow{position:absolute;right:-6px;top:50%;transform:translate(100%,-50%);width:34px;height:52px;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-size:34px!important;font-weight:800;line-height:1;min-height:0;padding:0 0 4px;box-shadow:none;justify-content:center}
+@media (max-width:520px){.wcard .acts button.nextarrow{right:6px;transform:translateY(-130%);background:#f3edf6;color:#5a4b66;width:30px;height:40px;font-size:28px}}
+#world.call .wbub .acts{display:none}
+/* tarjetita de palabra */
+.wpop{position:absolute;z-index:4;left:14px;width:min(330px,calc(100% - 28px));top:calc(env(safe-area-inset-top) + 200px);background:#fff;color:#22172b;border-radius:22px;padding:14px 16px;box-shadow:0 14px 34px rgba(0,0,0,.35)}
+#world.call .wpop{top:calc(34vh + 90px)}
+.wpop .wph{display:flex;align-items:center;gap:8px}.wpop .wph b{font-size:24px;font-family:Fredoka,sans-serif;font-weight:600}
+.wpop .wph .sp{flex:1}
+.wpop .round{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);color:#3b1f4a;font-size:16px}
+.wpop .round.on{background:#1e3a8a;color:#fff}
+.wpop .round svg{width:18px;height:18px}
+.wpop .wpi{display:flex;align-items:center;gap:10px;margin:8px 0 4px}.wpop .ipa{color:#8a7d94;font-size:18px}
+.wpop .wpd{margin:6px 0 10px;font-size:17px;line-height:1.35}
+.wpop .pos{display:inline-block;font-size:13px;font-weight:800;background:#e8f7ee;color:#1f9d63;border-radius:8px;padding:3px 8px}
+#wText .w.pick{background:color-mix(in srgb,var(--sun) 55%,transparent);border-radius:5px}
+/* grabar */
+.wctl .mic .stopsq{display:block;width:22px;height:22px;border-radius:5px;background:#fff;margin:0 auto 2px}
+.wctl .mic small{display:block;font-size:12px;font-weight:800}
+.wctl .mic.rec{flex-direction:column}
+.wctl .ib.send{background:var(--ok);color:#fff;font-size:24px;font-weight:800}
+#wCancel{font-size:20px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -472,6 +500,7 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
   <button class="ib" id="wMenu" aria-label="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
  </div>
  <div class="wbub" id="wBub"><p id="wText"></p><div class="es" id="wEs" hidden></div><div class="acts" id="wActs"></div></div>
+ <div class="wpop" id="wPop" hidden></div>
  <div class="wbot">
   <div class="wsaid" id="wSaid"></div>
   <div class="wsugs" id="wPacks"></div>
@@ -488,6 +517,8 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
   <div class="wctl" id="wCtl">
    <button class="ib" id="wKbd" aria-label="Escribir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></button>
    <button class="mic" id="wMic" aria-label="Hablar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+   <button class="ib" id="wCancel" aria-label="Cancelar" hidden>🗑</button>
+   <button class="ib send" id="wSend" aria-label="Enviar" hidden>✓</button>
    <button class="ib" id="wHelp" aria-label="¿Qué digo?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg></button>
   </div>
  </div>
@@ -1483,6 +1514,7 @@ ${m.t}`, 200); saveChats();
 function talkAnim(v) { world?.setSpeaking(v); $("#callBg")?.classList.toggle("talk", !!v); }
 const karaokeHTML = (t) => { let h = "", last = 0; for (const m of String(t).matchAll(/\p{L}[\p{L}'’-]*/gu)) { h += esc(t.slice(last, m.index)) + `<span class="w" data-o="${m.index}">${esc(m[0])}</span>`; last = m.index + m[0].length; } return h + esc(String(t).slice(last)); };
 function setBubble(text, es) {
+ if ($("#wPop")) $("#wPop").hidden = true;
  $("#wText").innerHTML = karaokeHTML(text); $("#wEs").hidden = !es; $("#wEs").textContent = es || "";
  $("#wBub").hidden = !text && !es; $("#wBub").scrollTop = $("#wBub").scrollHeight;
 }
@@ -1498,7 +1530,7 @@ $("#wActs").onclick = (e) => { const b = e.target.closest("button[data-a]"); if 
 $("#wText").onclick = (e) => {
  if (hubMode) return speak($("#wText").textContent, "en", $("#wText"));
  const i = lastAssistantIndex(); if (i < 0) return;
- const w = e.target.closest(".w"); if (w && !busy) return wordSheet(w.textContent, chats[cur].msgs[i].t);
+ const w = e.target.closest(".w"); if (w) return wordPop(w, chats[cur].msgs[i].t);
  speak(chats[cur].msgs[i].t, "en", $("#wText"), cur);
 };
 function showSaid(m) {
@@ -1549,7 +1581,7 @@ $("#wSugs").onclick = (e) => {
  if (go) { if (!hasAI()) { toast(NEED_AI); return goSetup(); } hush(); return openChat(go.dataset.go, null, "world"); }
  const b = e.target.closest("button"); if (b && !b.disabled) send(b.textContent);
 };
-$("#wBack").onclick = () => { if (hf) hfStop(); if (wRec) wRec.abort(); endCall(); leaveChat(); };
+$("#wBack").onclick = () => { if (hf) hfStop(); recReset(); endCall(); leaveChat(); };
 $("#wMenu").onclick = () => { hush(); hubMode = false; world?.stop(); goHome(); };
 $("#wLog").onclick = () => { world?.stop(); renderMsgs(); updTools(); show("chat"); };
 $("#wHf").onclick = () => { if (busy) return toast("Espera un momento…"); hfStart(); };
@@ -1577,8 +1609,10 @@ function renderCard() {
   const p = Math.round(card.pct * 100);
   $("#wCardScore").innerHTML = p >= 90 ? `<span style="color:var(--ok)">${T("¡Excelente pronunciación!", "Отличное произношение!")} ${p} %</span>` : p >= 60 ? `<span style="color:#b7791f">${T("Casi", "Почти")}: ${p} %. ${T("Toca las palabras en rojo para escucharlas.", "Нажми на красные слова, чтобы послушать.")}</span>` : `<span style="color:var(--red)">${p} %. ${T("Escúchala y vuelve a intentar.", "Послушай и попробуй ещё раз.")}</span>`;
  }
- $("#wCardAlts").innerHTML = card.loading ? "" : card.opts.map((o, i) => i === card.i ? "" : `<button data-alt="${i}">${esc(o)}</button>`).join("");
- $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="spk" aria-label="Escuchar">${ic("spk")}</button><button data-c="tr">${ic("tr")}${T("Español", "Перевод")}</button><button data-c="pr" class="${prRec ? "rec" : ""}">${ic("mic")}${prRec ? T("Te escucho…", "Слушаю…") : T("Practicar", "Практика")}</button><button data-c="use" class="go">${ic("check")}${T("Decirlo", "Сказать")}</button>`;
+ $("#wCardAlts").innerHTML = "";
+ $("#wCard").classList.toggle("multi", card.opts.length > 1);
+ $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="pr" class="pill ${prRec ? "rec" : ""}">${ic("mic")}${prRec ? T("Te escucho…", "Слушаю…") : T("Practicar", "Практика")}</button><span class="sp"></span><button data-c="spk" class="round" aria-label="${T("Escuchar", "Слушать")}">${ic("spk")}</button><button data-c="tr" class="round" aria-label="${T("Traducir", "Перевод")}">${ic("tr")}</button><button data-c="use" class="go" aria-label="${T("Decirlo", "Сказать")}">${ic("check")}${T("Decirlo", "Сказать")}</button>`
+  + (card.opts.length > 1 ? `<button data-c="next" class="nextarrow" aria-label="${T("Otra respuesta", "Другой ответ")}">›</button>` : "");
 }
 async function showSuggestions(key, force) {
  if (!inWorld() || hubMode || !key || cur !== key || key === "story") return;
@@ -1660,19 +1694,33 @@ $("#wDi").onclick = () => {
  };
 };
 let wRec = null;
-$("#wMic").onclick = () => {
- if (!SR) { $("#wForm").hidden = false; $("#wInp").focus(); return toast("Tu navegador no reconoce voz: escribe o usa el micrófono del teclado"); }
- if (wRec) { wRec.stop(); return; }
- if (busy) return toast("Espera a que termine de responder");
+// Grabar: toca para hablar (con tiempo), toca otra vez para pausar; luego Cancelar o Enviar.
+let rcText = "", rcBase = "", rcT0 = 0, rcTick = 0;
+function recUI(state) {
+ const m = $("#wMic"), sec = Math.floor((Date.now() - rcT0) / 1000);
+ m.classList.toggle("rec", state === "rec");
+ m.innerHTML = state === "rec" ? `<span class="stopsq"></span><small>${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}</small>` : micSVG;
+ $("#wKbd").hidden = state !== "idle"; $("#wHelp").hidden = state !== "idle";
+ $("#wCancel").hidden = state === "idle"; $("#wSend").hidden = state !== "paused";
+}
+const micSVG = $("#wMic").innerHTML;
+function recStart() {
+ if (!SR) { $("#wForm").hidden = false; $("#wInp").focus(); return toast(T("Tu navegador no reconoce voz: escribe o usa el micrófono del teclado", "Браузер не распознаёт речь: пиши или используй микрофон клавиатуры")); }
+ if (busy) return toast(T("Espera a que termine de responder", "Подожди, пока он ответит"));
  hush(); talkAnim(false);
- let text = "";
- const r = wRec = newRec();
- r.onresult = (ev) => { text = ""; for (const x of ev.results) text += x[0].transcript; $("#wSaid").innerHTML = `<span class="me" style="opacity:.75">${esc(text)}</span>`; };
+ if (!rcT0) { rcT0 = Date.now(); rcBase = ""; rcText = ""; }
+ rcBase = rcText ? rcText + " " : "";
+ const r = wRec = newRec(); r.continuous = true;
+ r.onresult = (ev) => { let t = ""; for (const x of ev.results) t += x[0].transcript; rcText = (rcBase + t).trim(); $("#wSaid").innerHTML = `<span class="me" style="opacity:.8">${esc(rcText)}</span>`; };
  r.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
- r.onend = () => { $("#wMic").classList.remove("rec"); wRec = null; if (text.trim()) send(text.trim()); };
- $("#wMic").classList.add("rec");
- try { r.start(); } catch { wRec = null; $("#wMic").classList.remove("rec"); }
-};
+ r.onend = () => { wRec = null; clearInterval(rcTick); if (rcT0) { recUI(rcText ? "paused" : "idle"); if (!rcText) rcT0 = 0; else toast(T(`En pausa. Toca el micrófono para seguir o envía lo que dijiste.`, "Пауза. Нажми микрофон, чтобы продолжить, или отправь сказанное.")); } };
+ recUI("rec"); rcTick = setInterval(() => recUI("rec"), 500);
+ try { r.start(); } catch { wRec = null; clearInterval(rcTick); recUI("idle"); }
+}
+function recReset() { rcT0 = 0; rcText = ""; rcBase = ""; clearInterval(rcTick); try { wRec?.abort(); } catch {} wRec = null; recUI("idle"); }
+$("#wMic").onclick = () => { if (wRec) { try { wRec.stop(); } catch {} return; } recStart(); };
+$("#wCancel").onclick = () => { recReset(); $("#wSaid").innerHTML = ""; };
+$("#wSend").onclick = () => { const t = rcText.trim(); recReset(); if (t) send(t); };
 $("#icoWorld").innerHTML = ic("flag");
 $("#worldBtn").onclick = () => goHub();
 $("#pathBtn").onclick = () => goPath("path");
@@ -2226,6 +2274,42 @@ $("#lsAct").onclick = async (e) => {
  if (P) return;
  return _lsActClick(e);
 };
+
+/* ---------- tarjetita de palabra: toca una palabra y aparece justo debajo ---------- */
+const wordInfo = store.get("wordinfo", {});
+async function wordPop(el, sentence) {
+ const word = el.textContent.replace(/[’']s$/, "").replace(/^[-']+|[-']+$/g, "");
+ document.querySelectorAll("#wText .w.pick").forEach((x) => x.classList.remove("pick")); el.classList.add("pick");
+ const box = $("#wPop"); box.hidden = false;
+ const br = $("#wBub").getBoundingClientRect(), z = S.zoom || 1;
+ box.style.top = (br.bottom / z + 6) + "px"; box.style.left = Math.max(12, br.left / z) + "px";
+ const key = (TL.name + ":" + word).toLowerCase();
+ let info = wordInfo[key], showTr = false;
+ const saved = () => vocab.some((v) => v.w.toLowerCase() === word.toLowerCase());
+ const draw = () => {
+  box.innerHTML = `<div class="wph"><b>${esc(showTr && info?.word_tr ? info.word_tr : word)}</b><span class="sp"></span><button class="round" data-wp="save" aria-label="${T("Guardar", "Сохранить")}">${saved() ? "★" : "☆"}</button><button class="round ${showTr ? "on" : ""}" data-wp="tr" aria-label="${T("Traducir", "Перевод")}">${ic("tr")}</button><button class="round" data-wp="x" aria-label="${T("Cerrar", "Закрыть")}">✕</button></div>
+  <div class="wpi"><button class="round" data-wp="say">${ic("spk")}</button><span class="ipa">${info ? esc(info.ipa || "") : ""}</span></div>
+  <p class="wpd">${info ? esc(showTr ? info.def_tr || info.def : info.def) : loadingDots}</p>
+  ${info?.pos ? `<span class="pos">${esc(showTr ? info.pos_tr || info.pos : info.pos)}</span>` : ""}`;
+ };
+ draw(); speak(word);
+ box.onclick = (e) => {
+  const b = e.target.closest("[data-wp]"); if (!b) return;
+  const a = b.dataset.wp;
+  if (a === "x") { box.hidden = true; el.classList.remove("pick"); return; }
+  if (a === "say") return speak(word);
+  if (a === "tr") { showTr = !showTr; return draw(); }
+  if (a === "save" && info && !saved()) { vocab.unshift({ w: word, d: `${info.def}\n${info.word_tr || ""}`, s: sentence.slice(0, 200) }); store.set("vocab", vocab); renderStats(); toast(T("Guardada para tu repaso", "Сохранено для повторения")); draw(); }
+ };
+ if (info) return;
+ try {
+  const out = await oneShot(`Word: "${word}" in the ${TL.name} sentence: "${sentence.slice(0, 300)}"
+Return ONLY valid JSON: {"ipa":"IPA pronunciation","pos":"part of speech in ${TL.name} (e.g. Adjective)","def":"very simple ${TL.name} definition of the word as used in this sentence, max 14 words","word_tr":"${NL.name} translation of the word (1-3 words)","def_tr":"the definition translated into ${NL.name}","pos_tr":"part of speech in ${NL.name}"}`, 160);
+  info = JSON.parse(out.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+  wordInfo[key] = info; store.set("wordinfo", wordInfo);
+ } catch { info = { def: T("No pude buscar la palabra ahora.", "Не удалось найти слово.") }; }
+ if (!box.hidden && el.classList.contains("pick")) draw();
+}
 
 /* ---------- videollamada: el personaje a pantalla completa y tu cámara ---------- */
 let camStream = null;
