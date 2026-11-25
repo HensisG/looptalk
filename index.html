@@ -1369,7 +1369,7 @@ function settingsSheet() {
  const cm = MODELS.find((m) => m.id === S.model), brain = cloudOn() ? "IA en la nube (tu servidor)" : cm ? `${cm.name} (${cm.size}) · en el teléfono · ${S.f16 ? "precisión f16" : "precisión f32"}` : "Ninguno elegido";
  openSheet(`<h3>Ajustes</h3>
  <div class="field"><label>Correcciones</label><div class="seg" id="corrSeg">${Object.entries(CORR).map(([k, n]) => `<button data-c="${k}" class="${k === S.corr ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">«Siempre»: corrige cada frase bajo tu mensaje (y en manos libres te dice el tip en voz alta). «Solo resumen»: te muestra tus errores al salir de la charla.</p></div>
- <div class="field"><label>${T("Familia", "Семья")}</label><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="setWho">👥 ${T("Perfiles y progreso", "Профили и прогресс")}</button><button class="btn ghost" id="setTest">📝 ${T("Test de nivel", "Тест на уровень")}</button></div></div>
+ <div class="field"><label>${T("Familia", "Семья")}</label><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="setWho">👥 ${T("Perfiles y progreso", "Профили и прогресс")}</button><button class="btn ghost" id="setTest">📝 ${T("Test de nivel", "Тест на уровень")}</button><button class="btn ghost" id="setInv">📲 ${T("Invitar a la familia", "Пригласить семью")}</button></div></div>
  <div class="field"><label>${T("Cómo ver las charlas", "Вид разговора")}</label><div class="seg" id="viewSeg" style="grid-template-columns:1fr 1fr"><button data-v="call" class="${S.view === "call" ? "sel" : ""}">📹 ${T("Videollamada", "Видеозвонок")}</button><button data-v="world" class="${S.view !== "call" ? "sel" : ""}">🏙️ ${T("Mundo 3D", "3D-мир")}</button></div>
  <label style="margin-top:8px;display:block"><input type="checkbox" id="subsChk" ${S.subs !== false ? "checked" : ""}> ${T("Subtítulos traducidos debajo", "Перевод под субтитрами")}</label>
  <label style="margin-top:6px;display:block"><input type="checkbox" id="camChk" ${S.cam !== false ? "checked" : ""}> ${T("Mi cámara en la videollamada", "Моя камера в видеозвонке")}</label></div>
@@ -1395,6 +1395,7 @@ function settingsSheet() {
  $("#camChk").onchange = (e) => { S.cam = e.target.checked; saveS(); };
  $("#zoomSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.zoom = +b.dataset.z; saveS(); applyZoom(); [...$("#zoomSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
  $("#setWho").onclick = () => { closeSheet(); whoScreen(); };
+ $("#setInv").onclick = () => shareInvite();
  $("#setTest").onclick = () => { closeSheet(); if (!hasAI()) return toast(NEED_AI); startPlacement(); };
  $("#profSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.prof = b.dataset.p; saveS(); [...$("#profSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
  if ($("#cvChk")) $("#cvChk").onchange = (e) => { S.cvoice = e.target.checked; saveS(); };
@@ -1760,6 +1761,7 @@ function renderPeople(route) {
  }).join("")}</div>` : `<p class="empty">${T("Aún no conoces a nadie. Empieza tu camino en «Llegada».", "Ты пока ни с кем не знаком. Начни путь с «Прибытия».")}</p>`}</div>`;
 }
 $("#pMain").onclick = (e) => {
+ if (e.target.closest("[data-review]")) return startReview();
  const ls = e.target.closest("[data-lesson]");
  if (ls) { if (ls.getAttribute("aria-disabled") === "true") return toast(T("Primero termina la clase anterior", "Сначала закончи предыдущий урок")); return startLesson(ls.dataset.lesson); }
  if (e.target.closest("[data-gclass]")) return goPath("classes");
@@ -1880,6 +1882,7 @@ function lessonOpen(i) { return i === 0 || lessons[COURSE[i - 1].id]?.done || LV
 function renderClasses() {
  let lastLvl = "";
  $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay">${T("<b>Clases con Nova.</b> Saca tu cuaderno ✍️. Te explico en la pizarra, practicamos juntos y repasamos cuando se te olvide.", "<b>Уроки с Новой.</b> Возьми тетрадь ✍️. Я объясню на доске, мы потренируемся и повторим, когда забудешь.")}${dueCount() ? T(` Tienes <b>${dueCount()} repaso${dueCount() > 1 ? "s" : ""}</b> pendiente${dueCount() > 1 ? "s" : ""}.`, ` Повторений на сегодня: <b>${dueCount()}</b>.`) : ""}</p></div></div>`
+  + `<button class="lesson" data-review="1"><span class="ln">🔁</span><span class="sp"><b>${T("Repaso rápido", "Быстрое повторение")}</b><small>${T("Tus palabras y errores guardados", "Твои сохранённые слова и ошибки")}</small></span><em class="${reviewItems().length ? "due" : ""}">${reviewItems().length}</em></button>`
   + COURSE.map((l, i) => {
    const st = lessons[l.id], open = lessonOpen(i), head = l.lvl !== lastLvl ? `<h3 class="lvh">${T("Nivel", "Уровень")} ${l.lvl}</h3>` : ""; lastLvl = l.lvl;
    const badge = isDue(l.id) ? `<em class="due">🔁 ${T("Repasar", "Повторить")}</em>` : st?.done ? `<em class="ok">✓ ${st.best}%</em>` : open ? `<em class="new">${T("Nueva", "Новый")}</em>` : `<em>🔒</em>`;
@@ -2030,7 +2033,7 @@ function finishLesson() {
  const gt = $("#lsAct").querySelector("#lsGoTalk"); if (gt) gt.onclick = (e) => { e.stopPropagation(); const s = stopState(ROUTE())[k]; if (s === "locked") { toast(T("Esa persona aún está bloqueada en tu camino", "Этот человек пока закрыт на твоём пути")); return goPath("path"); } goPath("path"); stopSheet(k); };
  addInput(L.data.steps.map((s) => (s.board || []).join(" ")).join(" ").slice(0, 400));
 }
-$("#lsBack").onclick = () => { readTurn++; hush(); const wasTest = !!P; P = null; goPath(wasTest ? "path" : "classes"); };
+$("#lsBack").onclick = () => { readTurn++; hush(); const wasTest = !!P; P = null; R = null; goPath(wasTest ? "path" : "classes"); };
 
 /* ---------- familia: perfiles, quién eres y tabla de progreso ----------
    Cada persona tiene su perfil en el teléfono (con PIN opcional) y su propio idioma.
@@ -2083,6 +2086,7 @@ function familyHTML() {
 function whoScreen() {
  const list = profiles();
  $("#whoList").innerHTML = list.map((p) => { const ps = profileStats(p); return `<button class="who" data-pid="${esc(p.id)}"><span class="wav">${p.emoji || "🙂"}</span><b>${esc(p.name)}</b><small>${FLAG[ps.target]} ${LANG_LABEL[ps.target][UIRU ? "ru" : "es"]} · ${ps.level}${p.pin ? " · 🔒" : ""}</small></button>`; }).join("")
+  + (cloudOn() ? `<button class="who add" data-inv="1"><span class="wav">📲</span><b>${T("Invitar", "Пригласить")}</b><small>${T("A su propio teléfono", "На свой телефон")}</small></button>` : "")
   + `<button class="who add" data-new="1"><span class="wav">＋</span><b>${T("Nuevo perfil", "Новый профиль")}</b><small>${T("Para otra persona", "Для другого человека")}</small></button>`;
  const fam = () => { $("#whoFam").innerHTML = list.length > 1 || famCache?.length > 1 ? `<h2>${T("Progreso de la familia", "Прогресс семьи")}</h2>${familyHTML()}<p class="note">${cloudOn() ? T("Incluye a la familia en otros teléfonos.", "Включая семью на других телефонах.") : ""}</p>` : ""; };
  fam(); show("who");
@@ -2094,6 +2098,7 @@ function switchProfile(id) {
 }
 $("#whoList").onclick = (e) => {
  if (e.target.closest("[data-new]")) return newProfileSheet();
+ if (e.target.closest("[data-inv]")) return shareInvite();
  const b = e.target.closest("[data-pid]"); if (!b) return;
  const p = profiles().find((x) => x.id === b.dataset.pid); if (!p) return;
  if (!p.pin) return switchProfile(p.id);
@@ -2210,9 +2215,120 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 function applyZoom() { document.body.style.zoom = S.zoom && S.zoom !== 1 ? S.zoom : ""; }
 applyZoom();
 
+/* ---------- invitar a la familia: un enlace conecta el teléfono a tu IA ---------- */
+function inviteLink() {
+ const data = btoa(unescape(encodeURIComponent(JSON.stringify({ u: S.cloudUrl, c: S.cloudCode }))));
+ return location.origin + location.pathname + "#join=" + data;
+}
+async function shareInvite() {
+ if (!cloudOn()) return toast(T("Primero conecta la IA en la nube", "Сначала подключи облачный ИИ"));
+ const url = inviteLink();
+ const text = T("¡Aprende idiomas conmigo! Abre este enlace en Chrome, crea tu perfil y empieza:", "Учи языки вместе со мной! Открой ссылку в Chrome, создай профиль и начни:");
+ try { if (navigator.share) { await navigator.share({ title: "Try Your New Language", text, url }); return; } } catch (e) { if (e?.name === "AbortError") return; }
+ try { await navigator.clipboard.writeText(text + " " + url); toast(T("Enlace copiado: pégalo en WhatsApp", "Ссылка скопирована: вставь её в WhatsApp")); }
+ catch { openSheet(`<h3>${T("Enlace de invitación", "Ссылка-приглашение")}</h3><p class="note">${T("Cópialo y envíalo solo a tu familia (incluye tu código).", "Скопируй и отправь только семье (там твой код).")}</p><textarea style="width:100%;min-height:120px">${esc(url)}</textarea>`); }
+}
+function readJoin() {
+ const m = location.hash.match(/^#join=(.+)$/); if (!m) return false;
+ try {
+  const j = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+  if (j.u && /^https:\/\/|^http:\/\/(localhost|127\.0\.0\.1)/.test(j.u)) { S.ai = "cloud"; S.cloudUrl = j.u; S.cloudCode = j.c || ""; saveS(); }
+ } catch {}
+ history.replaceState(null, "", location.pathname);
+ return true;
+}
+// Bienvenida en un teléfono nuevo: nombre, idiomas y letra grande; después el test de nivel.
+function welcomeSheet() {
+ openSheet(`<h3>${T("¡Bienvenido!", "Добро пожаловать!")} 👋</h3><p class="note">${T("Cuéntame quién eres para preparar tu camino.", "Расскажи о себе, чтобы я подготовил твой путь.")}</p>
+ <div class="field"><label for="wlName">${T("Tu nombre", "Твоё имя")}</label><input type="text" id="wlName" autocomplete="given-name"></div>
+ <div class="field"><label>${T("¿Qué idioma hablas?", "Твой родной язык")}</label><div class="seg" id="wlNat" style="grid-template-columns:1fr 1fr"><button data-v="es" class="sel">🇵🇪 Español</button><button data-v="ru">🇷🇺 Русский</button></div></div>
+ <div class="field"><label>${T("¿Qué idioma quieres aprender?", "Какой язык учить?")}</label><div class="seg" id="wlTar" style="grid-template-columns:1fr 1fr"><button data-v="en" class="sel">🇺🇸 English</button><button data-v="es">🇵🇪 Español</button></div></div>
+ <div class="field"><label><input type="checkbox" id="wlBig"> ${T("Letra grande (para ver mejor)", "Крупный текст")}</label></div>
+ <button class="btn" id="wlGo" style="width:100%">${T("Empezar", "Начать")}</button>`);
+ const seg = (id) => { $(id).onclick = (e) => { const b = e.target.closest("button"); if (b) [...$(id).children].forEach((x) => x.classList.toggle("sel", x === b)); }; };
+ seg("#wlNat"); seg("#wlTar");
+ $("#wlBig").onchange = (e) => { S.zoom = e.target.checked ? 1.3 : 1; applyZoom(); };
+ $("#wlGo").onclick = () => {
+  const name = $("#wlName").value.trim(); if (!name) return toast("✍️");
+  const nat = $("#wlNat .sel").dataset.v, tar = $("#wlTar .sel").dataset.v;
+  if (nat === tar) return toast(T("Elige un idioma distinto al tuyo", "Выбери язык, отличный от родного"));
+  Object.assign(S, { name, native: nat, target: tar, zoom: $("#wlBig").checked ? 1.3 : 1, v2: true, level: "A1", tested: false, welcomed: true });
+  saveS();
+  const list = profiles(); const me = list.find((x) => x.id === PROFILE); if (me) me.name = name; saveProfiles(list);
+  location.reload(); // recarga con su idioma; luego empieza el test de nivel
+ };
+}
+
+/* ---------- repaso rápido: palabras y errores con repetición espaciada (cajas de Leitner) ---------- */
+const BOX_DAYS = [0, 1, 3, 7, 16, 35];
+let srs = store.get("srs", {});
+function reviewItems() {
+ const now = Date.now(), items = [];
+ vocab.forEach((v) => items.push({ id: "w:" + v.w.toLowerCase(), kind: "w", v }));
+ fixes.forEach((f) => items.push({ id: "f:" + f.better.toLowerCase().slice(0, 80), kind: "f", f }));
+ return items.filter((it) => (srs[it.id]?.due || 0) <= now);
+}
+let R = null;
+function startReview() {
+ const due = reviewItems();
+ if (due.length < 1) return toast(T("No hay nada para repasar hoy. ¡Guarda palabras tocándolas en las charlas!", "Сегодня нечего повторять. Сохраняй слова, нажимая на них в разговорах!"));
+ R = { items: due.sort(() => Math.random() - 0.5).slice(0, 10), i: 0, ok: 0 };
+ L = null; P = null;
+ $("#lsTitle").textContent = T("Repaso rápido", "Быстрое повторение"); $("#lsLvl").textContent = `${R.items.length} ${T("tarjetas", "карточек")}`;
+ show("lesson"); renderReview();
+}
+function renderReview() {
+ const it = R.items[R.i];
+ $("#lsDots").innerHTML = R.items.map((_, i) => `<i class="${i < R.i ? "d" : i === R.i ? "c" : ""}"></i>`).join("");
+ let q, opts, ans;
+ if (it.kind === "f") {
+  q = T("¿Cuál es la forma correcta?", "Как правильно?"); ans = it.f.better;
+  opts = [it.f.better, it.f.said];
+ } else {
+  const def = (it.v.d || "").split("\n")[0]; q = it.v.w; ans = def;
+  const others = vocab.filter((x) => x !== it.v).map((x) => (x.d || "").split("\n")[0]).filter(Boolean).sort(() => Math.random() - 0.5).slice(0, 2);
+  opts = [def, ...others];
+ }
+ R.ans = ans;
+ $("#lsBoard").innerHTML = `<p class="chalk q">${esc(q)}</p>${it.kind === "w" && it.v.s ? `<p class="chalk nb">“${esc(it.v.s.slice(0, 90))}”</p>` : ""}`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${it.kind === "w" ? T("¿Qué significa esta palabra?", "Что значит это слово?") : T("Elige la frase bien dicha.", "Выбери правильную фразу.")}`;
+ $("#lsAct").innerHTML = `<div class="opts">${opts.sort(() => Math.random() - 0.5).map((o) => `<button class="opt" data-ro="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
+ if (it.kind === "w") speak(it.v.w);
+}
+function reviewAnswer(pick) {
+ const it = R.items[R.i], ok = pick === R.ans, st = srs[it.id] || { box: 0 };
+ st.box = ok ? Math.min(BOX_DAYS.length - 1, st.box + 1) : 0;
+ st.due = Date.now() + BOX_DAYS[st.box] * 86400000; srs[it.id] = st; store.set("srs", srs);
+ if (ok) R.ok++;
+ document.querySelectorAll("[data-ro]").forEach((b) => b.classList.toggle("right", b.dataset.ro === R.ans));
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${ok ? T("✅ ¡Bien! La verás en unos días.", "✅ Верно! Увидишь её через несколько дней.") : T("❌ Esta vuelve mañana para practicarla.", "❌ Эта вернётся завтра.")}`;
+ beep(ok ? 990 : 330); speak(R.ans, it.kind === "w" ? "es" : "en");
+ $("#lsAct").insertAdjacentHTML("beforeend", `<button class="btn" id="rvNext">${T("Siguiente", "Дальше")}</button>`);
+}
+function finishReview() {
+ const n = R.items.length, ok = R.ok; R = null;
+ $("#lsDots").innerHTML = "";
+ $("#lsBoard").innerHTML = `<p class="chalk q">${T("¡Repaso terminado!", "Повторение окончено!")}</p><p class="chalk">${ok} ${T("de", "из")} ${n} ✓</p>`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Repasar un poco cada día es lo que más ayuda a no olvidar.", "Понемногу каждый день — лучший способ не забывать.")}`;
+ $("#lsAct").innerHTML = `<button class="btn" id="rvDone">${T("Volver a clases", "К урокам")}</button>`;
+ addInput("review review review review review");
+}
+const _lsAct2 = $("#lsAct").onclick;
+$("#lsAct").onclick = (e) => {
+ if (e.target.closest("#rvDone")) return goPath("classes");
+ if (R) {
+  if (e.target.closest("#rvNext")) { R.i++; return R.i >= R.items.length ? finishReview() : renderReview(); }
+  const o = e.target.closest("[data-ro]"); if (o && !$("#rvNext")) reviewAnswer(o.dataset.ro);
+  return;
+ }
+ return _lsAct2(e);
+};
+
 /* ---------- arranque ---------- */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 renderStats();
+const joined = readJoin();
+const freshDevice = joined && !S.name && !S.welcomed;
 if (!S.v2) { S.v2 = true; S.level = "A1"; saveS(); }
 { const list = profiles(); if (!localStorage.getItem("tynl_profiles")) saveProfiles(list); const me = list.find((x) => x.id === PROFILE); $("#pWho").textContent = me?.emoji || "👤"; }
 $("#whoQ").textContent = T("¿Quién va a practicar?", "Кто будет заниматься?");
@@ -2220,9 +2336,10 @@ $("#whoQ").textContent = T("¿Quién va a practicar?", "Кто будет зан
 if (UIRU) document.querySelector('#pTabs [data-tab="more"]').hidden = true;
 $("#inp").placeholder = T(`Escribe o habla en ${TL === LANGS.en ? "inglés" : "español"}…`, "Пиши или говори по-испански…"); $("#wInp").placeholder = $("#inp").placeholder;
 const needWho = profiles().length > 1 && (() => { try { return sessionStorage.getItem("tynl_unlocked") !== (PROFILE || "main"); } catch { return false; } })();
-if (needWho) whoScreen();
+if (freshDevice && hasAI()) { goPath("path"); welcomeSheet(); }
+else if (needWho) whoScreen();
 else if (!hasAI()) goSetup();
-else if (S.v2 && PROFILE && !S.tested) startPlacement();
+else if (S.v2 && (PROFILE || S.welcomed) && !S.tested) startPlacement();
 else {
  goPath("path");
  if (cloudOn()) setEng("ok", "IA en la nube");

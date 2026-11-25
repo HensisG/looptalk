@@ -10,19 +10,30 @@ Qué es
     Si la nube falla por falta de internet y tienes un modelo descargado, la app lo usa como respaldo.
 
 Qué trae
-- Mundo 3D: Ollie, el búho profesor, y un personaje animado en cada lugar.
-- Tarjeta de sugerencias bajo cada respuesta: una frase que puedes decir, con
-  · Escuchar · Español (traducción) · Otra opción
-  · Practicar: lees la frase en voz alta y cada palabra se pone verde (bien) o roja (repítela).
-    Toca una palabra roja para escucharla despacio.
-  · "Di en español…": escribes o dices tu idea en español y te dice cómo decirla en inglés.
-  · Decirlo: la envía al personaje.
-- El texto del personaje se resalta palabra por palabra mientras habla. Toca cualquier palabra para ver
-  qué significa y guardarla.
-- Al salir: estrellas, puntos (con récord por lugar), evaluación de vocabulario, gramática, fluidez y
-  estilo, tus errores, y lo que contaste de ti (los personajes lo recuerdan la próxima vez).
-- Paquetes de escenas: Día a día, Medicina, Camiones, Contabilidad, Escuela, Vida en EE. UU. y "Mis escenas".
-- Manos libres: conversas solo con la voz ("repeat", "slower", "translate", "help", "stop").
+- Camino por barrios (Llegada, Mi barrio, Trabajo, Comunidad, Vida real). Cada parada es una persona con
+  su propia vida; la amistad sube en 5 niveles y con ella la dificultad (A1 → A2 → B1 → B2 → C1).
+- Nova, el robot guía, te propone la siguiente misión.
+- Videollamada: el personaje a pantalla completa, tu cámara en una esquina (no se graba nada) y
+  subtítulos dobles (la frase y su traducción). El mundo 3D sigue disponible en Ajustes.
+- Voz natural distinta para cada personaje (Gemini, por tu servidor) y la voz del teléfono de respaldo.
+- Tarjeta de respuestas posibles bajo cada pregunta: escuchar, traducir, practicar pronunciación
+  (palabras verdes/rojas), «Di en español…» y «Decirlo».
+- Clases con Nova: 23 clases de A1 a B2 con pizarra, momentos de «cópialo en tu cuaderno», ejercicios,
+  «Tengo una duda» y repaso espaciado (1, 3, 7, 14 y 30 días).
+- Repaso rápido: tus palabras guardadas y tus errores vuelven justo antes de olvidarlos.
+- Al terminar una charla: estrellas, puntos, evaluación, tus errores y lo que contaste de ti.
+- Familia: perfiles con PIN opcional, test de nivel («contesta solo lo que sabes») y tabla de progreso
+  que incluye a quienes usan su propio teléfono o tablet.
+- Idiomas: inglés para hispanohablantes, español para rusohablantes (textos en ruso) e inglés para
+  rusohablantes.
+- Letra grande (Ajustes → Tamaño de letra) para quien no ve bien de cerca.
+
+Invitar a la familia
+- En tu teléfono: Ajustes → Familia → «Invitar a la familia» (o 👤 → «Invitar»). Se abre WhatsApp con un
+  enlace. Compártelo solo con tu familia: incluye el código de tu servidor.
+- En el otro teléfono o tablet: abrir el enlace en Chrome → escribir su nombre, su idioma y si quiere
+  letra grande → test de nivel → listo. Después: menú ⋮ → «Instalar app».
+- Varias personas en el mismo teléfono: 👤 → «Nuevo perfil».
 
 
 CÓMO CONECTAR LA IA GRATIS EN LA NUBE (una sola vez, ~15 minutos)
