@@ -41,11 +41,12 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     const url = new URL(req.url);
     if (req.method === "GET" && url.pathname === "/") return json({ ok: true, app: "try-your-new-language", tts: true }, 200, cors);
-    if (req.method !== "POST" || !["/chat", "/tts"].includes(url.pathname)) return json({ error: "not found" }, 404, cors);
+    if (req.method !== "POST" || !["/chat", "/tts", "/family"].includes(url.pathname)) return json({ error: "not found" }, 404, cors);
 
     if (!env.AI_KEY) return json({ error: "Falta AI_KEY en el servidor" }, 500, cors);
     if (env.APP_CODE && req.headers.get("X-App-Code") !== env.APP_CODE) return json({ error: "Código de acceso incorrecto" }, 401, cors);
     if (url.pathname === "/tts") return tts(req, env, cors);
+    if (url.pathname === "/family") return family(req, env, cors);
 
     let body;
     try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400, cors); }
@@ -137,4 +138,26 @@ function wav(pcm, rate) {
   v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
   w(36, "data"); v.setUint32(40, pcm.length, true); out.set(pcm, 44);
   return out;
+}
+
+// ---------- familia: progreso compartido entre teléfonos (Cloudflare KV, binding "FAMILY") ----------
+// Cada perfil envía un resumen pequeño (nombre, idioma, nivel, racha, minutos…). Nada de conversaciones.
+async function family(req, env, cors) {
+  if (!env.FAMILY) return json({ error: "Falta conectar el almacenamiento FAMILY", members: [] }, 200, cors);
+  let b;
+  try { b = await req.json(); } catch { return json({ error: "JSON inválido" }, 400, cors); }
+  const m = b.me;
+  if (m && typeof m.uid === "string" && /^[a-z0-9]{6,32}$/.test(m.uid)) {
+    const clean = {
+      uid: m.uid, name: String(m.name || "").slice(0, 30), emoji: String(m.emoji || "🙂").slice(0, 8),
+      target: ["en", "es"].includes(m.target) ? m.target : "en", level: /^[ABC][12]$/.test(m.level) ? m.level : "A1",
+      streak: Math.max(0, Math.min(9999, +m.streak || 0)), weekMin: Math.max(0, Math.min(99999, +m.weekMin || 0)),
+      totalH: Math.max(0, Math.min(99999, +m.totalH || 0)), friends: Math.max(0, Math.min(99, +m.friends || 0)),
+      classes: Math.max(0, Math.min(99, +m.classes || 0)), at: Date.now()
+    };
+    await env.FAMILY.put("m:" + clean.uid, JSON.stringify(clean), { expirationTtl: 60 * 60 * 24 * 120 });
+  }
+  const list = await env.FAMILY.list({ prefix: "m:", limit: 50 });
+  const members = (await Promise.all(list.keys.map((k) => env.FAMILY.get(k.name, "json")))).filter(Boolean);
+  return json({ members }, 200, cors);
 }

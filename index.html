@@ -313,6 +313,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .sheet .fam th,.sheet .fam td{border-color:var(--line)}
 .opt.idk{background:transparent;border-style:dashed;color:#cbb9d6}
 .chips button.sel{border-color:var(--red);background:color-mix(in srgb,var(--red) 15%,transparent)}
+.callbg{position:absolute;inset:0;z-index:0;overflow:hidden;background:radial-gradient(circle at 50% 35%,#4a2c5e,#1b1424 70%)}
+.callbg img{position:absolute;left:50%;top:0;height:72%;max-width:none;aspect-ratio:1;transform:translateX(-50%);object-fit:cover;border-radius:0 0 40% 40%/0 0 18% 18%;animation:breathe 4.5s ease-in-out infinite;-webkit-mask-image:linear-gradient(180deg,#000 75%,transparent);mask-image:linear-gradient(180deg,#000 75%,transparent)}
+.callbg.talk img{animation:breathe 4.5s ease-in-out infinite,talky .45s ease-in-out infinite}
+.callglow{position:absolute;left:50%;top:66%;width:120px;height:6px;margin-left:-60px;border-radius:3px;background:#5ff5e6;opacity:0;transition:opacity .2s}
+.callbg.talk .callglow{opacity:.9;animation:pulse .5s infinite}
+@keyframes breathe{50%{transform:translateX(-50%) scale(1.015) translateY(2px)}}
+@keyframes talky{50%{filter:brightness(1.06)}}
+.selfie{position:absolute;z-index:3;right:14px;top:calc(env(safe-area-inset-top) + 74px);width:96px;height:128px;object-fit:cover;border-radius:16px;border:3px solid rgba(255,255,255,.85);transform:scaleX(-1);box-shadow:0 8px 20px rgba(0,0,0,.4);background:#000}
+#world.call .wbub{top:auto;bottom:calc(46% - 20px)}
+#world.call .wbub p{font-size:clamp(20px,5.4vw,26px);font-weight:700}
+#world.call .wbub .es{font-size:16px;color:#5a4b66}
+#wCam{font-size:18px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -421,11 +433,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <!-- MUNDO 3D -->
 <section class="screen" id="world">
  <canvas id="wc"></canvas>
+ <div class="callbg" id="callBg" hidden><img id="callImg" alt=""><div class="callglow"></div></div>
+ <video class="selfie" id="selfie" autoplay muted playsinline hidden></video>
  <div class="fade" id="wFade"></div>
  <div class="wtop">
   <button class="ib" id="wBack" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
   <div class="sp"><b id="wName">Try Your New Language</b><span id="wRole"></span><span id="wStat" class="wstat"></span></div>
   <button class="ib" id="wLog" aria-label="Ver la conversación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+  <button class="ib" id="wCam" aria-label="Cámara" hidden>📷</button>
   <button class="ib" id="wHf" aria-label="Manos libres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H4zM17 14h3v6h-3z"/></svg></button>
   <button class="ib" id="wMenu" aria-label="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
  </div>
@@ -603,7 +618,7 @@ const store = {
  get(k, d) { try { const v = localStorage.getItem(PFX + k); return v ? JSON.parse(v) : d; } catch { return d; } },
  set(k, v) { try { localStorage.setItem(PFX + k, JSON.stringify(v)); } catch {} }
 };
-const S = Object.assign({ gfx: "low", name: "", model: null, level: "B1", rate: 0.9, auto: true, voice: "", f16: null, corr: "always", pack: "daily", job: "", likes: "", ai: null, cloudUrl: "", cloudCode: "", sug: "auto", facts: [] }, store.get("settings", {}));
+const S = Object.assign({ gfx: "low", name: "", model: null, level: "B1", rate: 0.9, auto: true, voice: "", f16: null, corr: "always", pack: "daily", job: "", likes: "", ai: null, cloudUrl: "", cloudCode: "", sug: "auto", facts: [], view: "call" }, store.get("settings", {}));
 if (!S.ai) S.ai = S.model ? "local" : "cloud";
 /* idiomas: TL = el que aprendes, NL = el tuyo. Pedro: inglés←español. Anastasiya: español←ruso. */
 const LANGS = {
@@ -788,8 +803,8 @@ function speak(text, lang = "en", hl = null, k = null) {
    const clean = String(text).replace(/[*_#]/g, "");
    const spans = hl ? (hl.innerHTML = karaokeHTML(clean), [...hl.querySelectorAll(".w")]) : null;
    const a = curAudio = new Audio(url); let done = false;
-   const fin = () => { if (done) return; done = true; spans?.forEach((s) => s.classList.remove("on")); world?.setSpeaking(false); if (curAudio === a) curAudio = null; res(); };
-   a.onplay = () => world?.setSpeaking(true);
+   const fin = () => { if (done) return; done = true; spans?.forEach((s) => s.classList.remove("on")); talkAnim(false); if (curAudio === a) curAudio = null; res(); };
+   a.onplay = () => talkAnim(true);
    a.ontimeupdate = () => { if (!spans || !a.duration) return; const ci = a.currentTime / a.duration * clean.length; let on = null; for (const s of spans) { if (+s.dataset.o <= ci) on = s; else break; } spans.forEach((s) => s.classList.toggle("on", s === on)); };
    a.onended = fin; a.onerror = fin;
    a.play().catch(fin);
@@ -805,15 +820,15 @@ function speak(text, lang = "en", hl = null, k = null) {
   let spans = null, gotB = false, est = 0, t0 = 0;
   if (hl) { hl.innerHTML = karaokeHTML(clean); spans = [...hl.querySelectorAll(".w")]; }
   const mark = (ci) => { if (!spans) return; let on = null; for (const s of spans) { if (+s.dataset.o <= ci) on = s; else break; } spans.forEach((s) => s.classList.toggle("on", s === on)); };
-  let done = false; const fin = () => { if (!done) { done = true; clearInterval(est); spans?.forEach((s) => s.classList.remove("on")); world?.setSpeaking(false); res(); } };
+  let done = false; const fin = () => { if (!done) { done = true; clearInterval(est); spans?.forEach((s) => s.classList.remove("on")); talkAnim(false); res(); } };
   u.onboundary = (ev) => { if (ev.name && ev.name !== "word") return; gotB = true; mark(ev.charIndex); };
   u.onstart = () => {
-   world?.setSpeaking(true); t0 = Date.now();
+   talkAnim(true); t0 = Date.now();
    // si la voz no avisa de cada palabra, se estima por tiempo (~14 letras por segundo)
    if (spans) est = setInterval(() => { if (!gotB) mark((Date.now() - t0) / 1000 * 14 * S.rate); }, 120);
   };
   u.onend = fin; u.onerror = fin;
-  if (inWorld()) world?.setSpeaking(true);
+  if (inWorld()) talkAnim(true);
   setTimeout(fin, 2000 + text.length * 110 / S.rate); // por si el navegador no avisa al terminar
   speechSynthesis.speak(u);
  });
@@ -1022,6 +1037,7 @@ async function generate(speakIt = true) {
  clearInterval(wd);
  saveChats(); if (cur === key) renderMsgs(); addInput(m.t);
  if (inWorld() && cur === key) syncBubble();
+ subTranslate(key, m);
  if (speakIt && (S.auto || inWorld()) && !hf) speak(m.t, "en", inWorld() && cur === key ? $("#wText") : null, key);
  return m;
 }
@@ -1354,6 +1370,10 @@ function settingsSheet() {
  openSheet(`<h3>Ajustes</h3>
  <div class="field"><label>Correcciones</label><div class="seg" id="corrSeg">${Object.entries(CORR).map(([k, n]) => `<button data-c="${k}" class="${k === S.corr ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">«Siempre»: corrige cada frase bajo tu mensaje (y en manos libres te dice el tip en voz alta). «Solo resumen»: te muestra tus errores al salir de la charla.</p></div>
  <div class="field"><label>${T("Familia", "Семья")}</label><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="setWho">👥 ${T("Perfiles y progreso", "Профили и прогресс")}</button><button class="btn ghost" id="setTest">📝 ${T("Test de nivel", "Тест на уровень")}</button></div></div>
+ <div class="field"><label>${T("Cómo ver las charlas", "Вид разговора")}</label><div class="seg" id="viewSeg" style="grid-template-columns:1fr 1fr"><button data-v="call" class="${S.view === "call" ? "sel" : ""}">📹 ${T("Videollamada", "Видеозвонок")}</button><button data-v="world" class="${S.view !== "call" ? "sel" : ""}">🏙️ ${T("Mundo 3D", "3D-мир")}</button></div>
+ <label style="margin-top:8px;display:block"><input type="checkbox" id="subsChk" ${S.subs !== false ? "checked" : ""}> ${T("Subtítulos traducidos debajo", "Перевод под субтитрами")}</label>
+ <label style="margin-top:6px;display:block"><input type="checkbox" id="camChk" ${S.cam !== false ? "checked" : ""}> ${T("Mi cámara en la videollamada", "Моя камера в видеозвонке")}</label></div>
+ <div class="field"><label>${T("Tamaño de letra", "Размер текста")}</label><div class="seg" id="zoomSeg">${[[1, T("Normal", "Обычный")], [1.2, T("Grande", "Крупный")], [1.4, T("Muy grande", "Очень крупный")]].map(([z, n]) => `<button data-z="${z}" class="${(S.zoom || 1) == z ? "sel" : ""}">${n}</button>`).join("")}</div></div>
  <div class="field"><label>Tu trabajo en el camino</label><div class="seg" id="profSeg" style="grid-template-columns:1fr 1fr">${Object.entries(PROF_PACKS).map(([k, n]) => `<button data-p="${k}" class="${k === profPack() ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Las misiones del barrio «Trabajo».</p></div>
  ${cloudOn() ? `<div class="field"><label><input type="checkbox" id="cvChk" ${S.cvoice !== false ? "checked" : ""}> Voz natural para cada personaje</label><p class="note">Cada persona tiene su propia voz (usa tu servidor gratuito). Si se acaba el límite del día, se usa la voz del teléfono.</p></div>` : ""}
  <div class="field"><label>Sugerencias de respuesta</label><div class="seg" id="sugSeg">${[["auto", "Siempre"], ["ask", "Si las pido"], ["off", "Nunca"]].map(([k, n]) => `<button data-s="${k}" class="${k === S.sug ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Una frase que puedes decir, con práctica de pronunciación y «Di en español…». «Si las pido»: toca el botón de ayuda.</p></div>
@@ -1370,6 +1390,10 @@ function settingsSheet() {
  ${SR && SR.install ? `<div class="field"><label>Reconocimiento de voz sin internet</label><p class="note">Chrome puede descargar el paquete de inglés para reconocer tu voz sin conexión (necesario para manos libres sin internet).</p><button class="btn ghost" id="srInst">Descargar paquete de voz</button></div>` : ""}
  <button class="btn" id="setOk" style="width:100%;margin-top:8px">Listo</button>`);
  $("#gfxSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.gfx = b.dataset.g; saveS(); [...$("#gfxSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); toast("Cierra y vuelve a abrir la app para aplicar el cambio"); };
+ $("#viewSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.view = b.dataset.v; saveS(); [...$("#viewSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
+ $("#subsChk").onchange = (e) => { S.subs = e.target.checked; saveS(); };
+ $("#camChk").onchange = (e) => { S.cam = e.target.checked; saveS(); };
+ $("#zoomSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.zoom = +b.dataset.z; saveS(); applyZoom(); [...$("#zoomSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
  $("#setWho").onclick = () => { closeSheet(); whoScreen(); };
  $("#setTest").onclick = () => { closeSheet(); if (!hasAI()) return toast(NEED_AI); startPlacement(); };
  $("#profSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.prof = b.dataset.p; saveS(); [...$("#profSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
@@ -1413,6 +1437,20 @@ function fadeTo(fn) {
  setTimeout(() => { fn(); setTimeout(() => f.classList.remove("on"), 60); }, 330);
 }
 let speakTurn = 0;
+// Subtítulos dobles: la traducción aparece sola debajo de cada frase del personaje.
+function subTranslate(key, m) {
+ if (!inWorld() || cur !== key || S.subs === false || !hasAI() || m.x) return;
+ setTimeout(async () => {
+  if (cur !== key) return;
+  try {
+   m.x = await oneShot(`Translate into ${NL.tr}. Output only the translation.
+
+${m.t}`, 200); saveChats();
+   if (inWorld() && cur === key && lastAssistantIndex() === chats[key].msgs.indexOf(m)) { $("#wEs").textContent = m.x; $("#wEs").hidden = false; }
+  } catch {}
+ }, 60);
+}
+function talkAnim(v) { world?.setSpeaking(v); $("#callBg")?.classList.toggle("talk", !!v); }
 const karaokeHTML = (t) => { let h = "", last = 0; for (const m of String(t).matchAll(/\p{L}[\p{L}'’-]*/gu)) { h += esc(t.slice(last, m.index)) + `<span class="w" data-o="${m.index}">${esc(m[0])}</span>`; last = m.index + m[0].length; } return h + esc(String(t).slice(last)); };
 function setBubble(text, es) {
  $("#wText").innerHTML = karaokeHTML(text); $("#wEs").hidden = !es; $("#wEs").textContent = es || "";
@@ -1459,18 +1497,21 @@ function goHub(greet = true) {
  if (greet) setTimeout(async () => { if (!hubMode) return; await speak(es, "es"); if (hubMode) speak("Where do you want to practice today?"); }, 700);
 }
 function enterPlace(k) {
- const w = getWorld(); if (!w) { show("chat"); return; }
+ const call = S.view === "call";
+ const w = call ? null : getWorld(); if (!call && !w) { show("chat"); return; }
+ if (!call) endCall();
  hubMode = false; const c = charOf(k);
  show("world"); $("#wPacks").hidden = true; $("#wSugs").innerHTML = ""; $("#wCtl").hidden = false; $("#wForm").hidden = true;
  $("#wLog").hidden = false; $("#wHf").hidden = false; $("#wBack").hidden = false; $("#wMenu").hidden = true;
  $("#wName").textContent = c.n; $("#wRole").textContent = `${c.t} · nivel ${levelFor(k)}`;
  showSaid(null); hideCard(); syncBubble();
- fadeTo(() => w.setScene(sceneFor(k), charFor(k), c.c));
+ if (call) startCall(k); else fadeTo(() => w.setScene(sceneFor(k), charFor(k), c.c));
  const i = lastAssistantIndex();
  if (i >= 0 && chats[k].msgs.length - 1 === i) setTimeout(() => {
   if (!inWorld() || cur !== k) return;
   if (!busy) speak(chats[k].msgs[i].t, "en", $("#wText"), k);
   if (hasAI() && !busy) showSuggestions(k);
+  subTranslate(k, chats[k].msgs[i]);
  }, 900);
 }
 $("#wSugs").onclick = (e) => {
@@ -1478,7 +1519,7 @@ $("#wSugs").onclick = (e) => {
  if (go) { if (!hasAI()) { toast(NEED_AI); return goSetup(); } hush(); return openChat(go.dataset.go, null, "world"); }
  const b = e.target.closest("button"); if (b && !b.disabled) send(b.textContent);
 };
-$("#wBack").onclick = () => { if (hf) hfStop(); if (wRec) wRec.abort(); leaveChat(); };
+$("#wBack").onclick = () => { if (hf) hfStop(); if (wRec) wRec.abort(); endCall(); leaveChat(); };
 $("#wMenu").onclick = () => { hush(); hubMode = false; world?.stop(); goHome(); };
 $("#wLog").onclick = () => { world?.stop(); renderMsgs(); updTools(); show("chat"); };
 $("#wHf").onclick = () => { if (busy) return toast("Espera un momento…"); hfStart(); };
@@ -1534,7 +1575,7 @@ function practice() {
  const target = cardText(); if (!target) return;
  if (!SR) return toast("Tu navegador no reconoce voz. Usa Chrome en Android.");
  if (prRec) { prRec.stop(); return; }
- hush(); world?.setSpeaking(false);
+ hush(); talkAnim(false);
  let heard = ""; const r = prRec = newRec();
  r.onresult = (ev) => { heard = ""; for (const x of ev.results) heard += x[0].transcript; };
  r.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
@@ -1593,7 +1634,7 @@ $("#wMic").onclick = () => {
  if (!SR) { $("#wForm").hidden = false; $("#wInp").focus(); return toast("Tu navegador no reconoce voz: escribe o usa el micrófono del teclado"); }
  if (wRec) { wRec.stop(); return; }
  if (busy) return toast("Espera a que termine de responder");
- hush(); world?.setSpeaking(false);
+ hush(); talkAnim(false);
  let text = "";
  const r = wRec = newRec();
  r.onresult = (ev) => { text = ""; for (const x of ev.results) text += x[0].transcript; $("#wSaid").innerHTML = `<span class="me" style="opacity:.75">${esc(text)}</span>`; };
@@ -1686,7 +1727,7 @@ function portraitHTML(k, cls = "") {
 }
 let pathTab = "path";
 function goPath(tab = pathTab) {
- pathTab = tab; cur = null; mission = null; hubMode = false; world?.stop?.(); hush();
+ pathTab = tab; cur = null; mission = null; hubMode = false; world?.stop?.(); hush(); endCall(); syncFamily(false);
  [...$("#pTabs").children].forEach((b) => b.classList.toggle("sel", b.dataset.tab === tab));
  const route = ROUTE(), st = stopState(route);
  const total = route.reduce((a, d) => a + d.stops.length, 0), done = Object.values(st).filter((x) => x === "done").length;
@@ -1723,7 +1764,7 @@ $("#pMain").onclick = (e) => {
  if (ls) { if (ls.getAttribute("aria-disabled") === "true") return toast(T("Primero termina la clase anterior", "Сначала закончи предыдущий урок")); return startLesson(ls.dataset.lesson); }
  if (e.target.closest("[data-gclass]")) return goPath("classes");
  const g = e.target.closest("[data-gk],[data-gtalk],[data-gfree]");
- if (g) { if (g.dataset.gk) return stopSheet(g.dataset.gk); if (g.dataset.gfree) return goHome(); if (!hasAI()) return goSetup(); return openChat("owl", null, S.gfx === "off" ? "chat" : "world"); }
+ if (g) { if (g.dataset.gk) return stopSheet(g.dataset.gk); if (g.dataset.gfree) return goHome(); if (!hasAI()) return goSetup(); return openChat("owl", null, S.view === "call" || S.gfx !== "off" ? "world" : "chat"); }
  const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast(T("Primero conoce a la persona anterior del camino", "Сначала познакомься с предыдущим человеком")); stopSheet(b.dataset.k); };
 $("#pTabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (!b) return; if (b.dataset.tab === "more") { goHome(); return; } goPath(b.dataset.tab); };
 $("#pSet").onclick = settingsSheet;
@@ -1747,7 +1788,7 @@ async function startMission(k) {
  const first = lvl === 0 && c.o ? null : `Start the conversation now: say your first line in character, following your mission, and ask me something. Keep it at level ${levelFor(k)}.`;
  chats[k] = { msgs: first ? [{ r: "user", hidden: true, t: first }] : [], topic: "", persona: null, mission: true };
  saveChats();
- openChat(k, null, S.gfx === "off" ? "chat" : "world");
+ openChat(k, null, S.view === "call" || S.gfx !== "off" ? "world" : "chat");
  if (first) { const m = await generate(); if (m && cur === k) showSuggestions(k); }
 }
 // Al terminar la charla: estrellas → puntos de amistad, datos descubiertos y subida de nivel.
@@ -2018,8 +2059,24 @@ function profileStats(p) {
   friends: Object.values(rl).filter((r) => r.xp >= 3).length, classes: Object.values(ls).filter((x) => x.done).length
  };
 }
+let famCache = null;
+function myUid() { if (!S.uid) { S.uid = (Math.random().toString(36).slice(2, 10) + Date.now().toString(36)).slice(0, 16); saveS(); } return S.uid; }
+async function syncFamily(force) {
+ if (!cloudOn()) return null;
+ if (!force && famCache && Date.now() - (S.famAt || 0) < 5 * 60000) return famCache;
+ const me = profiles().find((x) => x.id === PROFILE) || { id: PROFILE, name: S.name || "Yo", emoji: "🙂" };
+ const st = profileStats({ ...me, id: PROFILE });
+ try {
+  const r = await fetch(S.cloudUrl.replace(/\/+$/, "") + "/family", { method: "POST", headers: { "Content-Type": "application/json", "X-App-Code": S.cloudCode || "" }, body: JSON.stringify({ me: { ...st, uid: myUid(), name: me.name, emoji: me.emoji || "🙂" } }) });
+  const j = await r.json(); if (Array.isArray(j.members)) { famCache = j.members; S.famAt = Date.now(); saveS(); }
+ } catch {}
+ return famCache;
+}
 function familyHTML() {
- const rows = profiles().map(profileStats).sort((a, b) => b.weekMin - a.weekMin || b.streak - a.streak);
+ const local = profiles().map((p) => ({ ...profileStats(p), uid: readOf(p.id, "settings", {}).uid }));
+ const seen = new Set(local.map((r) => r.uid).filter(Boolean));
+ const remote = (famCache || []).filter((m) => !seen.has(m.uid));
+ const rows = [...local, ...remote].sort((a, b) => b.weekMin - a.weekMin || b.streak - a.streak);
  return `<div class="fam"><table><thead><tr><th></th><th>${T("Quién", "Кто")}</th><th>${T("Idioma", "Язык")}</th><th>${T("Nivel", "Ур.")}</th><th>🔥</th><th>${T("Min/sem", "Мин/нед")}</th><th>👥</th><th>📚</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${["🥇", "🥈", "🥉"][i] || ""}</td><td><b>${r.emoji} ${esc(r.name)}</b></td><td>${FLAG[r.target]}</td><td>${r.level}</td><td>${r.streak}</td><td>${r.weekMin}</td><td>${r.friends}</td><td>${r.classes}</td></tr>`).join("")}</tbody></table>
  <p class="note">🔥 ${T("días seguidos", "дней подряд")} · 👥 ${T("amigos en el camino", "друзей на пути")} · 📚 ${T("clases terminadas", "уроков пройдено")}</p></div>`;
 }
@@ -2027,8 +2084,9 @@ function whoScreen() {
  const list = profiles();
  $("#whoList").innerHTML = list.map((p) => { const ps = profileStats(p); return `<button class="who" data-pid="${esc(p.id)}"><span class="wav">${p.emoji || "🙂"}</span><b>${esc(p.name)}</b><small>${FLAG[ps.target]} ${LANG_LABEL[ps.target][UIRU ? "ru" : "es"]} · ${ps.level}${p.pin ? " · 🔒" : ""}</small></button>`; }).join("")
   + `<button class="who add" data-new="1"><span class="wav">＋</span><b>${T("Nuevo perfil", "Новый профиль")}</b><small>${T("Para otra persona", "Для другого человека")}</small></button>`;
- $("#whoFam").innerHTML = list.length > 1 ? `<h2>${T("Progreso de la familia", "Прогресс семьи")}</h2>${familyHTML()}` : "";
- show("who");
+ const fam = () => { $("#whoFam").innerHTML = list.length > 1 || famCache?.length > 1 ? `<h2>${T("Progreso de la familia", "Прогресс семьи")}</h2>${familyHTML()}<p class="note">${cloudOn() ? T("Incluye a la familia en otros teléfonos.", "Включая семью на других телефонах.") : ""}</p>` : ""; };
+ fam(); show("who");
+ syncFamily(true).then(fam);
 }
 function switchProfile(id) {
  try { localStorage.setItem("tynl_profile", id); sessionStorage.setItem("tynl_unlocked", id || "main"); } catch {}
@@ -2050,6 +2108,7 @@ function newProfileSheet() {
  <div class="field"><label>${T("Ícono", "Значок")}</label><div class="chips" id="npEm">${em.map((x, i) => `<button class="${i ? "" : "sel"}">${x}</button>`).join("")}</div></div>
  <div class="field"><label>${T("¿Qué idioma habla?", "Родной язык")}</label><div class="seg" id="npNat" style="grid-template-columns:1fr 1fr"><button data-v="es" class="sel">🇵🇪 Español</button><button data-v="ru">🇷🇺 Русский</button></div></div>
  <div class="field"><label>${T("¿Qué idioma quiere aprender?", "Какой язык учить?")}</label><div class="seg" id="npTar" style="grid-template-columns:1fr 1fr"><button data-v="en" class="sel">🇺🇸 English</button><button data-v="es">🇵🇪 Español</button></div></div>
+ <div class="field"><label><input type="checkbox" id="npBig"> ${T("Letra grande (para ver mejor)", "Крупный текст")}</label></div>
  <div class="field"><label for="npPin">${T("PIN de 4 números (opcional)", "PIN из 4 цифр (необязательно)")}</label><input type="password" inputmode="numeric" maxlength="4" id="npPin" autocomplete="off"></div>
  <button class="btn" id="npGo" style="width:100%">${T("Crear y empezar", "Создать и начать")}</button>`);
  const segPick = (id) => { $(id).onclick = (e) => { const b = e.target.closest("button"); if (!b) return; [...$(id).children].forEach((x) => x.classList.toggle("sel", x === b)); }; };
@@ -2061,7 +2120,7 @@ function newProfileSheet() {
   if (pin && !/^\d{4}$/.test(pin)) return toast(T("El PIN debe tener 4 números", "PIN — 4 цифры"));
   const id = "p" + Date.now().toString(36), list = profiles();
   list.push({ id, name, emoji: $("#npEm .sel").textContent, pin: pin || "" }); saveProfiles(list);
-  try { localStorage.setItem("lt_" + id + "_settings", JSON.stringify({ name, target: tar, native: nat, level: "A1", v2: true, ai: S.ai, cloudUrl: S.cloudUrl, cloudCode: S.cloudCode, model: S.model, f16: S.f16, gfx: S.gfx, sug: "auto" })); } catch {}
+  try { localStorage.setItem("lt_" + id + "_settings", JSON.stringify({ name, target: tar, native: nat, level: "A1", v2: true, ai: S.ai, cloudUrl: S.cloudUrl, cloudCode: S.cloudCode, model: S.model, f16: S.f16, gfx: S.gfx, sug: "auto", view: "call", zoom: $("#npBig").checked ? 1.3 : 1 })); } catch {}
   switchProfile(id);
  };
 }
@@ -2125,6 +2184,31 @@ $("#lsAct").onclick = async (e) => {
  if (P) return;
  return _lsActClick(e);
 };
+
+/* ---------- videollamada: el personaje a pantalla completa y tu cámara ---------- */
+let camStream = null;
+function startCall(k) {
+ $("#world").classList.add("call"); $("#callBg").hidden = false;
+ const img = $("#callImg");
+ if (PORTRAITS.has(k)) { img.src = `img/p/${k}_l.webp`; img.hidden = false; } else { img.hidden = true; }
+ world?.stop?.();
+ $("#wCam").hidden = false;
+ if (S.cam !== false) startCam();
+}
+async function startCam() {
+ if (camStream || !navigator.mediaDevices?.getUserMedia) return;
+ try {
+  camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 640 } }, audio: false });
+  if (!$("#world").classList.contains("call")) return endCall();
+  $("#selfie").srcObject = camStream; $("#selfie").hidden = false;
+ } catch { camStream = null; $("#selfie").hidden = true; }
+}
+function stopCam() { camStream?.getTracks().forEach((t) => t.stop()); camStream = null; $("#selfie").hidden = true; $("#selfie").srcObject = null; }
+function endCall() { stopCam(); $("#world").classList.remove("call"); $("#callBg").hidden = true; $("#wCam").hidden = true; }
+$("#wCam").onclick = () => { if (camStream) { stopCam(); S.cam = false; } else { S.cam = true; startCam(); } saveS(); };
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") stopCam(); else if ($("#world").classList.contains("call") && S.cam !== false) startCam(); });
+function applyZoom() { document.body.style.zoom = S.zoom && S.zoom !== 1 ? S.zoom : ""; }
+applyZoom();
 
 /* ---------- arranque ---------- */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
