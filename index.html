@@ -165,6 +165,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .wtop{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) max(12px,env(safe-area-inset-right)) 10px max(12px,env(safe-area-inset-left));background:linear-gradient(rgba(10,6,20,.55),transparent)}
 .wtop .ib{background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(6px)}
 .wtop b{font-family:Fredoka,sans-serif;font-weight:600;font-size:19px;display:block;line-height:1.1}.wtop span{font-size:13px;opacity:.85;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wstat{font-size:12px!important;font-weight:700;opacity:1!important;color:var(--sun)}
+.wbub .think{color:#6b5d75;font-size:16px;display:flex;align-items:center;gap:10px}
 .wbub{position:absolute;z-index:2;left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));top:calc(env(safe-area-inset-top) + 70px);background:#fff;color:#22172b;border-radius:26px;padding:16px 18px 12px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-height:34vh;overflow-y:auto;max-width:640px;margin:0 auto}
 .wbub p{margin:0;font-size:clamp(19px,5vw,23px);line-height:1.35;white-space:pre-wrap;cursor:pointer}
 .wbub .es{font-size:15px;color:#6b5d75;margin-top:6px;white-space:pre-wrap}
@@ -273,7 +275,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
  <div class="fade" id="wFade"></div>
  <div class="wtop">
   <button class="ib" id="wBack" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <div class="sp"><b id="wName">LoopTalk</b><span id="wRole"></span></div>
+  <div class="sp"><b id="wName">LoopTalk</b><span id="wRole"></span><span id="wStat" class="wstat"></span></div>
   <button class="ib" id="wLog" aria-label="Ver la conversación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
   <button class="ib" id="wHf" aria-label="Manos libres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H4zM17 14h3v6h-3z"/></svg></button>
   <button class="ib" id="wMenu" aria-label="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -470,7 +472,10 @@ const loadingDots = `<span class="typing"><i></i><i></i><i></i></span>`;
 /* ---------- motor de IA ---------- */
 let engine = null, loading = null, busy = false;
 const fullId = (id) => `${id}-${S.f16 ? "q4f16_1" : "q4f32_1"}-MLC`;
-function setEng(state, txt) { $("#engDot").className = "dot " + (state || ""); $("#engTxt").textContent = txt; }
+function setEng(state, txt) {
+ $("#engDot").className = "dot " + (state || ""); $("#engTxt").textContent = txt;
+ $("#wStat").textContent = state === "ok" ? "" : "IA: " + txt;
+}
 async function checkGPU() {
  if (!("gpu" in navigator)) return "Este navegador no tiene WebGPU. Usa Chrome actualizado en Android, o Safari en iPhone con iOS 26 o superior.";
  try { const a = await navigator.gpu.requestAdapter(); if (!a) return "Tu teléfono no expone la GPU al navegador. Prueba con Chrome actualizado."; S.f16 = a.features.has("shader-f16"); saveS(); return ""; }
@@ -478,7 +483,7 @@ async function checkGPU() {
 }
 async function loadEngine(onProg) {
  if (engine) return engine; if (loading) return loading;
- setEng("busy", "Cargando tutor…");
+ setEng("busy", "Cargando tutor…"); world?.setBusy(true);
  loading = (async () => {
   const err = await checkGPU(); if (err) throw new Error(err);
   try { await navigator.storage?.persist?.(); } catch {}
@@ -487,7 +492,7 @@ async function loadEngine(onProg) {
   }, { context_window_size: 4096 });
   engine = e; setEng("ok", "Tutor listo · sin internet"); return e;
  })();
- try { return await loading; } catch (e) { loading = null; setEng("", "Tutor apagado"); throw e; }
+ try { return await loading; } catch (e) { loading = null; setEng("", "Tutor apagado"); throw e; } finally { if (!busy) world?.setBusy(false); }
 }
 async function ask(messages, opts = {}, onTok) {
  const e = await loadEngine();
@@ -671,10 +676,22 @@ async function generate(speakIt = true) {
  const m = { r: "assistant", t: "" }; ch.msgs.push(m);
  const el = document.createElement("div"); el.className = "m"; el.innerHTML = `<div class="b">${loadingDots}</div>`;
  $("#msgs").appendChild(el); $("#msgs").scrollTop = $("#msgs").scrollHeight;
+ const t0 = Date.now(); let gotTok = false;
+ const thinking = () => {
+  if (!inWorld() || gotTok || cur !== key) return;
+  const sec = Math.round((Date.now() - t0) / 1000);
+  const loadingTxt = engine ? "" : ` · ${$("#engTxt").textContent}`;
+  const msg = sec < 15 ? `${charOf(key).n} está pensando…${loadingTxt}`
+   : sec < 75 ? `Preparando la IA (${sec} s)…${loadingTxt} La primera respuesta tras abrir la app puede tardar hasta un minuto.`
+   : `La IA no responde (${sec} s). Toca «Atrás» y vuelve a entrar, o en Ajustes elige «Sin 3D» o el modelo «Ligero».`;
+  $("#wText").innerHTML = `<span class="think">${loadingDots}<span>${esc(msg)}</span></span>`; $("#wEs").hidden = true; $("#wBub").hidden = false; $("#wActs").innerHTML = "";
+ };
+ thinking(); const wd = setInterval(thinking, 1000);
  try {
-  m.t = await ask(msgs, { max: key === "story" ? 320 : 150 }, (t) => { el.firstChild.textContent = t; $("#msgs").scrollTop = $("#msgs").scrollHeight; if (hf) $("#hfSaid").textContent = t; if (inWorld()) setBubble(t); });
+  m.t = await ask(msgs, { max: key === "story" ? 320 : 150 }, (t) => { el.firstChild.textContent = t; $("#msgs").scrollTop = $("#msgs").scrollHeight; gotTok = true; if (hf) $("#hfSaid").textContent = t; if (inWorld()) setBubble(t); });
   if (!m.t) m.t = "Sorry, could you say that again?";
- } catch (e) { ch.msgs.pop(); saveChats(); el.remove(); toast(e.message); return null; }
+ } catch (e) { clearInterval(wd); ch.msgs.pop(); saveChats(); el.remove(); if (inWorld()) setBubble("No se pudo responder: " + e.message); toast(e.message); return null; }
+ clearInterval(wd);
  saveChats(); if (cur === key) renderMsgs(); addInput(m.t);
  if (inWorld() && cur === key) syncBubble();
  if (speakIt && (S.auto || inWorld()) && !hf) speak(m.t);
@@ -1123,7 +1140,7 @@ renderStats();
 if (!S.model) goSetup();
 else {
  goHub();
- hasModelInCache(fullId(S.model)).then((ok) => { if (ok) loadEngine().catch((e) => setEng("", "Error: " + e.message)); else setEng("", "Modelo no descargado"); }).catch(() => {});
+ hasModelInCache(fullId(S.model)).then((ok) => setEng("", ok ? "Se activa al entrar a un lugar" : "Modelo no descargado")).catch(() => {});
 }
 }
 </script>
