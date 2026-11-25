@@ -17,7 +17,7 @@ const DEFAULT_MODEL = "gemini-flash-lite-latest";
 const FALLBACK_MODEL = "gemini-flash-latest";
 const MAX_MESSAGES = 40;
 const MAX_CHARS = 24000;
-const MAX_TOKENS = 600;
+const MAX_TOKENS = 1500;
 
 function corsHeaders(req, env) {
   const origin = req.headers.get("Origin") || "";

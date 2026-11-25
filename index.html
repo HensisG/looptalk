@@ -246,7 +246,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .por.big{width:92px;height:92px}
 .hearts{display:inline-flex;gap:2px;font-size:13px;line-height:1}.hearts i{font-style:normal;color:rgba(255,255,255,.3)}.hearts i.on{color:#ff6b81}
 .sheet .hearts i{color:#d9d0de}.sheet .hearts i.on{color:#e8485f}
-.ptabs{position:fixed;left:0;right:0;bottom:0;z-index:4;display:grid;grid-template-columns:repeat(3,1fr);background:rgba(27,20,36,.95);backdrop-filter:blur(8px);padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);border-top:1px solid rgba(255,255,255,.1)}
+.ptabs{position:fixed;left:0;right:0;bottom:0;z-index:4;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(27,20,36,.95);backdrop-filter:blur(8px);padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);border-top:1px solid rgba(255,255,255,.1)}
 .ptabs button{display:flex;flex-direction:column;align-items:center;gap:2px;color:#cbb9d6;font-size:20px;padding:6px 0;border-radius:14px}
 .ptabs button span{font-size:12px;font-weight:800}
 .ptabs button.sel{color:#fff;background:rgba(255,255,255,.1)}
@@ -269,6 +269,36 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .wcard .alts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .wcard .alts button{text-align:left;padding:8px 12px;border-radius:14px;background:#f3edf6;color:#3b1f4a;font-weight:700;font-size:15px}
 .wcard .alts button::before{content:"💬 ";}
+#lesson{background:#1b1424;color:#fff;display:none;flex-direction:column;min-height:100%;padding-bottom:calc(env(safe-area-inset-bottom) + 12px)}
+#lesson.on{display:flex}
+.lstop{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 14px 6px}
+.lstop .ib{background:rgba(255,255,255,.12);color:#fff}
+.lstop b{display:block;font-family:Fredoka,sans-serif;font-size:19px;font-weight:600}.lstop small{opacity:.75;font-weight:800}
+.lstop .por{width:46px;height:46px;border-color:#5ff5e6}
+.lsdots{display:flex;gap:5px;justify-content:center;padding:4px 14px 8px}
+.lsdots i{width:22px;height:6px;border-radius:3px;background:rgba(255,255,255,.18)}.lsdots i.d{background:#5ff5e6}.lsdots i.c{background:var(--sun)}
+.board{margin:0 14px;min-height:190px;max-height:42vh;overflow:auto;padding:18px 18px 14px;border-radius:18px;background:#24453a;border:10px solid #8a5a33;box-shadow:inset 0 0 40px rgba(0,0,0,.35),0 10px 24px rgba(0,0,0,.35)}
+.chalk{margin:0 0 10px;font-family:"Comic Sans MS","Chalkboard SE",Fredoka,sans-serif;font-size:clamp(18px,4.8vw,22px);line-height:1.35;color:#f4f1e8;text-shadow:0 0 1px rgba(255,255,255,.6);letter-spacing:.01em}
+.chalk.q{color:#ffe58f;font-size:clamp(20px,5.2vw,24px)}
+.chalk.nb{color:#9ff0e3;font-size:16px}
+.lssay{margin:12px 14px 0;padding:12px 14px;border-radius:18px;background:#fff;color:#22172b;font-size:16px;line-height:1.4}
+.lssay b{color:#3b1f4a}
+.lsact{display:flex;flex-wrap:wrap;gap:8px;margin:12px 14px 0;align-items:center}
+.lsact .btn.ghost{color:#fff;border-color:rgba(255,255,255,.35)}
+.opts{display:flex;flex-direction:column;gap:8px;width:100%}
+.opt{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.1);color:#fff;font-size:17px;font-weight:700;text-align:left;border:2px solid rgba(255,255,255,.18)}
+.opt.right{background:rgba(31,157,99,.35);border-color:#1f9d63}.opt.wrong{background:rgba(232,72,59,.35);border-color:var(--red)}
+.wans{display:flex;gap:8px;width:100%;align-items:center}
+.wans input{flex:1;min-height:48px;border-radius:14px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:0 12px;font:16px Nunito,sans-serif}
+.wans .ib{background:rgba(255,255,255,.12);color:#fff}.wans .ib.rec{background:var(--ok)}
+.lsask{margin-left:auto;font-size:14px;font-weight:800;color:#cbb9d6;padding:8px 4px}
+.lvh{margin:18px 4px 6px;font-size:15px;color:#ffd978;letter-spacing:.06em}
+.lesson{display:flex;align-items:center;gap:12px;width:100%;margin:6px 0;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.08);color:#fff;text-align:left}
+.lesson.locked{opacity:.45}
+.lesson .ln{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#5ff5e6;color:#1b1424;font-weight:800}
+.lesson .sp{display:flex;flex-direction:column}.lesson small{opacity:.75}
+.lesson em{font-style:normal;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.12);white-space:nowrap}
+.lesson em.due{background:var(--sun);color:#2a1630}.lesson em.ok{background:rgba(31,157,99,.4)}.lesson em.new{background:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -314,7 +344,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
  <div class="ptop"><div class="row"><div class="sp"><b class="brand">Try Your New Language</b><div class="pstats" id="pStats"></div></div>
   <button class="ib" id="pSet" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button></div></div>
  <div class="pmain" id="pMain"></div>
- <nav class="ptabs" id="pTabs"><button data-tab="path" class="sel">🗺️<span>Camino</span></button><button data-tab="people">👥<span>Personas</span></button><button data-tab="more">💬<span>Práctica libre</span></button></nav>
+ <nav class="ptabs" id="pTabs"><button data-tab="path" class="sel">🗺️<span>Camino</span></button><button data-tab="classes">🧑‍🏫<span>Clases</span></button><button data-tab="people">👥<span>Personas</span></button><button data-tab="more">💬<span>Práctica libre</span></button></nav>
+</section>
+
+<section class="screen" id="lesson">
+ <div class="lstop"><button class="ib" id="lsBack" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button><div class="sp"><b id="lsTitle"></b><small id="lsLvl"></small></div><img class="por" src="img/p/owl.webp" alt="Nova"></div>
+ <div class="lsdots" id="lsDots"></div>
+ <div class="board" id="lsBoard"></div>
+ <div class="lssay" id="lsSay"></div>
+ <div class="lsact" id="lsAct"></div>
 </section>
 
 <section class="screen" id="home">
@@ -712,7 +750,7 @@ async function ttsURL(text, k) {
 }
 // hl: elemento donde se resalta cada palabra mientras se pronuncia (como karaoke). k: personaje que habla.
 function speak(text, lang = "en", hl = null, k = null) {
- if (k && lang === "en" && cloudOn() && S.cvoice !== false && Date.now() > ttsOff) {
+ if (k && (lang === "en" || k === "owl") && cloudOn() && S.cvoice !== false && Date.now() > ttsOff) {
   hush(); const myTurn = (speakTurn = (speakTurn || 0) + 1);
   return ttsURL(String(text).replace(/[*_#]/g, ""), k).then((url) => new Promise((res) => {
    if (myTurn !== speakTurn) return res();
@@ -1613,11 +1651,12 @@ function goPath(tab = pathTab) {
  const t = stats.days[today()] || 0;
  $("#pStats").innerHTML = `<span>🔥 ${streakDays()} días</span><span>⭐ ${done}/${total} paradas</span><span>🗣 ${Math.round(t / 130)} min hoy</span>`;
  if (tab === "people") return renderPeople(route), show("path");
+ if (tab === "classes") return renderClasses(), show("path");
  let idx = 0;
  const nextK = Object.keys(st).find((x) => st[x] === "open"), nc = nextK && charOf(nextK);
  const hi = S.name ? `¡Hola, ${esc(S.name)}!` : "¡Hola!";
  const guide = `<div class="guide">${PORTRAITS.has("owl") ? `<img class="por big" src="img/p/owl.webp" alt="Nova">` : portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>${hi}</b> Soy Nova, tu guía. ${nc ? `¿Seguimos? Tu próxima misión es con <b>${esc(nc.n)}</b>: ${esc(nc.es || nc.t)}.` : "¡Completaste el camino! Sigue charlando con tus amigos para subir de nivel."}</p>
-  <div class="gacts">${nc ? `<button class="btn" data-gk="${esc(nextK)}">▶ Continuar</button>` : ""}<button class="btn ghost" data-gtalk="1">Charlar con Nova</button><button class="btn ghost" data-gfree="1">Práctica libre</button></div></div></div>`;
+  <div class="gacts">${nc ? `<button class="btn" data-gk="${esc(nextK)}">▶ Continuar</button>` : ""}<button class="btn ghost" data-gclass="1">🧑‍🏫 Clase${dueCount() ? ` (${dueCount()} repaso${dueCount() > 1 ? "s" : ""})` : ""}</button><button class="btn ghost" data-gtalk="1">Charlar con Nova</button><button class="btn ghost" data-gfree="1">Práctica libre</button></div></div></div>`;
  $("#pMain").innerHTML = guide + route.map((d) => {
   const dDone = d.stops.filter((k) => st[k] === "done").length, locked = st[d.stops[0]] === "locked";
   return `<section class="dist ${locked ? "locked" : ""}"><div class="dban" style="background-image:url('${d.img}')"><div><b>${esc(d.name)}</b><span>${esc(d.es)}</span></div><em>${dDone}/${d.stops.length}</em></div>
@@ -1638,6 +1677,9 @@ function renderPeople(route) {
  }).join("")}</div>` : `<p class="empty">Aún no conoces a nadie. Empieza tu camino en «Llegada».</p>`}</div>`;
 }
 $("#pMain").onclick = (e) => {
+ const ls = e.target.closest("[data-lesson]");
+ if (ls) { if (ls.getAttribute("aria-disabled") === "true") return toast("Primero termina la clase anterior"); return startLesson(ls.dataset.lesson); }
+ if (e.target.closest("[data-gclass]")) return goPath("classes");
  const g = e.target.closest("[data-gk],[data-gtalk],[data-gfree]");
  if (g) { if (g.dataset.gk) return stopSheet(g.dataset.gk); if (g.dataset.gfree) return goHome(); if (!hasAI()) return goSetup(); return openChat("owl", null, S.gfx === "off" ? "chat" : "world"); }
  const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast("Primero conoce a la persona anterior del camino"); stopSheet(b.dataset.k); };
@@ -1688,6 +1730,196 @@ async function missionResult(k, stars, box, transcript) {
  if (after > before) beep(1180);
  mission = null;
 }
+
+/* ---------- clases con Nova: pizarra, cuaderno, ejercicios y repaso ----------
+   Temario propio por niveles del MCER. Cada clase la arma la IA la primera vez
+   y queda guardada para repasarla las veces que quieras (también sin internet). */
+const COURSE = [
+ { id: "a1-hello", lvl: "A1", t: "Saludos y presentarte", goal: "greetings, introducing yourself (Hi, my name is..., I'm from..., Nice to meet you)", k: "airport" },
+ { id: "a1-be", lvl: "A1", t: "El verbo «to be»", goal: "verb to be: I am / you are / he is, negatives and yes/no questions", k: "airport" },
+ { id: "a1-num", lvl: "A1", t: "Números, precios y la hora", goal: "numbers 1-100, prices in dollars, telling the time", k: "cafe" },
+ { id: "a1-polite", lvl: "A1", t: "Pedir cosas con amabilidad", goal: "polite requests: I'd like..., Can I have..., please, thank you", k: "cafe" },
+ { id: "a1-art", lvl: "A1", t: "Artículos y plurales", goal: "a / an / the and regular and irregular plurals", k: "grocery" },
+ { id: "a1-pres", lvl: "A1", t: "El presente simple", goal: "present simple for routines: I work, she works, he doesn't...", k: "pharmacy" },
+ { id: "a1-do", lvl: "A1", t: "Preguntas con do / does", goal: "questions with do/does and wh- words (Where do you live?)", k: "pharmacy" },
+ { id: "a1-there", lvl: "A1", t: "There is / there are", goal: "there is / there are, prepositions of place (in, on, next to)", k: "landlord" },
+ { id: "a2-past1", lvl: "A2", t: "El pasado: verbos regulares", goal: "past simple of regular verbs, yesterday / last week, did questions", k: "neighbor" },
+ { id: "a2-past2", lvl: "A2", t: "El pasado: verbos irregulares", goal: "the 25 most common irregular past verbs (went, had, saw...)", k: "neighbor" },
+ { id: "a2-future", lvl: "A2", t: "El futuro: going to y will", goal: "future with going to (plans) and will (decisions, promises)", k: "bank" },
+ { id: "a2-can", lvl: "A2", t: "Can y could para pedir y ofrecer", goal: "can / could / may for requests, offers and permission", k: "restaurant" },
+ { id: "a2-comp", lvl: "A2", t: "Comparar cosas", goal: "comparatives and superlatives (cheaper, more expensive, the best)", k: "restaurant" },
+ { id: "a2-cont", lvl: "A2", t: "El presente continuo", goal: "present continuous for now and for near plans", k: "interview" },
+ { id: "b1-perf", lvl: "B1", t: "El presente perfecto", goal: "present perfect: experiences, for / since, have you ever...?", k: "interview" },
+ { id: "b1-advice", lvl: "B1", t: "Consejos y obligaciones", goal: "should, have to, must, don't have to", k: "clinic" },
+ { id: "b1-if1", lvl: "B1", t: "Si pasa esto… (condicional 1)", goal: "first conditional: if + present, will", k: "dmv" },
+ { id: "b1-phrasal", lvl: "B1", t: "Phrasal verbs del día a día", goal: "20 common phrasal verbs (pick up, fill out, run out of...)", k: "mechanic" },
+ { id: "b1-story", lvl: "B1", t: "Contar una historia", goal: "telling a story with connectors (first, then, after that, finally, because, so)", k: "church" },
+ { id: "b2-if23", lvl: "B2", t: "Si hubiera… (condicional 2 y 3)", goal: "second and third conditionals", k: "free" },
+ { id: "b2-passive", lvl: "B2", t: "La voz pasiva", goal: "passive voice in present and past (it was made, it is used)", k: "free" },
+ { id: "b2-report", lvl: "B2", t: "Lo que otros dijeron", goal: "reported speech (she said that..., he asked if...)", k: "free" },
+ { id: "b2-opinion", lvl: "B2", t: "Dar tu opinión y debatir", goal: "giving opinions, agreeing, disagreeing politely, hedging", k: "free" }
+];
+const SRS = [1, 3, 7, 14, 30]; // días hasta el siguiente repaso
+let lessons = store.get("lessons", {});
+const saveLessons = () => store.set("lessons", lessons);
+const lessonState = (id) => lessons[id] || (lessons[id] = { done: false, reps: 0, due: 0, best: 0, data: null });
+const isDue = (id) => lessons[id]?.done && lessons[id].due && lessons[id].due <= Date.now();
+const dueCount = () => COURSE.filter((l) => isDue(l.id)).length;
+function lessonOpen(i) { return i === 0 || lessons[COURSE[i - 1].id]?.done || LV.indexOf(COURSE[i].lvl) <= LV.indexOf(S.level) && LV.indexOf(S.level) > 0; }
+
+function renderClasses() {
+ let lastLvl = "";
+ $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>Clases con Nova.</b> Saca tu cuaderno ✍️. Te explico en la pizarra, practicamos juntos y repasamos cuando se te olvide.${dueCount() ? ` Tienes <b>${dueCount()} repaso${dueCount() > 1 ? "s" : ""}</b> pendiente${dueCount() > 1 ? "s" : ""}.` : ""}</p></div></div>`
+  + COURSE.map((l, i) => {
+   const st = lessons[l.id], open = lessonOpen(i), head = l.lvl !== lastLvl ? `<h3 class="lvh">Nivel ${l.lvl}</h3>` : ""; lastLvl = l.lvl;
+   const badge = isDue(l.id) ? `<em class="due">🔁 Repasar</em>` : st?.done ? `<em class="ok">✓ ${st.best}%</em>` : open ? `<em class="new">Nueva</em>` : `<em>🔒</em>`;
+   return `${head}<button class="lesson ${open ? "" : "locked"}" data-lesson="${l.id}" ${open ? "" : 'aria-disabled="true"'}><span class="ln">${i + 1}</span><span class="sp"><b>${esc(l.t)}</b><small>Prepara tu charla con ${esc(charOf(l.k).n)}</small></span>${badge}</button>`;
+  }).join("") + `<div style="height:96px"></div>`;
+}
+
+/* --- la clase --- */
+let L = null; // { l, data, i, score, total, answered }
+async function startLesson(id, fresh = false) {
+ if (!hasAI() && !lessons[id]?.data) { toast(NEED_AI); return goSetup(); }
+ const l = COURSE.find((x) => x.id === id), st = lessonState(id);
+ L = { l, data: st.data, i: 0, score: 0, total: 0, answered: false };
+ $("#lsTitle").textContent = l.t; $("#lsLvl").textContent = "Nivel " + l.lvl;
+ $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsSay").innerHTML = `<b>Nova:</b> Preparando la clase en la pizarra…`; $("#lsAct").innerHTML = ""; $("#lsDots").innerHTML = "";
+ show("lesson"); hush();
+ if (!L.data || fresh) {
+  try { L.data = await makeLesson(l); st.data = L.data; saveLessons(); }
+  catch (e) { $("#lsSay").innerHTML = `<b>Nova:</b> No pude preparar la clase: ${esc(e.message)}`; $("#lsAct").innerHTML = `<button class="btn" id="lsRetry">Intentar otra vez</button>`; $("#lsRetry").onclick = () => startLesson(id, true); return; }
+ }
+ renderStep();
+}
+async function makeLesson(l) {
+ const job = S.job ? ` The learner works as: ${S.job}; use examples from their life when natural.` : "";
+ const out = await oneShot(`You are Nova, a friendly robot English teacher. Your student is an adult native Spanish speaker from Latin America who lives in the USA.${job}
+Create a short, clear lesson.
+Lesson title (Spanish): "${l.t}". Grammar/vocabulary focus: ${l.goal}. Level: ${l.lvl}.
+Return ONLY valid JSON (no markdown, no comments) with this shape:
+{"steps":[
+ {"type":"explain","es":"short explanation in simple Spanish, max 45 words","board":["short board line","..."],"say":["English example to read aloud"]},
+ {"type":"notebook","es":"tell the student what to copy, in Spanish","board":["line to copy","..."]},
+ {"type":"choice","es":"instruction in Spanish","q":"English sentence with ___ or a question","options":["option A","option B","option C"],"answer":"the correct option, copied exactly","why":"why, in Spanish, max 20 words"},
+ {"type":"write","es":"instruction in Spanish","q":"a Spanish sentence to translate, or a question to answer in English","answer":"a model answer in English","why":"tip in Spanish, max 20 words"}
+]}
+Rules: 9 to 11 steps. Alternate: explain a little, then practice it. Board lines: max 38 characters each, max 5 lines per step, English examples with the key part in CAPITALS. Include exactly 2 notebook steps, at least 3 choice and at least 2 write steps. Everyday examples from life in the USA. The last step is an explain step that summarizes the lesson.`, 1400);
+ const j = JSON.parse(out.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+ const steps = (j.steps || []).filter((s) => s && s.type && (s.es || s.q)).slice(0, 12);
+ if (steps.length < 4) throw new Error("la clase salió incompleta");
+ return { steps, made: Date.now() };
+}
+const chalk = (lines = []) => lines.map((x) => `<p class="chalk">${esc(x)}</p>`).join("");
+function renderStep() {
+ const st = L.data.steps[L.i], n = L.data.steps.length;
+ L.answered = false;
+ $("#lsDots").innerHTML = L.data.steps.map((_, i) => `<i class="${i < L.i ? "d" : i === L.i ? "c" : ""}"></i>`).join("");
+ const nova = (t) => { $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(t)}`; };
+ let board = "", act = "";
+ if (st.type === "explain" || st.type === "notebook") {
+  board = (st.type === "notebook" ? `<p class="chalk nb">✍️ Cópialo en tu cuaderno</p>` : "") + chalk(st.board);
+  nova(st.es || "");
+  act = `${(st.say || st.board || []).length ? `<button class="btn ghost" id="lsHear">🔊 Escuchar</button>` : ""}<button class="btn" id="lsNext">${st.type === "notebook" ? "Ya lo copié ✓" : L.i === n - 1 ? "Terminar clase" : "Siguiente"}</button>`;
+ } else if (st.type === "choice") {
+  board = `<p class="chalk q">${esc(st.q || st.es || "")}</p>`;
+  nova(st.es || "Elige la opción correcta.");
+  act = `<div class="opts">${(st.options || []).map((o, i) => `<button class="opt" data-o="${i}">${esc(o)}</button>`).join("")}</div>`;
+ } else {
+  board = `<p class="chalk q">${esc(st.q || st.es || "")}</p>`;
+  nova(st.q ? (st.es || "Escribe tu respuesta en inglés.") : "Escribe tu respuesta en inglés.");
+  act = `<div class="wans"><button class="ib" id="lsMic" aria-label="Hablar">${ic("mic")}</button><input id="lsIn" placeholder="Escribe o di tu respuesta en inglés" autocomplete="off" enterkeyhint="send"><button class="btn" id="lsCheck">Comprobar</button></div>`;
+ }
+ $("#lsBoard").innerHTML = board;
+ $("#lsAct").innerHTML = act + `<button class="lsask" id="lsAsk">🙋 Tengo una duda</button>`;
+ $("#lsBoard").scrollTop = 0;
+ // Nova lee la explicación y luego los ejemplos en inglés
+ if (st.type === "explain" || st.type === "notebook") readStep(st);
+ else speak(st.es || "", "es", null, "owl");
+}
+async function readStep(st) {
+ const turn = ++readTurn;
+ await speak(st.es || "", "es", null, "owl");
+ for (const x of st.say || []) { if (turn !== readTurn || !$("#lesson").classList.contains("on")) return; await speak(x, "en", null, "owl"); }
+}
+let readTurn = 0;
+function feedback(ok, st, extra = "") {
+ L.total++; if (ok) L.score++;
+ L.answered = true;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${ok ? "✅ ¡Muy bien!" : `❌ Casi. La respuesta: <b>${esc(st.answer)}</b>.`} ${esc(st.why || "")} ${esc(extra)}`;
+ beep(ok ? 990 : 330);
+ if (!ok) speak(st.answer, "en", null, "owl");
+ const next = document.createElement("button"); next.className = "btn"; next.id = "lsNext"; next.textContent = "Siguiente";
+ $("#lsAct").querySelector(".lsask").before(next);
+}
+$("#lsAct").onclick = async (e) => {
+ const st = L?.data?.steps[L.i]; if (!st) return;
+ const t = e.target;
+ if (t.closest("#lsNext")) { readTurn++; hush(); if (L.i >= L.data.steps.length - 1) return finishLesson(); L.i++; return renderStep(); }
+ if (t.closest("#lsHear")) return readStep(st);
+ if (t.closest("#lsAsk")) return askNova(st);
+ const o = t.closest(".opt");
+ if (o && !L.answered) {
+  const pick = st.options[+o.dataset.o], ok = norm(pick) === norm(st.answer);
+  [...document.querySelectorAll(".opt")].forEach((b) => { const v = st.options[+b.dataset.o]; b.classList.toggle("right", norm(v) === norm(st.answer)); });
+  if (!ok) o.classList.add("wrong");
+  return feedback(ok, st);
+ }
+ if (t.closest("#lsMic")) {
+  if (!SR) return toast("Tu navegador no reconoce voz");
+  const r = newRec(); $("#lsMic").classList.add("rec");
+  r.onresult = (ev) => { let x = ""; for (const y of ev.results) x += y[0].transcript; $("#lsIn").value = x; };
+  r.onend = () => $("#lsMic")?.classList.remove("rec");
+  try { r.start(); } catch {}
+  return;
+ }
+ if (t.closest("#lsCheck") && !L.answered) {
+  const ans = $("#lsIn").value.trim(); if (!ans) return toast("Escribe o di tu respuesta");
+  if (norm(ans) === norm(st.answer)) return feedback(true, st);
+  $("#lsCheck").innerHTML = loadingDots;
+  try {
+   const out = await oneShot(`Exercise for a Spanish-speaking English learner (level ${L.l.lvl}): ${st.q || st.es}\nModel answer: ${st.answer}\nLearner's answer: ${ans}\nIs the learner's answer correct and natural enough? Small typos and capitalization are fine, and other correct wordings are fine. Reply with exactly two lines:\nYES or NO\nA short tip in Spanish (max 20 words).`, 60);
+   const ok = /^\s*YES/i.test(out), tip = out.split("\n").slice(1).join(" ").trim();
+   feedback(ok, st, tip);
+  } catch (er) { feedback(norm(ans) === norm(st.answer), st); }
+ }
+};
+const norm = (s) => String(s || "").toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]/g, " ").replace(/\s+/g, " ").trim();
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target?.id === "lsIn") { e.preventDefault(); $("#lsCheck")?.click(); } });
+function askNova(st) {
+ openSheet(`<h3>Pregúntale a Nova</h3><p class="note">Escribe tu duda sobre esta parte de la clase (en español o inglés).</p><div class="field"><textarea id="dqTxt" placeholder="p. ej. ¿Cuándo uso «an» en vez de «a»?"></textarea></div><p class="note" id="dqOut"></p><div class="row"><button class="btn" id="dqGo">Preguntar</button><button class="btn ghost" id="dqNo">Cerrar</button></div>`);
+ $("#dqNo").onclick = closeSheet;
+ $("#dqGo").onclick = async () => {
+  const q = $("#dqTxt").value.trim(); if (!q) return;
+  if (busy) return toast("Espera un momento…");
+  $("#dqOut").innerHTML = loadingDots;
+  try {
+   const a = await oneShot(`You are Nova, a patient English teacher. Lesson: "${L.l.t}" (${L.l.goal}), level ${L.l.lvl}. Current board: ${(st.board || [st.q]).join(" / ")}.\nThe student (native Spanish speaker) asks: "${q}"\nAnswer in simple Spanish, max 70 words, with 1 or 2 short English examples.`, 220);
+   $("#dqOut").textContent = a; speak(a, "es", null, "owl");
+  } catch (e) { $("#dqOut").textContent = e.message; }
+ };
+}
+function finishLesson() {
+ const st = lessonState(L.l.id), pct = L.total ? Math.round(L.score / L.total * 100) : 100;
+ const passed = pct >= 70;
+ st.best = Math.max(st.best || 0, pct);
+ if (passed) { st.done = true; st.reps = Math.min(SRS.length, (st.reps || 0) + 1); st.due = Date.now() + SRS[st.reps - 1] * 86400000; }
+ else if (st.done) st.due = Date.now() + 86400000;
+ saveLessons();
+ const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0, ch = charOf(L.l.k);
+ $("#lsBoard").innerHTML = `<p class="chalk q">${passed ? "¡Clase completada!" : "¡Buen intento!"}</p><p class="chalk">${L.score} de ${L.total} ejercicios bien (${pct} %)</p>${passed ? `<p class="chalk">Próximo repaso: en ${SRS[st.reps - 1]} día${SRS[st.reps - 1] > 1 ? "s" : ""}</p>` : `<p class="chalk">Repite la clase cuando quieras.</p>`}`;
+ $("#lsDots").innerHTML = "";
+ $("#lsSay").innerHTML = `<b>Nova:</b> <span class="stars" style="font-size:30px;justify-content:flex-start">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</span> ${passed ? `Ahora practica lo aprendido conversando con <b>${esc(ch.n)}</b>.` : "Repasa la pizarra y vuelve a intentarlo. ¡Tú puedes!"}`;
+ $("#lsAct").innerHTML = `${passed ? `<button class="btn" id="lsGoTalk">Practicar con ${esc(ch.n)}</button>` : ""}<button class="btn ghost" id="lsAgain">Repetir clase</button><button class="btn ghost" id="lsNew">Nueva versión</button><button class="btn ghost" id="lsList">Volver a clases</button>`;
+ if (passed) beep(1180);
+ const k = L.l.k, id = L.l.id;
+ $("#lsAct").querySelector("#lsAgain").onclick = (e) => { e.stopPropagation(); startLesson(id); };
+ $("#lsAct").querySelector("#lsNew").onclick = (e) => { e.stopPropagation(); startLesson(id, true); };
+ $("#lsAct").querySelector("#lsList").onclick = (e) => { e.stopPropagation(); goPath("classes"); };
+ const gt = $("#lsAct").querySelector("#lsGoTalk"); if (gt) gt.onclick = (e) => { e.stopPropagation(); const s = stopState(ROUTE())[k]; if (s === "locked") { toast("Esa persona aún está bloqueada en tu camino"); return goPath("path"); } goPath("path"); stopSheet(k); };
+ addInput(L.data.steps.map((s) => (s.board || []).join(" ")).join(" ").slice(0, 400));
+}
+$("#lsBack").onclick = () => { readTurn++; hush(); goPath("classes"); };
 
 /* ---------- arranque ---------- */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
