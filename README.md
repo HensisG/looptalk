@@ -48,7 +48,8 @@ Nota: en el plan gratuito de Gemini, Google puede usar tus conversaciones para m
                                   usen tu servidor y gasten tu límite gratuito.
    - ALLOW_ORIGIN  tipo Text    → https://hensisg.github.io
    Guarda y vuelve a desplegar ("Deploy").
-   Opcional: AI_MODEL (por defecto gemini-2.5-flash) si Google cambia el nombre del modelo gratuito.
+   Opcional: AI_MODEL (por defecto gemini-flash-lite-latest, el más rápido) y AI_MODEL_FALLBACK (por defecto
+   gemini-flash-latest, que se usa solo si el principal está saturado).
 
 4) En la app
    - Ajustes → "Cambiar cerebro de la IA" → "En la nube".

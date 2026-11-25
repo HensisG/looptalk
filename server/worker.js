@@ -7,10 +7,14 @@
 //   APP_CODE     (secreto)  código de acceso que escribes una vez en la app
 //   ALLOW_ORIGIN (texto)    p. ej. https://hensisg.github.io  (varios separados por coma)
 //   AI_URL       (texto, opcional)  por defecto, la API de Gemini compatible con OpenAI
-//   AI_MODEL     (texto, opcional)  por defecto gemini-2.5-flash
+//   AI_MODEL     (texto, opcional)  por defecto gemini-flash-lite-latest (rápido)
+//   AI_MODEL_FALLBACK (texto, opcional)  por defecto gemini-flash-latest (si el principal está saturado)
 
 const DEFAULT_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const DEFAULT_MODEL = "gemini-2.5-flash";
+// Los alias "-latest" siempre apuntan al modelo vigente, así la app no se rompe cuando Google retira uno.
+// "Lite" responde en ~1 s, lo que hace la charla fluida; el "Flash" normal queda de respaldo.
+const DEFAULT_MODEL = "gemini-flash-lite-latest";
+const FALLBACK_MODEL = "gemini-flash-latest";
 const MAX_MESSAGES = 40;
 const MAX_CHARS = 24000;
 const MAX_TOKENS = 600;
@@ -53,26 +57,34 @@ export default {
     }
     if (size > MAX_CHARS) return json({ error: "Conversación demasiado larga" }, 413, cors);
 
-    const payload = {
-      model: env.AI_MODEL || DEFAULT_MODEL,
-      messages,
-      stream: !!body.stream,
-      temperature: Math.max(0, Math.min(1.5, +body.temperature || 0.7)),
-      max_tokens: Math.max(16, Math.min(MAX_TOKENS, +body.max_tokens || 200)),
-      // Sin "pensar" el modelo responde mucho más rápido. Si el proveedor no lo acepta, se reintenta sin esto.
-      reasoning_effort: env.AI_REASONING || "none"
-    };
     const call = (p) => fetch(env.AI_URL || DEFAULT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.AI_KEY}` },
       body: JSON.stringify(p)
     });
-    let upstream = await call(payload);
-    if (upstream.status === 400) { delete payload.reasoning_effort; upstream = await call(payload); }
+    // Si el modelo principal está saturado (503), sin cupo (429) o retirado (404), se prueba el de respaldo.
+    const models = [env.AI_MODEL || DEFAULT_MODEL, env.AI_MODEL_FALLBACK || FALLBACK_MODEL];
+    let upstream;
+    for (const model of models) {
+      const payload = {
+        model,
+        messages,
+        stream: !!body.stream,
+        temperature: Math.max(0, Math.min(1.5, +body.temperature || 0.7)),
+        max_tokens: Math.max(16, Math.min(MAX_TOKENS, +body.max_tokens || 200)),
+        // Sin "pensar" el modelo responde mucho más rápido. Si el modelo no lo acepta, se reintenta sin esto.
+        reasoning_effort: env.AI_REASONING || "none"
+      };
+      upstream = await call(payload);
+      if (upstream.status === 400) { delete payload.reasoning_effort; upstream = await call(payload); }
+      if (![404, 429, 500, 503].includes(upstream.status)) break;
+    }
 
     if (!upstream.ok) {
       const txt = await upstream.text();
-      const msg = upstream.status === 429 ? "Se acabó el límite gratuito por ahora. Espera un minuto o mañana." : `La IA respondió ${upstream.status}`;
+      const msg = upstream.status === 429 ? "Se acabó el límite gratuito por ahora. Espera un minuto o mañana."
+        : upstream.status === 503 ? "La IA de Google está saturada en este momento. Intenta otra vez en un minuto."
+        : `La IA respondió ${upstream.status}`;
       return json({ error: msg, detail: txt.slice(0, 300) }, upstream.status === 429 ? 429 : 502, cors);
     }
     return new Response(upstream.body, {
