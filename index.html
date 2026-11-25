@@ -325,6 +325,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 #world.call .wbub p{font-size:clamp(20px,5.4vw,26px);font-weight:700}
 #world.call .wbub .es{font-size:16px;color:#5a4b66}
 #wCam{font-size:18px}
+.gap{width:7.5em;max-width:40%;min-height:34px;margin:0 3px;border-radius:8px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:16px;padding:0 6px;text-align:center}
+.gap.gok,.gok{border-color:#1f9d63;color:#9ff0b9}.gap.gbad,.gbad{border-color:var(--red);color:#ffb3aa}
+span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
+.xtext{width:100%;min-height:180px;border-radius:14px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:10px 12px;font:16px Nunito,sans-serif}
+.lesson.exam{background:linear-gradient(90deg,rgba(255,200,61,.22),rgba(255,255,255,.08));border:1px solid rgba(255,200,61,.45)}
+#xWords button:disabled{opacity:.3}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1120,6 +1126,7 @@ $("#inp").oninput = grow;
 $("#inp").onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !matchMedia("(pointer:coarse)").matches) { e.preventDefault(); send($("#inp").value); } };
 $("#micBtn").onclick = toggleMic;
 function leaveChat() {
+ if (cur === "oetpt" && X?.role) { hush(); if (rec) rec.stop(); X.role = false; cur = null; return finishRoleplay(); }
  hush(); if (rec) rec.stop(); hideCard?.();
  const k = cur, ms = mission, said = chats[k] ? chats[k].msgs.slice(sessionStart).filter((m) => m.r === "user" && !m.hidden).length : 0;
  if (ms || viewMode === "world") goPath(); else goHome();
@@ -1736,6 +1743,7 @@ function goPath(tab = pathTab) {
  $("#pStats").innerHTML = `<span>🔥 ${streakDays()} ${T("días", "дн.")}</span><span>⭐ ${done}/${total} ${T("paradas", "шагов")}</span><span>🗣 ${Math.round(t / 130)} ${T("min hoy", "мин сегодня")}</span>`;
  if (tab === "people") return renderPeople(route), show("path");
  if (tab === "classes") return renderClasses(), show("path");
+ if (tab === "exam") return renderExam(), show("path");
  let idx = 0;
  const nextK = Object.keys(st).find((x) => st[x] === "open"), nc = nextK && charOf(nextK);
  const hi = S.name ? T(`¡Hola, ${esc(S.name)}!`, `Привет, ${esc(S.name)}!`) : T("¡Hola!", "Привет!");
@@ -1762,6 +1770,12 @@ function renderPeople(route) {
 }
 $("#pMain").onclick = (e) => {
  if (e.target.closest("[data-review]")) return startReview();
+ if (e.target.closest("[data-goexam]")) return goPath("exam");
+ const exb = e.target.closest("[data-exam]"); if (exb) { ex.k = exb.dataset.exam; saveEx(); renderExam(); return examSettings(); }
+ const tk = e.target.closest("[data-task]"); if (tk) { if (!hasAI()) return toast(NEED_AI); const [sk, kk] = tk.dataset.task.split(":"); return startTask(sk, kk); }
+ if (e.target.closest("[data-mock]")) { if (!hasAI()) return toast(NEED_AI); return startMock(); }
+ if (e.target.closest("[data-exset]")) return examSettings();
+ if (e.target.closest("[data-exchange]")) { ex.k = null; saveEx(); return renderExam(); }
  const ls = e.target.closest("[data-lesson]");
  if (ls) { if (ls.getAttribute("aria-disabled") === "true") return toast(T("Primero termina la clase anterior", "Сначала закончи предыдущий урок")); return startLesson(ls.dataset.lesson); }
  if (e.target.closest("[data-gclass]")) return goPath("classes");
@@ -1882,6 +1896,7 @@ function lessonOpen(i) { return i === 0 || lessons[COURSE[i - 1].id]?.done || LV
 function renderClasses() {
  let lastLvl = "";
  $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay">${T("<b>Clases con Nova.</b> Saca tu cuaderno ✍️. Te explico en la pizarra, practicamos juntos y repasamos cuando se te olvide.", "<b>Уроки с Новой.</b> Возьми тетрадь ✍️. Я объясню на доске, мы потренируемся и повторим, когда забудешь.")}${dueCount() ? T(` Tienes <b>${dueCount()} repaso${dueCount() > 1 ? "s" : ""}</b> pendiente${dueCount() > 1 ? "s" : ""}.`, ` Повторений на сегодня: <b>${dueCount()}</b>.`) : ""}</p></div></div>`
+  + `<button class="lesson exam" data-goexam="1"><span class="ln">🎓</span><span class="sp"><b>${T("Preparar mi examen", "Подготовка к экзамену")}</b><small>${S.target === "es" ? "DELE" : "TOEFL iBT · OET Medicine"}${ex.k && EXAMS[ex.k] ? ` · ${EXAMS[ex.k].name}` : ""}</small></span></button>`
   + `<button class="lesson" data-review="1"><span class="ln">🔁</span><span class="sp"><b>${T("Repaso rápido", "Быстрое повторение")}</b><small>${T("Tus palabras y errores guardados", "Твои сохранённые слова и ошибки")}</small></span><em class="${reviewItems().length ? "due" : ""}">${reviewItems().length}</em></button>`
   + COURSE.map((l, i) => {
    const st = lessons[l.id], open = lessonOpen(i), head = l.lvl !== lastLvl ? `<h3 class="lvh">${T("Nivel", "Уровень")} ${l.lvl}</h3>` : ""; lastLvl = l.lvl;
@@ -2033,7 +2048,7 @@ function finishLesson() {
  const gt = $("#lsAct").querySelector("#lsGoTalk"); if (gt) gt.onclick = (e) => { e.stopPropagation(); const s = stopState(ROUTE())[k]; if (s === "locked") { toast(T("Esa persona aún está bloqueada en tu camino", "Этот человек пока закрыт на твоём пути")); return goPath("path"); } goPath("path"); stopSheet(k); };
  addInput(L.data.steps.map((s) => (s.board || []).join(" ")).join(" ").slice(0, 400));
 }
-$("#lsBack").onclick = () => { readTurn++; hush(); const wasTest = !!P; P = null; R = null; goPath(wasTest ? "path" : "classes"); };
+$("#lsBack").onclick = () => { readTurn++; hush(); const wasTest = !!P, wasExam = !!X; P = null; R = null; X = null; goPath(wasTest ? "path" : wasExam ? "exam" : "classes"); };
 
 /* ---------- familia: perfiles, quién eres y tabla de progreso ----------
    Cada persona tiene su perfil en el teléfono (con PIN opcional) y su propio idioma.
@@ -2322,6 +2337,312 @@ $("#lsAct").onclick = (e) => {
   return;
  }
  return _lsAct2(e);
+};
+
+/* ---------- rutas de examen: TOEFL iBT (2026), OET Medicine y DELE ----------
+   Cada examen se divide en secciones y tipos de tarea. Nova genera tareas nuevas cada vez,
+   las corrige (opción múltiple al instante; escritura y oral con la rúbrica del examen)
+   y calcula una nota ORIENTATIVA. Formatos verificados en noviembre de 2026; confirmar en ETS / OET / Cervantes. */
+const EXAMS = {
+ toefl: {
+  name: "TOEFL iBT", lang: "en", scale: "1–6",
+  intro: { es: "Formato nuevo (desde enero de 2026): Reading, Listening, Writing y Speaking, unos 90 minutos. Nota de 1 a 6.", ru: "Новый формат (с января 2026): Reading, Listening, Writing, Speaking, около 90 минут. Оценка от 1 до 6." },
+  sections: [
+   { k: "R", n: "Reading", tasks: [
+    { k: "ctw", t: "Complete the Words", kind: "fill", spec: "A short academic paragraph (70-90 words) where, starting from the second sentence, every second word has its second half missing (C-test). Give the paragraph with each damaged word written as the visible first half followed by ___ , and list the full missing words in order." },
+    { k: "rdl", t: "Read in Daily Life", kind: "mcq", spec: "A short everyday text (notice, email, schedule or ad, 80-120 words) and 3 multiple-choice questions about details and purpose." },
+    { k: "rap", t: "Read an Academic Passage", kind: "mcq", spec: "An academic passage of about 200 words (biology, history, psychology or similar) and 4 questions: main idea, detail, vocabulary in context, inference." } ] },
+   { k: "L", n: "Listening", tasks: [
+    { k: "lcr", t: "Listen and Choose a Response", kind: "mcq", audio: true, spec: "4 separate items. For each item: one short spoken line by a speaker; the question asks for the best response; 4 options. Put each spoken line in the question's 'say' field." },
+    { k: "lcv", t: "Listen to a Conversation", kind: "mcq", audio: true, spec: "A campus or daily-life conversation between two people (8-10 turns) and 3 questions (gist, detail, speaker attitude)." },
+    { k: "lan", t: "Listen to an Announcement", kind: "mcq", audio: true, spec: "A campus or workplace announcement (80-110 words) by one speaker and 3 questions." },
+    { k: "lat", t: "Listen to an Academic Talk", kind: "mcq", audio: true, spec: "A short academic talk by a professor (150-200 words) and 3 questions (main idea, detail, organization)." } ] },
+   { k: "W", n: "Writing", tasks: [
+    { k: "bas", t: "Build a Sentence", kind: "order", spec: "5 items. Each item: a short context line said by one person, and the reply sentence (8-12 words) that the learner must build from scrambled words." },
+    { k: "eml", t: "Write an Email", kind: "write", minutes: 7, spec: "A realistic situation that requires writing an email (to a professor, landlord, manager...), with 3 things the email must include. About 120 words expected.", rubric: "task completion (all 3 points), organization, language accuracy, register/politeness" },
+    { k: "wad", t: "Write for an Academic Discussion", kind: "write", minutes: 10, spec: "A professor's discussion question plus two short student posts with different opinions. The learner writes their own contribution (at least 100 words).", rubric: "relevance and contribution to the discussion, development and support, language accuracy and range, coherence" } ] },
+   { k: "S", n: "Speaking", tasks: [
+    { k: "lar", t: "Listen and Repeat", kind: "repeat", spec: "7 sentences that someone would say in a single setting (for example a campus tour or a clinic), getting longer: from 5 to 15 words." },
+    { k: "tai", t: "Take an Interview", kind: "speak", seconds: 45, spec: "4 interview questions on one everyday or academic topic, from simple to opinion questions.", rubric: "fluency and coherence, relevance and development, vocabulary range, grammar accuracy" } ] }
+  ]
+ },
+ oet: {
+  name: "OET Medicine", lang: "en", scale: "0–500 (B = 350)",
+  intro: { es: "El examen de inglés médico que pide ECFMG. Listening, Reading, Writing (carta de referencia) y Speaking (2 role-plays con pacientes). Meta: grado B (350) en cada parte.", ru: "Медицинский английский для врачей. Цель — оценка B (350) в каждой части." },
+  sections: [
+   { k: "L", n: "Listening", tasks: [
+    { k: "lpa", t: "Part A · Consultation notes", kind: "fill", audio: true, spec: "A doctor-patient consultation (10-14 turns) with symptoms, history and medication. Give the consultation in 'audio' and a set of case notes with 6 gaps (___) the learner completes with 1-3 words heard in the consultation; list the answers in order." },
+    { k: "lpb", t: "Part B · Workplace extracts", kind: "mcq", audio: true, spec: "3 short healthcare workplace extracts (handover, briefing, team meeting), each 4-6 turns, each with one 3-option question about its purpose or a key detail." },
+    { k: "lpc", t: "Part C · Presentation", kind: "mcq", audio: true, spec: "An extract of a talk by a health professional (150-200 words) on a clinical topic and 3 questions about opinions and details." } ] },
+   { k: "R", n: "Reading", tasks: [
+    { k: "rpa", t: "Part A · Expeditious reading", kind: "mcq", spec: "Two short clinical texts (Text A guideline extract, Text B drug information) about the same condition, and 4 quick factual questions (which text / what dose / when)." },
+    { k: "rpb", t: "Part B · Workplace texts", kind: "mcq", spec: "3 short healthcare workplace texts (policy, email, procedure note), each with one 3-option question about its purpose or main point." },
+    { k: "rpc", t: "Part C · Long text", kind: "mcq", spec: "A 250-word healthcare article and 4 questions on detail, inference, the writer's opinion and vocabulary." } ] },
+   { k: "W", n: "Writing", tasks: [
+    { k: "ref", t: "Referral letter", kind: "write", minutes: 45, spec: "Realistic case notes for a patient (name, age, history, findings, treatment so far) and the writing task: a referral letter to a named specialist explaining the reason for referral and relevant information. About 180-200 words expected.", rubric: "purpose (clear early), content (relevant case notes selected), conciseness and clarity, genre and style (professional letter), organization and layout, language accuracy" } ] },
+   { k: "S", n: "Speaking", tasks: [
+    { k: "rpl", t: "Patient role-play", kind: "roleplay", spec: "A role-play card: the setting, the candidate is the doctor, and 4 tasks to do with the patient (explain, reassure, find out, advise). Also a short patient card (how the patient behaves and worries).", rubric: "intelligibility, fluency, appropriateness of language, grammar and expression; clinical communication: relationship building, understanding the patient's perspective, providing structure, information gathering, information giving" } ] }
+  ]
+ },
+ dele: {
+  name: "DELE", lang: "es", scale: "Apto / No apto (60/100)",
+  intro: { es: "Diploma oficial de español del Instituto Cervantes: lectura, audición, escritura y expresión oral. Apto con 60 de 100 (y mínimo por grupo).", ru: "Официальный диплом Института Сервантеса: чтение, аудирование, письмо и устная речь. «Apto» — 60 из 100 (и минимум по группам)." },
+  sections: [
+   { k: "R", n: "Comprensión de lectura", tasks: [
+    { k: "dlr", t: "Lectura", kind: "mcq", spec: "A Spanish text appropriate to the learner's DELE level (notice, email, article) and 4 multiple-choice questions." } ] },
+   { k: "L", n: "Comprensión auditiva", tasks: [
+    { k: "dla", t: "Audición", kind: "mcq", audio: true, spec: "A Spanish dialogue or announcement appropriate to the learner's DELE level and 4 multiple-choice questions." } ] },
+   { k: "W", n: "Expresión escrita", tasks: [
+    { k: "dle", t: "Escribir un texto", kind: "write", minutes: 20, spec: "A DELE-style writing task in Spanish (email to a friend, complaint, opinion text) with 3-4 points to include and the expected length for the level.", rubric: "adecuación a la tarea, coherencia, corrección gramatical, alcance del vocabulario" } ] },
+   { k: "S", n: "Expresión oral", tasks: [
+    { k: "dlo", t: "Hablar", kind: "speak", seconds: 60, spec: "4 DELE-style speaking prompts in Spanish (describe, talk about experiences, give opinion) for the learner's level.", rubric: "fluidez, pronunciación, corrección gramatical, alcance del vocabulario, coherencia" } ] }
+  ]
+ }
+};
+const examsForLang = () => Object.entries(EXAMS).filter(([, e]) => e.lang === S.target || (!S.target && e.lang === "en"));
+let ex = store.get("exam", { k: null, date: "", target: "", scores: {} });
+const saveEx = () => store.set("exam", ex);
+const curExam = () => EXAMS[ex.k] || null;
+function taskScore(tk) { return ex.scores[ex.k + ":" + tk]?.pct; }
+function sectionPct(sec) { const v = sec.tasks.map((t) => taskScore(t.k)).filter((x) => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }
+function estimate(e, pct) {
+ if (pct == null) return "—";
+ if (ex.k === "toefl") return (Math.round((1 + 5 * pct) * 2) / 2).toFixed(1);
+ if (ex.k === "oet") { const sc = Math.round(pct * 500 / 10) * 10; return `${sc} (${sc >= 450 ? "A" : sc >= 350 ? "B" : sc >= 300 ? "C+" : sc >= 200 ? "C" : "D"})`; }
+ return `${Math.round(pct * 25)}/25`;
+}
+function renderExam() {
+ const opts = examsForLang();
+ if (!ex.k || !EXAMS[ex.k] || EXAMS[ex.k].lang !== (S.target || "en")) {
+  $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>${T("¿Para qué examen te preparo?", "К какому экзамену готовимся?")}</b> ${T("Practicaremos cada parte del examen y te diré tu nota estimada.", "Мы потренируем каждую часть, и я скажу примерную оценку.")}</p></div></div>`
+   + opts.map(([k, e]) => `<button class="lesson" data-exam="${k}"><span class="ln">🎓</span><span class="sp"><b>${e.name}</b><small>${esc(e.intro[UIRU ? "ru" : "es"])}</small></span></button>`).join("") + `<div style="height:96px"></div>`;
+  return;
+ }
+ const e = curExam(), days = ex.date ? Math.ceil((new Date(ex.date) - Date.now()) / 86400000) : null;
+ const all = e.sections.map(sectionPct), got = all.filter((x) => x != null), overall = got.length ? got.reduce((a, b) => a + b, 0) / got.length : null;
+ $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>${e.name}</b> · ${T("nota estimada", "примерная оценка")}: <b>${estimate(e, overall)}</b>${ex.target ? ` · ${T("meta", "цель")}: <b>${esc(ex.target)}</b>` : ""}${days != null ? ` · ${days >= 0 ? `${days} ${T("días para el examen", "дн. до экзамена")}` : T("fecha pasada", "дата прошла")}` : ""}</p>
+  <div class="gacts"><button class="btn" data-mock="1">⏱️ ${T("Simulacro corto", "Мини-экзамен")}</button><button class="btn ghost" data-exset="1">⚙️ ${T("Fecha y meta", "Дата и цель")}</button><button class="btn ghost" data-exchange="1">${T("Cambiar examen", "Сменить экзамен")}</button></div></div></div>
+  <p class="note" style="color:#cbb9d6">${T("Notas orientativas calculadas por la IA. Confirma el formato oficial en la web del examen.", "Оценки примерные, их считает ИИ. Официальный формат проверяй на сайте экзамена.")}</p>`
+  + e.sections.map((sec) => `<h3 class="lvh">${esc(sec.n)} · ${estimate(e, sectionPct(sec))}</h3>` + sec.tasks.map((t) => { const sc = taskScore(t.k); return `<button class="lesson" data-task="${sec.k}:${t.k}"><span class="ln">${{ mcq: "☑️", fill: "✏️", order: "🧩", write: "📝", speak: "🎤", repeat: "🔁", roleplay: "🩺" }[t.kind]}</span><span class="sp"><b>${esc(t.t)}</b><small>${t.audio ? "🎧 " : ""}${t.minutes ? `${t.minutes} min` : t.seconds ? `${t.seconds} s ${T("por respuesta", "на ответ")}` : ""}</small></span><em class="${sc == null ? "new" : sc >= 0.7 ? "ok" : "due"}">${sc == null ? T("Practicar", "Тренировать") : Math.round(sc * 100) + "%"}</em></button>`; }).join("")).join("")
+  + `<div style="height:96px"></div>`;
+}
+function examSettings() {
+ const e = curExam(); if (!e) return;
+ openSheet(`<h3>${e.name}</h3><div class="field"><label for="exDate">${T("Fecha de tu examen", "Дата экзамена")}</label><input type="date" id="exDate" value="${esc(ex.date)}" style="width:100%;min-height:48px;border-radius:14px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);padding:0 12px"></div>
+ <div class="field"><label for="exTarget">${T("Nota que necesitas", "Нужная оценка")}</label><input type="text" id="exTarget" value="${esc(ex.target)}" placeholder="${ex.k === "toefl" ? "p. ej. 4.5" : ex.k === "oet" ? "350 (B)" : "B2 apto"}"></div>
+ <button class="btn" id="exOk" style="width:100%">${T("Guardar", "Сохранить")}</button>`);
+ $("#exOk").onclick = () => { ex.date = $("#exDate").value; ex.target = $("#exTarget").value.trim(); saveEx(); closeSheet(); renderExam(); };
+}
+
+/* --- práctica de una tarea --- */
+let X = null; // { sec, task, data, i, ok, n, mock: [...] }
+async function startTask(secK, taskK, mockQueue) {
+ const e = curExam(), sec = e.sections.find((s) => s.k === secK), task = sec.tasks.find((t) => t.k === taskK);
+ L = null; P = null; R = null;
+ X = { sec, task, data: null, i: 0, ok: 0, n: 0, mock: mockQueue || null, answers: [] };
+ $("#lsTitle").textContent = `${e.name} · ${sec.n}`; $("#lsLvl").textContent = task.t + (mockQueue ? ` · ${T("simulacro", "мини-экзамен")}` : "");
+ $("#lsDots").innerHTML = ""; $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsAct").innerHTML = "";
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Preparando una tarea nueva…", "Готовлю новое задание…")}`;
+ show("lesson"); hush();
+ try { X.data = await makeTask(e, task); } catch (er) { $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(er.message)}`; $("#lsAct").innerHTML = `<button class="btn" id="xRetry">${T("Intentar otra vez", "Попробовать снова")}</button>`; return; }
+ renderTask();
+}
+async function makeTask(e, task) {
+ const shape = {
+  mcq: `{"title":"short title","text":"the reading text (empty if listening)","audio":[{"who":"A","text":"spoken line"}],"questions":[{"say":"optional spoken line for this question","q":"question","options":["A","B","C","D"],"answer":"the correct option copied exactly","why":"short explanation in ${NL.name}"}]}`,
+  fill: `{"title":"short title","audio":[{"who":"A","text":"spoken line"}],"text":"text with gaps written as ___","answers":["missing word or words for each ___ in order"]}`,
+  order: `{"items":[{"context":"what the other person says","answer":"the full correct sentence"}]}`,
+  write: `{"title":"short title","prompt":"the full task the learner sees (in ${TL.name}, with any case notes or posts)","tips":"2 short tips in ${NL.name}"}`,
+  speak: `{"title":"short title","questions":["question 1","question 2","question 3","question 4"]}`,
+  repeat: `{"title":"setting","sentences":["sentence 1","..."]}`,
+  roleplay: `{"title":"short title","card":"the candidate's role-play card in ${TL.name}: setting and the tasks","patient":"how the patient behaves, their worries, in ${TL.name}","opening":"the patient's first line"}`
+ }[task.kind];
+ const lvl = e === EXAMS.dele ? `The learner is preparing DELE level ${ex.target || levelFor("owl") || "B1"}.` : `Make it realistic ${e.name} difficulty.`;
+ const out = await oneShot(`Create one practice task for the ${e.name} exam, task type "${task.t}". ${task.spec} ${lvl}
+Everything the learner reads or hears is in ${TL.name}. Do not copy real copyrighted exam material: write original content.
+Return ONLY valid JSON (no markdown) with this shape: ${shape}`, 1400);
+ return JSON.parse(out.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+}
+const voicePair = ["airport", "cafe", "bank", "pharmacy"];
+async function playAudio(lines) {
+ const turn = ++readTurn; const who = {};
+ for (const l of lines || []) {
+  if (turn !== readTurn || !X) return;
+  if (!(l.who in who)) who[l.who] = voicePair[Object.keys(who).length % voicePair.length];
+  await speak(l.text, "en", null, who[l.who]);
+ }
+}
+function xDots(n) { $("#lsDots").innerHTML = Array.from({ length: n }, (_, i) => `<i class="${i < X.i ? "d" : i === X.i ? "c" : ""}"></i>`).join(""); }
+function renderTask() {
+ const t = X.task, d = X.data;
+ if (t.kind === "mcq") {
+  const qs = d.questions || []; if (X.i >= qs.length) return finishTask();
+  xDots(qs.length); const q = qs[X.i];
+  const listening = !!t.audio;
+  $("#lsBoard").innerHTML = (X.i === 0 && d.title ? `<p class="chalk nb">${esc(d.title)}</p>` : "") + (!listening && d.text ? `<p class="chalk" style="font-size:17px">${esc(d.text)}</p>` : listening ? `<p class="chalk nb">🎧 ${T("Escucha con atención (sin texto, como en el examen)", "Слушай внимательно (без текста, как на экзамене)")}</p>` : "") + `<p class="chalk q">${esc(q.q)}</p>`;
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Elige la respuesta correcta.", "Выбери правильный ответ.")}`;
+  $("#lsAct").innerHTML = `${listening ? `<button class="btn ghost" id="xPlay">🔊 ${T("Escuchar", "Слушать")}</button>` : ""}<div class="opts">${q.options.map((o, i) => `<button class="opt" data-xo="${i}">${esc(o)}</button>`).join("")}</div>`;
+  if (listening) { if (q.say) playAudio([{ who: "A", text: q.say }]); else if (X.i === 0) playAudio(d.audio); }
+ } else if (t.kind === "fill") {
+  xDots(1); let k = 0;
+  const nAns = (d.answers || []).length;
+  const html = esc(d.text || "").replace(/_{3,}/g, () => k < nAns ? `<input class="gap" data-g="${k++}" autocomplete="off" autocapitalize="off" spellcheck="false">` : "…");
+  $("#lsBoard").innerHTML = (d.title ? `<p class="chalk nb">${esc(d.title)}</p>` : "") + (t.audio ? `<p class="chalk nb">🎧 ${T("Escucha y completa las notas", "Слушай и заполни заметки")}</p>` : "") + `<p class="chalk" style="font-size:17px;line-height:2">${html}</p>`;
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${t.audio ? T("Escucha la consulta y completa los espacios.", "Слушай приём и заполни пропуски.") : T("Completa las palabras que faltan.", "Допиши недостающие части слов.")}`;
+  $("#lsAct").innerHTML = `${t.audio ? `<button class="btn ghost" id="xPlay">🔊 ${T("Escuchar", "Слушать")}</button>` : ""}<button class="btn" id="xCheckFill">${T("Comprobar", "Проверить")}</button>`;
+  if (t.audio) playAudio(d.audio);
+ } else if (t.kind === "order") {
+  const it = (d.items || [])[X.i]; if (!it) return finishTask();
+  xDots(d.items.length);
+  const words = it.answer.replace(/[.!?]$/, "").split(/\s+/).sort(() => Math.random() - 0.5);
+  X.built = [];
+  $("#lsBoard").innerHTML = `<p class="chalk nb">${esc(it.context)}</p><p class="chalk q" id="xBuilt">…</p>`;
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Toca las palabras en orden para formar la respuesta.", "Нажимай слова по порядку, чтобы составить ответ.")}`;
+  $("#lsAct").innerHTML = `<div class="chips" id="xWords">${words.map((w, i) => `<button data-xw="${i}">${esc(w)}</button>`).join("")}</div><button class="btn ghost" id="xUndo">↩︎</button><button class="btn" id="xCheckOrder">${T("Comprobar", "Проверить")}</button>`;
+  speak(it.context, "en", null, "cafe");
+ } else if (t.kind === "write") {
+  xDots(1);
+  $("#lsBoard").innerHTML = `<p class="chalk nb">${esc(d.title || t.t)} · ⏱️ ${t.minutes} min</p><p class="chalk" style="font-size:16px;white-space:pre-wrap">${esc(d.prompt || "")}</p>`;
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(d.tips || T("Escribe tu respuesta. Te corrijo con la rúbrica del examen.", "Напиши ответ. Я проверю по критериям экзамена."))}`;
+  $("#lsAct").innerHTML = `<textarea id="xText" class="xtext" placeholder="${T("Escribe aquí…", "Пиши здесь…")}"></textarea><div class="row" style="width:100%"><span class="note" id="xCount" style="color:#cbb9d6">0 ${T("palabras", "слов")}</span><span class="sp"></span><button class="btn" id="xGrade">${T("Corregir", "Проверить")}</button></div>`;
+  $("#xText").oninput = () => { $("#xCount").textContent = `${($("#xText").value.match(/\S+/g) || []).length} ${T("palabras", "слов")}`; };
+  X.t0 = Date.now();
+ } else if (t.kind === "speak" || t.kind === "repeat") {
+  const list = t.kind === "speak" ? d.questions || [] : d.sentences || []; if (X.i >= list.length) return finishTask();
+  xDots(list.length); const item = list[X.i];
+  $("#lsBoard").innerHTML = `<p class="chalk nb">${esc(d.title || t.t)}</p>` + (t.kind === "repeat" ? `<p class="chalk q">🎧 ${T("Escucha y repite", "Слушай и повторяй")}</p><p class="chalk" id="xRep" style="opacity:.25">${esc(item)}</p>` : `<p class="chalk q">${esc(item)}</p><p class="chalk nb">⏱️ ${t.seconds} s</p>`);
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${t.kind === "repeat" ? T("Escucha la frase y repítela igual.", "Послушай фразу и повтори её.") : T("Escucha la pregunta y responde hablando.", "Послушай вопрос и ответь вслух.")}`;
+  $("#lsAct").innerHTML = `<button class="btn ghost" id="xPlay">🔊</button><button class="btn" id="xRec">🎤 ${T("Responder", "Ответить")}</button>`;
+  speak(item, "en", null, "airport");
+ } else if (t.kind === "roleplay") {
+  xDots(1);
+  $("#lsBoard").innerHTML = `<p class="chalk nb">🩺 ${T("Tarjeta del role-play", "Карточка ролевой игры")}</p><p class="chalk" style="font-size:16px;white-space:pre-wrap">${esc(d.card || "")}</p>`;
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Lee la tarjeta (3 minutos en el examen). Luego hablarás con el paciente como en una consulta real.", "Прочитай карточку. Потом поговоришь с пациентом, как на настоящем приёме.")}`;
+  $("#lsAct").innerHTML = `<button class="btn" id="xRole">${T("Empezar la consulta", "Начать приём")}</button>`;
+ }
+}
+const gradeLine = (sc) => `${Math.round(sc * 100)}%`;
+function saveTaskScore(pct) {
+ const key = ex.k + ":" + X.task.k, prev = ex.scores[key];
+ ex.scores[key] = { pct: prev ? Math.round((prev.pct * 0.4 + pct * 0.6) * 100) / 100 : pct, at: Date.now() }; saveEx();
+}
+function finishTask(pctOverride, extraHTML = "") {
+ const pct = pctOverride != null ? pctOverride : X.n ? X.ok / X.n : 0;
+ saveTaskScore(pct);
+ const e = curExam(), mock = X.mock;
+ if (mock) mock.results.push({ sec: X.sec.k, pct });
+ $("#lsDots").innerHTML = "";
+ $("#lsBoard").innerHTML = `<p class="chalk q">${esc(X.task.t)}: ${gradeLine(pct)}</p><p class="chalk">${T("Estimación", "Оценка")} ${esc(X.sec.n)}: ${estimate(e, sectionPct(X.sec))}</p>` + extraHTML;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${pct >= 0.75 ? T("¡Excelente! Vas por buen camino.", "Отлично! Ты на верном пути.") : pct >= 0.5 ? T("Bien. Repite esta tarea otro día para subir.", "Хорошо. Повтори это задание в другой день.") : T("Esta parte necesita práctica. Hazla de nuevo con calma.", "Эта часть требует практики. Попробуй ещё раз спокойно.")}`;
+ if (mock && mock.queue.length) { $("#lsAct").innerHTML = `<button class="btn" id="xMockNext">${T("Siguiente sección", "Следующая секция")} ▶</button>`; return; }
+ if (mock) {
+  const avg = mock.results.reduce((a, r) => a + r.pct, 0) / mock.results.length;
+  $("#lsBoard").insertAdjacentHTML("beforeend", `<p class="chalk q">${T("Nota estimada del simulacro", "Оценка мини-экзамена")}: ${estimate(e, avg)}</p>`);
+ }
+ $("#lsAct").innerHTML = `<button class="btn" id="xAgain">${T("Otra tarea igual", "Ещё такое же задание")}</button><button class="btn ghost" id="xBack">${T("Volver al examen", "К экзамену")}</button>`;
+ X.done = true;
+}
+async function rubricGrade(text, extra = "") {
+ const t = X.task, e = curExam();
+ const out = await oneShot(`You are a strict but kind ${e.name} rater. Task: ${t.t}. Task prompt: ${(X.data.prompt || X.data.card || (X.data.questions || []).join(" | ")).slice(0, 1500)}
+${extra}Learner's response: """${text.slice(0, 4000)}"""
+Rate using these criteria: ${t.rubric}. Give each criterion a score from 0 to 5.
+Return ONLY valid JSON: {"criteria":[{"name":"criterion","score":0}],"overall_percent":0,"strengths":"in ${NL.name}, max 30 words","fix":"the 2 most important things to improve, in ${NL.name}, max 40 words","better":"a short improved model answer in ${TL.name} (max 120 words)"}`, 900);
+ return JSON.parse(out.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+}
+function rubricHTML(g) {
+ return `${(g.criteria || []).map((c) => `<p class="chalk" style="font-size:15px">${esc(c.name)}: ${"★".repeat(Math.max(0, Math.min(5, c.score)))}${"☆".repeat(5 - Math.max(0, Math.min(5, c.score)))}</p>`).join("")}<p class="chalk nb">👍 ${esc(g.strengths || "")}</p><p class="chalk nb">🎯 ${esc(g.fix || "")}</p>${g.better ? `<p class="chalk" style="font-size:15px;white-space:pre-wrap">✨ ${esc(g.better)}</p>` : ""}`;
+}
+// role-play OET: conversación con un paciente usando el chat normal, luego rúbrica
+function startRoleplay() {
+ const d = X.data, key = "oetpt";
+ SPECIAL[key] = { k: key, t: "OET role-play", n: "Patient", r: `patient in an OET Medicine speaking role-play. ${d.patient}. The learner is the doctor and must complete these tasks: ${d.card}. Stay in role as the patient; never act as the doctor; keep answers short and realistic`, av: ["#e7b48f", "#3b2416", "#2563eb", 1], o: d.opening || "Hello doctor." };
+ chats[key] = { msgs: [{ r: "assistant", t: d.opening || "Hello doctor." }], topic: "", persona: null };
+ X.role = true; saveChats();
+ openChat(key, null, "chat");
+ toast(T("Cuando termines la consulta, toca ← para recibir tu nota", "Когда закончишь приём, нажми ← чтобы получить оценку"));
+}
+async function finishRoleplay() {
+ const key = "oetpt", lines = (chats[key]?.msgs || []).filter((m) => !m.hidden);
+ show("lesson");
+ const doc = lines.filter((m) => m.r === "user").map((m) => m.t).join("\n");
+ if (doc.split(/\s+/).length < 20) { $("#lsSay").innerHTML = `<b>Nova:</b> ${T("La consulta fue muy corta para evaluarla. Inténtalo de nuevo.", "Приём был слишком коротким. Попробуй ещё раз.")}`; $("#lsAct").innerHTML = `<button class="btn" id="xRole">${T("Empezar la consulta", "Начать приём")}</button>`; return; }
+ $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Evaluando tu consulta…", "Оцениваю приём…")}`; $("#lsAct").innerHTML = "";
+ try { const g = await rubricGrade(lines.map((m) => (m.r === "user" ? "Doctor: " : "Patient: ") + m.t).join("\n"), "The response is the full role-play transcript; rate only the doctor (the learner).\n"); finishTask((g.overall_percent || 0) / 100, rubricHTML(g)); }
+ catch (er) { $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(er.message)}`; }
+}
+function startMock() {
+ const e = curExam(); if (!e) return;
+ const queue = e.sections.map((s) => { const opts = s.tasks.filter((t) => t.kind !== "roleplay" || s.tasks.length === 1); const t = opts[Math.floor(Math.random() * opts.length)]; return [s.k, t.k]; });
+ const mock = { queue, results: [] };
+ const [s, t] = mock.queue.shift(); startTask(s, t, mock);
+}
+const _lsAct3 = $("#lsAct").onclick;
+$("#lsAct").onclick = async (e) => {
+ if (!X) return _lsAct3(e);
+ const tg = e.target, t = X.task, d = X.data;
+ if (tg.closest("#xRetry")) return startTask(X.sec.k, t.k, X.mock);
+ if (tg.closest("#xBack")) { X = null; return goPath("exam"); }
+ if (tg.closest("#xAgain")) return startTask(X.sec.k, t.k);
+ if (tg.closest("#xMockNext")) { const m = X.mock, [s, k] = m.queue.shift(); return startTask(s, k, m); }
+ if (tg.closest("#xPlay")) { if (t.kind === "mcq") { const q = d.questions[X.i]; return q?.say ? playAudio([{ who: "A", text: q.say }]) : playAudio(d.audio); } if (t.kind === "fill") return playAudio(d.audio); const list = t.kind === "speak" ? d.questions : d.sentences; return speak(list[X.i], "en", null, "airport"); }
+ if (tg.closest("#xRole")) return startRoleplay();
+ const xo = tg.closest("[data-xo]");
+ if (xo && !X.answered) {
+  const q = d.questions[X.i], ok = norm(q.options[+xo.dataset.xo]) === norm(q.answer);
+  X.answered = true; X.n++; if (ok) X.ok++;
+  document.querySelectorAll("[data-xo]").forEach((b) => b.classList.toggle("right", norm(q.options[+b.dataset.xo]) === norm(q.answer)));
+  if (!ok) xo.classList.add("wrong");
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${ok ? "✅" : "❌"} ${esc(q.why || "")}`;
+  if (t.audio && X.i === (d.questions.length - 1) && d.text) $("#lsBoard").insertAdjacentHTML("beforeend", `<p class="chalk nb">${esc(d.text)}</p>`);
+  $("#lsAct").insertAdjacentHTML("beforeend", `<button class="btn" id="xNext">${T("Siguiente", "Дальше")}</button>`);
+  beep(ok ? 990 : 330); return;
+ }
+ if (tg.closest("#xNext")) { X.answered = false; X.i++; return renderTask(); }
+ if (tg.closest("#xCheckFill")) {
+  const gaps = [...document.querySelectorAll(".gap")], ans = d.answers || [];
+  gaps.forEach((g, i) => { const ok = norm(g.value) === norm(ans[i] || "") || (ans[i] && norm(ans[i]).endsWith(norm(g.value)) && norm(g.value).length > 1); X.n++; if (ok) X.ok++; g.classList.add(ok ? "gok" : "gbad"); if (!ok) g.value = ans[i] || ""; });
+  return finishTask();
+ }
+ const xw = tg.closest("[data-xw]");
+ if (xw && !xw.disabled) { X.built.push(xw.textContent); xw.disabled = true; $("#xBuilt").textContent = X.built.join(" "); return; }
+ if (tg.closest("#xUndo")) { const w = X.built.pop(); const b = [...document.querySelectorAll("[data-xw]")].find((x) => x.disabled && x.textContent === w); if (b) b.disabled = false; $("#xBuilt").textContent = X.built.join(" ") || "…"; return; }
+ if (tg.closest("#xCheckOrder")) {
+  const it = d.items[X.i], ok = norm(X.built.join(" ")) === norm(it.answer); X.n++; if (ok) X.ok++;
+  $("#lsSay").innerHTML = `<b>Nova:</b> ${ok ? "✅ ¡Correcto!" : `❌ ${esc(it.answer)}`}`; beep(ok ? 990 : 330);
+  $("#lsAct").innerHTML = `<button class="btn" id="xNext">${T("Siguiente", "Дальше")}</button>`; return;
+ }
+ if (tg.closest("#xGrade")) {
+  const txt = $("#xText").value.trim(); if ((txt.match(/\S+/g) || []).length < 20) return toast(T("Escribe un poco más (mínimo 20 palabras)", "Напиши больше (минимум 20 слов)"));
+  $("#xGrade").innerHTML = loadingDots;
+  try { const g = await rubricGrade(txt, `Time used: ${Math.round((Date.now() - X.t0) / 60000)} of ${t.minutes} minutes.\n`); finishTask((g.overall_percent || 0) / 100, rubricHTML(g)); }
+  catch (er) { $("#xGrade").textContent = T("Corregir", "Проверить"); toast(er.message); }
+  return;
+ }
+ if (tg.closest("#xRec")) {
+  if (!SR) return toast(T("Tu navegador no reconoce voz. Usa Chrome.", "Браузер не распознаёт речь. Используй Chrome."));
+  const list = t.kind === "speak" ? d.questions : d.sentences, item = list[X.i];
+  hush(); let heard = ""; const r = newRec(); r.continuous = t.kind === "speak";
+  $("#xRec").classList.add("sun"); $("#xRec").textContent = T("🎤 Te escucho… (toca para terminar)", "🎤 Слушаю… (нажми, чтобы закончить)");
+  const stopT = setTimeout(() => { try { r.stop(); } catch {} }, (t.seconds || 12) * 1000);
+  $("#xRec").onclick = () => { try { r.stop(); } catch {} };
+  r.onresult = (ev) => { heard = ""; for (const x of ev.results) heard += x[0].transcript + " "; };
+  r.onend = async () => {
+   clearTimeout(stopT); heard = heard.trim();
+   if (t.kind === "repeat") {
+    const s = scorePron(item, heard); X.n++; X.ok += s.pct; $("#xRep").style.opacity = 1;
+    $("#xRep").innerHTML = s.words.map((p, i) => i % 2 ? `<span class="${p.ok ? "gok" : "gbad"}">${esc(p.t)}</span>` : esc(p.t)).join("");
+    $("#lsSay").innerHTML = `<b>Nova:</b> ${Math.round(s.pct * 100)}% · ${T("oí", "я услышал")}: «${esc(heard || "—")}»`;
+    $("#lsAct").innerHTML = `<button class="btn" id="xNext">${T("Siguiente", "Дальше")}</button>`; return;
+   }
+   X.answers.push({ q: item, a: heard || "(no answer)" });
+   if (X.i < list.length - 1) { X.i++; return renderTask(); }
+   $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Evaluando tus respuestas…", "Оцениваю ответы…")}`; $("#lsAct").innerHTML = "";
+   try { const g = await rubricGrade(X.answers.map((x) => `Q: ${x.q}\nA (speech-to-text transcript): ${x.a}`).join("\n\n"), "The answers were spoken and transcribed automatically; ignore punctuation and small transcription errors.\n"); finishTask((g.overall_percent || 0) / 100, rubricHTML(g)); }
+   catch (er) { $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(er.message)}`; }
+  };
+  try { r.start(); } catch { clearTimeout(stopT); }
+ }
 };
 
 /* ---------- arranque ---------- */
