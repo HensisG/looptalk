@@ -320,10 +320,31 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .callbg.talk .callglow{opacity:.9;animation:pulse .5s infinite}
 @keyframes breathe{50%{transform:translateX(-50%) scale(1.015) translateY(2px)}}
 @keyframes talky{50%{filter:brightness(1.06)}}
-.selfie{position:absolute;z-index:3;right:14px;top:calc(env(safe-area-inset-top) + 74px);width:96px;height:128px;object-fit:cover;border-radius:16px;border:3px solid rgba(255,255,255,.85);transform:scaleX(-1);box-shadow:0 8px 20px rgba(0,0,0,.4);background:#000}
-#world.call .wbub{top:auto;bottom:calc(46% - 20px)}
-#world.call .wbub p{font-size:clamp(20px,5.4vw,26px);font-weight:700}
-#world.call .wbub .es{font-size:16px;color:#5a4b66}
+.selfie{position:absolute;z-index:3;right:12px;top:calc(env(safe-area-inset-top) + 66px);width:78px;height:104px;object-fit:cover;border-radius:16px;border:3px solid rgba(255,255,255,.85);transform:scaleX(-1);box-shadow:0 8px 20px rgba(0,0,0,.4);background:#000}
+/* videollamada: todo en columna para que nada se encime en el teléfono */
+#world.call.on{display:flex;flex-direction:column}
+#world.call #wc{display:none}
+#world.call .callbg{inset:0 0 auto 0;height:34vh;background:radial-gradient(circle at 50% 60%,#4a2c5e,#1b1424 75%)}
+#world.call .callbg img{left:50%;top:calc(env(safe-area-inset-top) + 58px);bottom:0;height:auto;max-height:calc(34vh - env(safe-area-inset-top) - 58px);width:auto;aspect-ratio:1;object-fit:contain;border-radius:50%;-webkit-mask-image:none;mask-image:none;box-shadow:0 0 0 4px rgba(255,255,255,.18),0 10px 30px rgba(0,0,0,.45)}
+#world.call .wbub{position:relative;top:auto;bottom:auto;left:auto;right:auto;flex:none;align-self:center;width:calc(100% - 24px);max-width:640px;margin:calc(34vh + 6px) 0 0;max-height:26vh;overflow:auto;padding:12px 16px 8px;border-radius:20px}
+#world.call .wbub p{font-size:clamp(18px,4.8vw,22px);font-weight:700}
+#world.call .wbub .es{font-size:15px;color:#5a4b66}
+#world.call .wbub .acts{margin-top:6px}
+#world.call .wbot{position:relative;flex:1;min-height:0;overflow:auto;padding:8px 12px calc(10px + env(safe-area-inset-bottom));background:none;display:flex;flex-direction:column}
+#world.call .wbot>:first-child{margin-top:auto}
+#world.call .wbot>*{width:100%;max-width:640px;margin-left:auto;margin-right:auto}
+#world.call .wsaid{margin-bottom:6px}
+#world.call .wsaid .me{font-size:14px;padding:6px 12px}
+#world.call .wsaid .fx{font-size:13px;max-width:100%}
+#world.call .wcard{padding:8px 12px 10px;margin-bottom:8px}
+#world.call .wcard .ctx{font-size:18px;margin:2px 0}
+#world.call .wcard .acts{margin-top:4px}
+#world.call .wcard .acts button{min-height:34px;padding:0 10px;font-size:13px}
+#world.call .wcard .alts{margin-top:6px;gap:4px}
+#world.call .wcard .alts button{padding:6px 10px;font-size:14px}
+#world.call .wctl{position:sticky;bottom:calc(-10px - env(safe-area-inset-bottom));padding:8px 0 calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#1a1d3b 35%)}
+#world.call .wctl .mic{width:66px;height:66px}
+#world.call .wctl .ib{width:46px;height:46px}
 #wCam{font-size:18px}
 .gap{width:7.5em;max-width:40%;min-height:34px;margin:0 3px;border-radius:8px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:16px;padding:0 6px;text-align:center}
 .gap.gok,.gok{border-color:#1f9d63;color:#9ff0b9}.gap.gbad,.gbad{border-color:var(--red);color:#ffb3aa}
@@ -789,11 +810,11 @@ function hush() {
  if (curAudio) { const a = curAudio; curAudio = null; a.pause(); a.onended?.(); }
 }
 async function ttsURL(text, k) {
- const key = voiceFor(k) + "|" + levelFor(k) + "|" + text;
+ const key = voiceFor(k) + "|" + text;
  if (ttsCache.has(key)) return ttsCache.get(key);
  const r = await fetch(S.cloudUrl.replace(/\/+$/, "") + "/tts", {
   method: "POST", headers: { "Content-Type": "application/json", "X-App-Code": S.cloudCode || "" },
-  body: JSON.stringify({ text, voice: voiceFor(k), style: STYLE_BY_LEVEL[levelFor(k)] })
+  body: JSON.stringify({ text, voice: voiceFor(k) }) // sin instrucción de estilo: el modelo la leía en voz alta
  });
  if (!r.ok) { if (r.status === 429) ttsOff = Date.now() + 30 * 60000; throw new Error("tts " + r.status); }
  const url = URL.createObjectURL(await r.blob());
@@ -809,6 +830,7 @@ function speak(text, lang = "en", hl = null, k = null) {
    const clean = String(text).replace(/[*_#]/g, "");
    const spans = hl ? (hl.innerHTML = karaokeHTML(clean), [...hl.querySelectorAll(".w")]) : null;
    const a = curAudio = new Audio(url); let done = false;
+   a.playbackRate = { A1: 0.85, A2: 0.92 }[levelFor(k)] || 1; // más despacio en niveles iniciales (sin cambiar el tono)
    const fin = () => { if (done) return; done = true; spans?.forEach((s) => s.classList.remove("on")); talkAnim(false); if (curAudio === a) curAudio = null; res(); };
    a.onplay = () => talkAnim(true);
    a.ontimeupdate = () => { if (!spans || !a.duration) return; const ci = a.currentTime / a.duration * clean.length; let on = null; for (const s of spans) { if (+s.dataset.o <= ci) on = s; else break; } spans.forEach((s) => s.classList.toggle("on", s === on)); };
@@ -2220,7 +2242,8 @@ async function startCam() {
  try {
   camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 640 } }, audio: false });
   if (!$("#world").classList.contains("call")) return endCall();
-  $("#selfie").srcObject = camStream; $("#selfie").hidden = false;
+  const v = $("#selfie"); v.srcObject = camStream; v.hidden = false;
+  try { await v.play(); } catch {}
  } catch { camStream = null; $("#selfie").hidden = true; }
 }
 function stopCam() { camStream?.getTracks().forEach((t) => t.stop()); camStream = null; $("#selfie").hidden = true; $("#selfie").srcObject = null; }

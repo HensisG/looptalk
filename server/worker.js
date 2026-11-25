@@ -107,14 +107,14 @@ async function tts(req, env, cors) {
   const text = String(b.text || "").replace(/[*_#]/g, "").slice(0, 700).trim();
   if (!text) return json({ error: "Falta texto" }, 400, cors);
   const voice = VOICES.has(b.voice) ? b.voice : "Kore";
-  const style = String(b.style || "").replace(/[:\n]/g, " ").slice(0, 120).trim();
   let last = 0;
   for (const model of [env.TTS_MODEL || TTS_MODEL, env.TTS_MODEL_FALLBACK || TTS_FALLBACK]) {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": env.AI_KEY },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: style ? `${style}: ${text}` : text }] }],
+        // Solo el texto: si se agrega una instrucción de estilo, algunos modelos la leen en voz alta.
+        contents: [{ parts: [{ text }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }
       })
     });
