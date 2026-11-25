@@ -262,6 +262,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .relbox small{display:block;color:var(--mute);font-weight:800}
 .relbox .por{width:48px;height:48px}
 .lvup{margin:8px 0 0;font-weight:800;color:var(--red)}
+.guide{display:flex;gap:12px;align-items:flex-start;margin:14px 0 4px;padding:14px;border-radius:24px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.guide .por.big{width:78px;height:78px;border-color:#5ff5e6}
+.gsay{margin:0 0 10px;font-size:16px;line-height:1.4}
+.gacts{display:flex;gap:8px;flex-wrap:wrap}.gacts .btn{min-height:40px;padding:0 14px;font-size:14px}.gacts .btn.ghost{color:#fff;border-color:rgba(255,255,255,.35)}
 .wcard .alts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .wcard .alts button{text-align:left;padding:8px 12px;border-radius:14px;background:#f3edf6;color:#3b1f4a;font-weight:700;font-size:15px}
 .wcard .alts button::before{content:"💬 ";}
@@ -332,7 +336,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="grid" id="places"></div>
   <div class="sec"><h2>Más práctica</h2></div>
   <button class="wide" id="pathBtn"><span class="ico" style="background:var(--plum)">🗺️</span><span><b>Volver a mi camino</b><span>Misiones, amistades y niveles</span></span></button>
-  <button class="wide" id="worldBtn"><span class="ico" style="background:var(--red)" id="icoWorld"></span><span><b>Entrar al mundo 3D</b><span>Camina con Ollie, el búho profesor, y conversa cara a cara con los personajes.</span></span></button>
+  <button class="wide" id="worldBtn"><span class="ico" style="background:var(--red)" id="icoWorld"></span><span><b>Entrar al mundo 3D</b><span>Camina con Nova, tu robot guía, y conversa cara a cara con los personajes.</span></span></button>
   <button class="wide" id="storyBtn"><span class="ico" id="icoBook"></span><span><b>Historias por capítulos</b><span>Lee y escucha un cuento a tu nivel, sobre tu tema, con las mismas palabras que vuelven.</span></span></button>
   <button class="wide" id="freeBtn"><span class="ico" id="icoChat"></span><span><b>Charla libre con Sam</b><span>Habla de lo que quieras: tu día, tu trabajo, tus planes.</span></span></button>
   <button class="wide" id="vocBtn"><span class="ico" id="icoStar"></span><span><b>Mis palabras y correcciones</b><span id="vocCount">Toca cualquier palabra en un mensaje para guardarla.</span></span></button>
@@ -506,7 +510,7 @@ const PACKS = [
  ]}
 ];
 const SPECIAL = {
- owl: { k: "owl", t: "Owl tutor", n: "Ollie", r: "wise, warm owl professor who is the learner's personal English tutor; chat about anything and now and then teach one useful phrase", av: ["#8b5a2b", "#6e4420", "#8b5a2b", 2], o: "Hello! I'm Ollie, your English teacher. How are you feeling today?" },
+ owl: { k: "owl", t: "Robot guide", n: "Nova", r: "friendly humanoid robot guide who is the learner's personal English coach; curious about humans, a little funny, chat about anything and now and then teach one useful phrase", av: ["#eef1f6", "#9aa3b5", "#5ff5e6", 0], o: "Hi! I'm Nova, your English guide. How are you feeling today?" },
  free: { k: "free", t: "Free talk", n: "Sam", r: "an easygoing American friend who is curious about the learner's life", av: ["#e9b995", "#4a2c1a", "#3b1f4a", 2], o: "Hey! Good to see you. So, how was your day?" },
  story: { k: "story", t: "Stories", n: "Storyteller", r: "storyteller", av: ["#f1c6a1", "#9ca3af", "#7c3aed", 2] }
 };
@@ -685,7 +689,7 @@ function loadVoices() { const all = window.speechSynthesis?.getVoices() || []; v
 if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 function pickVoice() { return voices.find((v) => v.name === S.voice) || voices.find((v) => /en[-_]US/i.test(v.lang) && v.localService) || voices.find((v) => v.localService) || voices[0]; }
 // Voz natural de cada personaje (Gemini, por tu servidor). Si falla, se usa la voz del teléfono.
-const CHAR_VOICE = { cafe: "Leda", airport: "Puck", grocery: "Kore", pharmacy: "Aoede", landlord: "Sulafat", neighbor: "Fenrir", bank: "Orus", restaurant: "Achird", interview: "Despina", church: "Vindemiatrix", dmv: "Schedar", mechanic: "Algenib", free: "Umbriel", owl: "Charon", guide: "Zephyr", clinic: "Callirrhoe", rounds: "Iapetus", results: "Rasalgethi", occ: "Enceladus", weigh: "Alnilam", dispatch: "Autonoe", breakdown: "Sadaltager", truckstop: "Erinome", client: "Algieba", irs: "Laomedeia", close: "Zubenelgenubi", firstday: "Achernar", teacher: "Sadachbia", parents: "Pulcherrima", story: "Gacrux" };
+const CHAR_VOICE = { cafe: "Leda", airport: "Puck", grocery: "Kore", pharmacy: "Aoede", landlord: "Sulafat", neighbor: "Fenrir", bank: "Orus", restaurant: "Achird", interview: "Despina", church: "Vindemiatrix", dmv: "Schedar", mechanic: "Algenib", free: "Umbriel", owl: "Puck", guide: "Zephyr", clinic: "Callirrhoe", rounds: "Iapetus", results: "Rasalgethi", occ: "Enceladus", weigh: "Alnilam", dispatch: "Autonoe", breakdown: "Sadaltager", truckstop: "Erinome", client: "Algieba", irs: "Laomedeia", close: "Zubenelgenubi", firstday: "Achernar", teacher: "Sadachbia", parents: "Pulcherrima", story: "Gacrux" };
 const VOICE_POOL = ["Kore", "Puck", "Leda", "Orus", "Aoede", "Fenrir", "Despina", "Iapetus", "Autonoe", "Algenib"];
 const voiceFor = (k) => CHAR_VOICE[k] || VOICE_POOL[[...String(k)].reduce((a, c) => a + c.charCodeAt(0), 0) % VOICE_POOL.length];
 const STYLE_BY_LEVEL = { A1: "Say slowly and very clearly, in a warm friendly voice", A2: "Say slowly and clearly, in a friendly voice", B1: "Say clearly, in a friendly natural voice", B2: "Say naturally", C1: "Say naturally and expressively" };
@@ -1357,7 +1361,7 @@ function hubChips() {
  $("#wPacks").innerHTML = PACKS.map((p) => `<button class="pk ${p.k === wPack ? "sel" : ""}" data-pk="${p.k}">${esc(p.name)}</button>`).join("");
  $("#wPacks").hidden = false;
  const scenes = PACKS.find((p) => p.k === wPack).scenes;
- $("#wSugs").innerHTML = `<button data-go="owl">Hablar con Ollie</button>` + scenes.map((x) => `<button data-go="${esc(x.k)}">${esc(x.t)}</button>`).join("") + `<button data-go="free">Charla libre</button>`;
+ $("#wSugs").innerHTML = `<button data-go="owl">Hablar con Nova</button>` + scenes.map((x) => `<button data-go="${esc(x.k)}">${esc(x.t)}</button>`).join("") + `<button data-go="free">Charla libre</button>`;
 }
 $("#wPacks").onclick = (e) => { const b = e.target.closest("[data-pk]"); if (b) { wPack = b.dataset.pk; hubChips(); } };
 function goHub(greet = true) {
@@ -1366,10 +1370,10 @@ function goHub(greet = true) {
  hubMode = true; cur = null; viewMode = "world";
  hush(); hideCard();
  show("world"); $("#wForm").hidden = true; $("#wCtl").hidden = true; $("#wLog").hidden = true; $("#wHf").hidden = true; $("#wBack").hidden = true; $("#wMenu").hidden = false;
- $("#wName").textContent = "Ollie"; $("#wRole").textContent = "Tu profesor de inglés"; $("#wActs").innerHTML = ""; showSaid(null);
+ $("#wName").textContent = "Nova"; $("#wRole").textContent = "Tu robot guía"; $("#wActs").innerHTML = ""; showSaid(null);
  hubChips();
  const hi = S.name ? `¡Hola ${S.name}! ` : "¡Hola! ";
- const es = greet ? `${hi}Bienvenido. Soy Ollie, tu profesor. Elige un lugar para practicar.` : "¡Buen trabajo! Elige otro lugar para practicar.";
+ const es = greet ? `${hi}Soy Nova, tu robot guía. Elige un lugar para practicar.` : "¡Buen trabajo! Elige otro lugar para practicar.";
  setBubble("Where do you want to practice today?", es);
  fadeTo(() => w.setScene("street", { owl: true }));
  if (greet) setTimeout(async () => { if (!hubMode) return; await speak(es, "es"); if (hubMode) speak("Where do you want to practice today?"); }, 700);
@@ -1535,7 +1539,7 @@ const FLV = [
  { n: "Mejor amigo", es: "Conversación real" }
 ];
 const XP_AT = [0, 3, 8, 14, 21]; // puntos de amistad para llegar a cada nivel
-const PORTRAITS = new Set(["cafe"]);
+const PORTRAITS = new Set(["airport", "bank", "cafe", "church", "clinic", "dmv", "free", "grocery", "interview", "landlord", "mechanic", "neighbor", "occ", "owl", "pharmacy", "restaurant", "results", "rounds"]);
 const PROF_PACKS = { med: "Medicina", truck: "Camiones", acct: "Contabilidad", school: "Escuela" };
 const profPack = () => (PROF_PACKS[S.prof] ? S.prof : "med");
 function ROUTE() {
@@ -1610,7 +1614,11 @@ function goPath(tab = pathTab) {
  $("#pStats").innerHTML = `<span>🔥 ${streakDays()} días</span><span>⭐ ${done}/${total} paradas</span><span>🗣 ${Math.round(t / 130)} min hoy</span>`;
  if (tab === "people") return renderPeople(route), show("path");
  let idx = 0;
- $("#pMain").innerHTML = route.map((d) => {
+ const nextK = Object.keys(st).find((x) => st[x] === "open"), nc = nextK && charOf(nextK);
+ const hi = S.name ? `¡Hola, ${esc(S.name)}!` : "¡Hola!";
+ const guide = `<div class="guide">${PORTRAITS.has("owl") ? `<img class="por big" src="img/p/owl.webp" alt="Nova">` : portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>${hi}</b> Soy Nova, tu guía. ${nc ? `¿Seguimos? Tu próxima misión es con <b>${esc(nc.n)}</b>: ${esc(nc.es || nc.t)}.` : "¡Completaste el camino! Sigue charlando con tus amigos para subir de nivel."}</p>
+  <div class="gacts">${nc ? `<button class="btn" data-gk="${esc(nextK)}">▶ Continuar</button>` : ""}<button class="btn ghost" data-gtalk="1">Charlar con Nova</button><button class="btn ghost" data-gfree="1">Práctica libre</button></div></div></div>`;
+ $("#pMain").innerHTML = guide + route.map((d) => {
   const dDone = d.stops.filter((k) => st[k] === "done").length, locked = st[d.stops[0]] === "locked";
   return `<section class="dist ${locked ? "locked" : ""}"><div class="dban" style="background-image:url('${d.img}')"><div><b>${esc(d.name)}</b><span>${esc(d.es)}</span></div><em>${dDone}/${d.stops.length}</em></div>
   <div class="trail">${d.stops.map((k) => {
@@ -1629,7 +1637,10 @@ function renderPeople(route) {
   return `<button class="person" data-k="${esc(k)}">${portraitHTML(k)}<span class="sp"><b>${esc(c.n)}</b><small>${FLV[lvlOf(k)].n} · nivel ${levelFor(k)}</small><small>${r.found.length} dato${r.found.length === 1 ? "" : "s"} descubierto${r.found.length === 1 ? "" : "s"}</small></span>${heartsHTML(k)}</button>`;
  }).join("")}</div>` : `<p class="empty">Aún no conoces a nadie. Empieza tu camino en «Llegada».</p>`}</div>`;
 }
-$("#pMain").onclick = (e) => { const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast("Primero conoce a la persona anterior del camino"); stopSheet(b.dataset.k); };
+$("#pMain").onclick = (e) => {
+ const g = e.target.closest("[data-gk],[data-gtalk],[data-gfree]");
+ if (g) { if (g.dataset.gk) return stopSheet(g.dataset.gk); if (g.dataset.gfree) return goHome(); if (!hasAI()) return goSetup(); return openChat("owl", null, S.gfx === "off" ? "chat" : "world"); }
+ const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast("Primero conoce a la persona anterior del camino"); stopSheet(b.dataset.k); };
 $("#pTabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (!b) return; if (b.dataset.tab === "more") { goHome(); return; } goPath(b.dataset.tab); };
 $("#pSet").onclick = settingsSheet;
 function stopSheet(k) {

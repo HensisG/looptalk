@@ -17,49 +17,37 @@ const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 const cyl = (rt, rb, h, s = 8) => new THREE.CylinderGeometry(rt, rb, h, s);
 const rnd = (a, b) => a + Math.random() * (b - a);
 
-/* ---------- búho profesor ---------- */
+/* ---------- Nova, el robot guía (reemplaza al búho) ----------
+   Diseño propio: robot humanoide blanco y plateado, visor oscuro con ojos turquesa,
+   discos amarillos a los lados de la cabeza y una antena con bolita roja. */
 function makeOwl() {
   const g = new THREE.Group();
-  const brown = M("#8b5a2b"), dark = M("#6e4420"), cream = M("#f3e3c3"), ink = M("#1d1626"), orange = M("#f29e38"), white = M("#ffffff"), red = M("#d63a2f"), sun = M("#ffc83d");
-  const body = mesh(ico(1, 1), brown, 0, 1.05, 0); body.scale.set(1, 1.12, 0.95); g.add(body);
-  const belly = mesh(ico(0.78, 1), cream, 0, 0.95, 0.42); belly.scale.set(1, 1.1, 0.55); g.add(belly);
-  for (const s of [-1, 1]) { const f = mesh(new THREE.ConeGeometry(0.16, 0.3, 4), orange, s * 0.38, 0.08, 0.55); f.rotation.x = Math.PI / 2; g.add(f); }
-  // pajarita y libro
-  for (const s of [-1, 1]) { const t = mesh(new THREE.ConeGeometry(0.16, 0.3, 4), red, s * 0.15, 1.95, 0.78); t.rotation.z = s * Math.PI / 2; g.add(t); }
-  const book = mesh(box(0.55, 0.7, 0.18), M("#3b82c4"), 0.85, 0.9, 0.45); book.rotation.z = -0.25; g.add(book);
-  // alas (pivote en el hombro)
-  const wings = [];
+  const W = M("#eef1f6"), G = M("#9aa3b5"), D = M("#1d1626"), T = M("#5ff5e6"), Y = M("#ffc83d"), R = M("#e8483b");
+  for (const s of [-1, 1]) { g.add(mesh(new THREE.CapsuleGeometry(0.2, 0.62, 3, 6), G, s * 0.28, 0.45, 0)); g.add(mesh(box(0.34, 0.14, 0.5), D, s * 0.28, 0.06, 0.08)); }
+  const body = mesh(new THREE.CapsuleGeometry(0.62, 0.7, 4, 8), W, 0, 1.05, 0); body.scale.z = 0.75; g.add(body);
+  body.add(mesh(box(0.5, 0.32, 0.08), D, 0, 0.12, 0.47, false));
+  body.add(mesh(ico(0.09, 1), T, 0, 0.12, 0.52, false));
+  body.add(mesh(cyl(0.12, 0.12, 0.04, 10), Y, 0.3, -0.3, 0.42, false));
+  g.add(mesh(cyl(0.14, 0.18, 0.28, 8), G, 0, 1.92, 0));
+  const arms = [];
   for (const s of [-1, 1]) {
-    const p = new THREE.Group(); p.position.set(s * 0.92, 1.6, 0); g.add(p);
-    const w = mesh(ico(0.42, 1), dark, 0, -0.55, 0); w.scale.set(0.55, 1.4, 1); p.add(w);
-    p.rotation.z = s * 0.18; wings.push(p);
+    const p = new THREE.Group(); p.position.set(s * 0.82, 1.55, 0); g.add(p);
+    p.add(mesh(ico(0.2, 1), W, 0, 0, 0)); p.add(mesh(new THREE.CapsuleGeometry(0.14, 0.6, 3, 6), G, 0, -0.5, 0)); p.add(mesh(ico(0.17, 1), W, 0, -0.98, 0));
+    p.rotation.z = s * 0.15; arms.push(p);
   }
-  // cabeza
   const head = new THREE.Group(); head.position.set(0, 2.45, 0); g.add(head);
-  const skull = mesh(ico(0.88, 1), brown); skull.scale.set(1.1, 0.95, 1); head.add(skull);
-  const face = mesh(ico(0.62, 1), cream, 0, -0.05, 0.5); face.scale.set(1.3, 0.92, 0.5); head.add(face);
-  const lids = [];
+  const skull = mesh(ico(0.62, 1), W); skull.scale.set(1.15, 1, 1); head.add(skull);
+  head.add(mesh(box(1.05, 0.44, 0.25), D, 0, 0.02, 0.5));
+  const eyes = [];
   for (const s of [-1, 1]) {
-    head.add(mesh(ico(0.27, 2), white, s * 0.31, 0.06, 0.78, false));
-    head.add(mesh(ico(0.13, 1), ink, s * 0.31, 0.06, 1.0, false));
-    head.add(mesh(ico(0.045, 0), white, s * 0.27, 0.11, 1.1, false));
-    const gl = mesh(new THREE.TorusGeometry(0.31, 0.04, 6, 16), ink, s * 0.31, 0.06, 0.98, false); head.add(gl);
-    const lid = mesh(ico(0.285, 2), brown, s * 0.31, 0.06, 0.8, false); lid.visible = false; head.add(lid); lids.push(lid);
-    const tuft = mesh(new THREE.ConeGeometry(0.2, 0.5, 4), dark, s * 0.62, 0.72, 0); tuft.rotation.z = -s * 0.5; head.add(tuft);
+    const e = mesh(ico(0.09, 1), T, s * 0.23, 0.06, 0.64, false); head.add(e); eyes.push(e);
+    const ear = mesh(cyl(0.2, 0.2, 0.12, 10), Y, s * 0.72, 0, 0); ear.rotation.z = Math.PI / 2; head.add(ear);
   }
-  head.add(mesh(box(0.18, 0.04, 0.04), ink, 0, 0.1, 1.03, false));
-  const beakTop = mesh(new THREE.ConeGeometry(0.13, 0.28, 4), orange, 0, -0.2, 0.98); beakTop.rotation.x = Math.PI; head.add(beakTop);
-  const jaw = new THREE.Group(); jaw.position.set(0, -0.3, 0.95); head.add(jaw);
-  const beakLow = mesh(new THREE.ConeGeometry(0.09, 0.14, 4), M("#d9832a"), 0, -0.05, 0); beakLow.rotation.x = Math.PI; jaw.add(beakLow);
-  // birrete
-  const cap = new THREE.Group(); cap.position.set(0, 0.78, 0); cap.rotation.z = 0.12; head.add(cap);
-  cap.add(mesh(cyl(0.5, 0.55, 0.3, 8), ink, 0, 0, 0));
-  const board = mesh(box(1.35, 0.07, 1.35), ink, 0, 0.18, 0); board.rotation.y = Math.PI / 4; cap.add(board);
-  cap.add(mesh(ico(0.07, 0), sun, 0, 0.24, 0));
-  const tassel = new THREE.Group(); tassel.position.set(0, 0.22, 0); cap.add(tassel);
-  const cord = mesh(cyl(0.025, 0.025, 0.7, 4), sun, 0.62, -0.2, 0); tassel.add(cord);
-  tassel.add(mesh(cyl(0.02, 0.09, 0.25, 6), sun, 0.62, -0.62, 0));
-  g.userData = { kind: "owl", head, jaw, lids, armL: wings[1], armR: wings[0], body, tassel, base: { armL: wings[1].rotation.z, armR: wings[0].rotation.z } };
+  const mouth = mesh(box(0.3, 0.04, 0.03), T, 0, -0.12, 0.64, false); head.add(mouth);
+  const antenna = new THREE.Group(); antenna.position.set(0, 0.6, 0); head.add(antenna);
+  antenna.add(mesh(cyl(0.025, 0.025, 0.34, 5), G, 0, 0.17, 0)); antenna.add(mesh(ico(0.09, 1), R, 0, 0.38, 0));
+  // kind "owl" para reutilizar la animación del guía (rebote, antena que se mueve, saludo)
+  g.userData = { kind: "owl", head, mouth, eyes, armL: arms[1], armR: arms[0], body, tassel: antenna, base: { armL: arms[1].rotation.z, armR: arms[0].rotation.z } };
   return g;
 }
 
