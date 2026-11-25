@@ -216,6 +216,55 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .sc{display:grid;grid-template-columns:7.5em 1fr 2.6em;align-items:center;gap:8px;font-weight:700;font-size:14px}
 .sc .tr{height:12px;border-radius:999px;background:var(--bg2);overflow:hidden}.sc .tr i{display:block;height:100%;background:var(--red);border-radius:999px}
 .sc b{text-align:right}
+#path{background:linear-gradient(180deg,#2a1636 0%,#3b1f4a 40%,#1b1424 100%);color:#fff;min-height:100%}
+.ptop{position:sticky;top:0;z-index:3;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(27,20,36,.85);backdrop-filter:blur(8px)}
+.ptop .brand{font-family:Fredoka,sans-serif;font-size:21px;font-weight:600}
+.pstats{display:flex;gap:12px;font-size:13px;font-weight:800;color:#ffd978;margin-top:2px;flex-wrap:wrap}
+.ptop .ib{background:rgba(255,255,255,.12);color:#fff}
+.pmain{max-width:560px;margin:0 auto;padding:6px 16px 0}
+.dist{margin:18px 0 8px}
+.dist.locked .dban{filter:grayscale(.85) brightness(.6)}
+.dban{position:relative;height:132px;border-radius:24px;background-size:cover;background-position:center;display:flex;align-items:flex-end;justify-content:space-between;padding:12px 14px;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.dban::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(20,10,30,.85))}
+.dban>*{position:relative}
+.dban b{display:block;font-family:Fredoka,sans-serif;font-size:24px;font-weight:600;line-height:1.1}
+.dban span{font-size:13px;font-weight:700;opacity:.9}
+.dban em{font-style:normal;font-weight:800;background:var(--sun);color:#2a1630;border-radius:999px;padding:3px 10px;font-size:13px}
+.trail{position:relative;display:flex;flex-direction:column;gap:14px;padding:18px 0 6px}
+.trail::before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:4px dotted rgba(255,255,255,.25);transform:translateX(-50%)}
+.stop{position:relative;display:flex;align-items:center;gap:10px;width:min(300px,86%);padding:8px 14px 8px 8px;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;text-align:left;border:2px solid rgba(255,255,255,.14)}
+.stop.l{align-self:flex-start}.stop.c{align-self:center}.stop.r{align-self:flex-end}
+.stop.done{background:rgba(255,200,61,.16);border-color:rgba(255,200,61,.55)}
+.stop.open{background:var(--red);border-color:#fff;box-shadow:0 0 0 6px rgba(232,72,59,.3);animation:bob 2.2s ease-in-out infinite}
+.stop.locked{opacity:.5}
+.stop .sl{display:flex;flex-direction:column;min-width:0;flex:1}
+.stop .sl b{font-size:16px}.stop .sl small{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stop .go{font-weight:800;font-size:13px;background:#fff;color:var(--red);border-radius:999px;padding:5px 10px}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.por{width:54px;height:54px;border-radius:50%;flex:none;object-fit:cover;display:inline-grid;place-items:center;overflow:hidden;border:3px solid rgba(255,255,255,.85);background:#3b1f4a}
+.por svg{width:100%;height:100%}
+.por.big{width:92px;height:92px}
+.hearts{display:inline-flex;gap:2px;font-size:13px;line-height:1}.hearts i{font-style:normal;color:rgba(255,255,255,.3)}.hearts i.on{color:#ff6b81}
+.sheet .hearts i{color:#d9d0de}.sheet .hearts i.on{color:#e8485f}
+.ptabs{position:fixed;left:0;right:0;bottom:0;z-index:4;display:grid;grid-template-columns:repeat(3,1fr);background:rgba(27,20,36,.95);backdrop-filter:blur(8px);padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);border-top:1px solid rgba(255,255,255,.1)}
+.ptabs button{display:flex;flex-direction:column;align-items:center;gap:2px;color:#cbb9d6;font-size:20px;padding:6px 0;border-radius:14px}
+.ptabs button span{font-size:12px;font-weight:800}
+.ptabs button.sel{color:#fff;background:rgba(255,255,255,.1)}
+.people{display:flex;flex-direction:column;gap:10px;margin:10px 0 100px}
+.person{display:flex;gap:12px;align-items:center;padding:10px 14px;border-radius:20px;background:rgba(255,255,255,.08);color:#fff;text-align:left}
+.person .sp{display:flex;flex-direction:column}.person small{opacity:.8;font-size:13px}
+.ssh{display:flex;gap:14px;align-items:center}
+.ssh h3{margin:0}
+.mis{margin:14px 0;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--red) 10%,transparent);border-left:4px solid var(--red)}
+.mis p{margin:4px 0 0}
+.facts{margin:6px 0 0;padding-left:20px}.facts li{margin:3px 0}
+.relbox{padding:12px 14px;border-radius:16px;background:var(--bg2);margin:10px 0}
+.relbox small{display:block;color:var(--mute);font-weight:800}
+.relbox .por{width:48px;height:48px}
+.lvup{margin:8px 0 0;font-weight:800;color:var(--red)}
+.wcard .alts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.wcard .alts button{text-align:left;padding:8px 12px;border-radius:14px;background:#f3edf6;color:#3b1f4a;font-weight:700;font-size:15px}
+.wcard .alts button::before{content:"💬 ";}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -257,6 +306,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </section>
 
 <!-- INICIO -->
+<section class="screen" id="path">
+ <div class="ptop"><div class="row"><div class="sp"><b class="brand">Try Your New Language</b><div class="pstats" id="pStats"></div></div>
+  <button class="ib" id="pSet" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button></div></div>
+ <div class="pmain" id="pMain"></div>
+ <nav class="ptabs" id="pTabs"><button data-tab="path" class="sel">🗺️<span>Camino</span></button><button data-tab="people">👥<span>Personas</span></button><button data-tab="more">💬<span>Práctica libre</span></button></nav>
+</section>
+
 <section class="screen" id="home">
  <div class="top"><div class="wrap">
   <div class="row"><span class="pill"><i class="dot" id="engDot"></i><span id="engTxt">Tutor apagado</span></span><span class="sp"></span>
@@ -275,6 +331,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="packs" id="packs"></div>
   <div class="grid" id="places"></div>
   <div class="sec"><h2>Más práctica</h2></div>
+  <button class="wide" id="pathBtn"><span class="ico" style="background:var(--plum)">🗺️</span><span><b>Volver a mi camino</b><span>Misiones, amistades y niveles</span></span></button>
   <button class="wide" id="worldBtn"><span class="ico" style="background:var(--red)" id="icoWorld"></span><span><b>Entrar al mundo 3D</b><span>Camina con Ollie, el búho profesor, y conversa cara a cara con los personajes.</span></span></button>
   <button class="wide" id="storyBtn"><span class="ico" id="icoBook"></span><span><b>Historias por capítulos</b><span>Lee y escucha un cuento a tu nivel, sobre tu tema, con las mismas palabras que vuelven.</span></span></button>
   <button class="wide" id="freeBtn"><span class="ico" id="icoChat"></span><span><b>Charla libre con Sam</b><span>Habla de lo que quieras: tu día, tu trabajo, tus planes.</span></span></button>
@@ -322,6 +379,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
    <div class="es" id="wCardEs" hidden></div>
    <div class="score" id="wCardScore" hidden></div>
    <div class="acts" id="wCardActs"></div>
+   <div class="alts" id="wCardAlts"></div>
   </div>
   <form class="wform" id="wForm" hidden><input id="wInp" placeholder="Write in English…" enterkeyhint="send" autocomplete="off"><button aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2-7z"/></svg></button></form>
   <div class="wctl" id="wCtl">
@@ -462,10 +520,13 @@ const MODELS = [
  { id: "Llama-3.2-3B-Instruct", name: "Más natural", size: "≈ 2.3 GB", bind: 197001216, note: "El inglés más fluido y las mejores correcciones. Solo teléfonos potentes (8–12 GB de RAM)." }
 ];
 const LEVELS = {
+ A1: "Use only very basic, high-frequency words and very short sentences (3 to 7 words). Present tense only. Ask very simple questions, often yes/no or with two options (for example: Coffee or tea?).",
  A2: "Use very simple, common words and short sentences (under 10 words). Mostly present and past tense.",
  B1: "Use everyday words and clear sentences (under 15 words). Avoid rare idioms.",
- B2: "Use natural everyday American English. You may use common idioms and phrasal verbs."
+ B2: "Use natural everyday American English. You may use common idioms and phrasal verbs.",
+ C1: "Speak like a native speaker with a friend: natural rhythm, idioms, phrasal verbs, light humor, longer turns and open questions."
 };
+const LV = Object.keys(LEVELS);
 const TRAITS = ["cheerful and talkative", "a bit shy but very kind", "funny and loves small jokes", "calm and patient", "busy and in a hurry, but polite", "curious and asks lots of questions", "enthusiastic and very positive"];
 const INTERESTS = ["baseball", "cooking", "hiking", "music", "movies", "travel", "basketball", "gardening", "video games", "photography", "dogs", "coffee", "the Chicago Bears", "running"];
 const MOODS = ["having a great day", "a little tired today", "excited about the weekend", "celebrating a birthday this week", "planning a vacation", "just back from a trip"];
@@ -623,11 +684,47 @@ let voices = [], esVoices = [];
 function loadVoices() { const all = window.speechSynthesis?.getVoices() || []; voices = all.filter((v) => /^en[-_]/i.test(v.lang)); esVoices = all.filter((v) => /^es[-_]/i.test(v.lang)); }
 if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 function pickVoice() { return voices.find((v) => v.name === S.voice) || voices.find((v) => /en[-_]US/i.test(v.lang) && v.localService) || voices.find((v) => v.localService) || voices[0]; }
-// hl: elemento donde se resalta cada palabra mientras se pronuncia (como karaoke).
-function speak(text, lang = "en", hl = null) {
+// Voz natural de cada personaje (Gemini, por tu servidor). Si falla, se usa la voz del teléfono.
+const CHAR_VOICE = { cafe: "Leda", airport: "Puck", grocery: "Kore", pharmacy: "Aoede", landlord: "Sulafat", neighbor: "Fenrir", bank: "Orus", restaurant: "Achird", interview: "Despina", church: "Vindemiatrix", dmv: "Schedar", mechanic: "Algenib", free: "Umbriel", owl: "Charon", guide: "Zephyr", clinic: "Callirrhoe", rounds: "Iapetus", results: "Rasalgethi", occ: "Enceladus", weigh: "Alnilam", dispatch: "Autonoe", breakdown: "Sadaltager", truckstop: "Erinome", client: "Algieba", irs: "Laomedeia", close: "Zubenelgenubi", firstday: "Achernar", teacher: "Sadachbia", parents: "Pulcherrima", story: "Gacrux" };
+const VOICE_POOL = ["Kore", "Puck", "Leda", "Orus", "Aoede", "Fenrir", "Despina", "Iapetus", "Autonoe", "Algenib"];
+const voiceFor = (k) => CHAR_VOICE[k] || VOICE_POOL[[...String(k)].reduce((a, c) => a + c.charCodeAt(0), 0) % VOICE_POOL.length];
+const STYLE_BY_LEVEL = { A1: "Say slowly and very clearly, in a warm friendly voice", A2: "Say slowly and clearly, in a friendly voice", B1: "Say clearly, in a friendly natural voice", B2: "Say naturally", C1: "Say naturally and expressively" };
+let curAudio = null, ttsOff = 0; const ttsCache = new Map();
+function hush() {
+ try { speechSynthesis?.cancel(); } catch {}
+ if (curAudio) { const a = curAudio; curAudio = null; a.pause(); a.onended?.(); }
+}
+async function ttsURL(text, k) {
+ const key = voiceFor(k) + "|" + levelFor(k) + "|" + text;
+ if (ttsCache.has(key)) return ttsCache.get(key);
+ const r = await fetch(S.cloudUrl.replace(/\/+$/, "") + "/tts", {
+  method: "POST", headers: { "Content-Type": "application/json", "X-App-Code": S.cloudCode || "" },
+  body: JSON.stringify({ text, voice: voiceFor(k), style: STYLE_BY_LEVEL[levelFor(k)] })
+ });
+ if (!r.ok) { if (r.status === 429) ttsOff = Date.now() + 30 * 60000; throw new Error("tts " + r.status); }
+ const url = URL.createObjectURL(await r.blob());
+ ttsCache.set(key, url); if (ttsCache.size > 40) { const [k0, u0] = ttsCache.entries().next().value; URL.revokeObjectURL(u0); ttsCache.delete(k0); }
+ return url;
+}
+// hl: elemento donde se resalta cada palabra mientras se pronuncia (como karaoke). k: personaje que habla.
+function speak(text, lang = "en", hl = null, k = null) {
+ if (k && lang === "en" && cloudOn() && S.cvoice !== false && Date.now() > ttsOff) {
+  hush(); const myTurn = (speakTurn = (speakTurn || 0) + 1);
+  return ttsURL(String(text).replace(/[*_#]/g, ""), k).then((url) => new Promise((res) => {
+   if (myTurn !== speakTurn) return res();
+   const clean = String(text).replace(/[*_#]/g, "");
+   const spans = hl ? (hl.innerHTML = karaokeHTML(clean), [...hl.querySelectorAll(".w")]) : null;
+   const a = curAudio = new Audio(url); let done = false;
+   const fin = () => { if (done) return; done = true; spans?.forEach((s) => s.classList.remove("on")); world?.setSpeaking(false); if (curAudio === a) curAudio = null; res(); };
+   a.onplay = () => world?.setSpeaking(true);
+   a.ontimeupdate = () => { if (!spans || !a.duration) return; const ci = a.currentTime / a.duration * clean.length; let on = null; for (const s of spans) { if (+s.dataset.o <= ci) on = s; else break; } spans.forEach((s) => s.classList.toggle("on", s === on)); };
+   a.onended = fin; a.onerror = fin;
+   a.play().catch(fin);
+  })).catch(() => speak(text, lang, hl, null));
+ }
  return new Promise((res) => {
   if (!window.speechSynthesis) { toast("Tu navegador no puede leer en voz alta"); return res(); }
-  speechSynthesis.cancel();
+  hush();
   const clean = String(text).replace(/[*_#]/g, "");
   const u = new SpeechSynthesisUtterance(clean);
   const v = lang === "es" ? (esVoices.find((x) => x.localService) || esVoices[0]) : pickVoice();
@@ -662,7 +759,7 @@ function toggleMic() {
  rec.onresult = (ev) => { let t = ""; for (const r of ev.results) t += r[0].transcript; $("#inp").value = base + t; grow(); };
  rec.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
  rec.onend = () => { $("#micBtn").classList.remove("rec"); rec = null; };
- $("#micBtn").classList.add("rec"); speechSynthesis?.cancel();
+ $("#micBtn").classList.add("rec"); hush();
  try { rec.start(); } catch { rec = null; $("#micBtn").classList.remove("rec"); }
 }
 
@@ -695,7 +792,7 @@ async function connectCloud() {
  try {
   const out = await cloudAsk([{ role: "user", content: "Reply with only the word: ready" }], { max: 10, temp: 0 });
   if (!out) throw new Error("El servidor no devolvió respuesta");
-  saveS(); resetEngine(); setEng("ok", "IA en la nube"); $("#cMsg").textContent = "¡Conectado!"; goHub();
+  saveS(); resetEngine(); setEng("ok", "IA en la nube"); $("#cMsg").textContent = "¡Conectado!"; goPath("path");
  } catch (e) { [S.ai, S.cloudUrl, S.cloudCode] = prev; $("#cMsg").textContent = "No se pudo conectar: " + e.message; }
 }
 $("#dlBtn").onclick = async () => {
@@ -708,11 +805,11 @@ $("#dlBtn").onclick = async () => {
   $("#dl").hidden = false;
   try {
    await loadEngine((r) => { $("#dlBar").style.width = Math.round(r.progress * 100) + "%"; $("#dlTxt").textContent = r.progress < 1 ? `Descargando ${Math.round(r.progress * 100)}% · no cierres la app` : "¡Listo! Ya funciona sin internet."; });
-   goHub();
+   goPath("path");
   } catch (e) { $("#dlTxt").textContent = "No se pudo cargar: " + e.message; S.model = prevModel; S.ai = prevAI; saveS(); }
  } finally { $("#dlBtn").disabled = false; }
 };
-$("#skipBtn").onclick = () => goHub();
+$("#skipBtn").onclick = () => goPath("path");
 async function goSetup() {
  setupAI = S.ai; $("#pfName").value = S.name; $("#pfJob").value = S.job; $("#pfLike").value = S.likes;
  $("#cUrl").value = S.cloudUrl; $("#cCode").value = S.cloudCode; $("#cMsg").textContent = "";
@@ -755,18 +852,18 @@ function learnerLine() {
  return bits.length ? `\nAbout the learner (${bits.join("; ")}). Bring this up naturally only when it fits the conversation.` : "";
 }
 function sysPrompt(k) {
- const c = charOf(k), lv = LEVELS[S.level];
- if (k === "story") return `You are a warm storyteller for an English learner whose native language is Spanish (level ${S.level}). ${lv}
+ const c = charOf(k), L = levelFor(k), lv = LEVELS[L];
+ if (k === "story") return `You are a warm storyteller for an English learner whose native language is Spanish (level ${L}). ${lv}
 Tell stories in short parts of 100-160 words. Keep the same characters and repeat key words often so the learner can pick them up from context. Make the story interesting and easy to follow. When the learner answers or comments, reply kindly in 1-3 sentences, using the correct form of anything they got wrong. No lists, no emojis, no markdown.${learnerLine()}`;
  const role = c.custom ? `the other person in this scene, which the learner described (maybe in Spanish): "${c.r}". Your name is ${c.n}` : `${c.n}, a ${c.r}`;
- return `You are ${role}. You are having a spoken conversation with an English learner whose native language is Spanish (level ${S.level}).
+ return `You are ${role}. You are having a spoken conversation with an English learner whose native language is Spanish (level ${L}).
 Rules:
 - Stay in character and keep the scene realistic. Always speak English.
 - Reply in 1 to 3 short sentences, then ask one easy question to keep talking.
 - ${lv}
 - Do not stop the conversation to correct the learner (a separate teacher does that). If they make an error, simply use the correct form naturally in your reply.
 - If the learner writes in Spanish, answer in simple English and help them say it.
-- Be warm and encouraging. No lists, no emojis, no markdown.${personaLine(k)}${learnerLine()}`;
+- Be warm and encouraging. No lists, no emojis, no markdown.${personaLine(k)}${relLine(k)}${learnerLine()}`;
 }
 function personaLine(k) {
  const p = chats[k]?.persona; if (!p || k === "owl") return "";
@@ -782,7 +879,7 @@ function openChat(k, storyTopic, view = "chat") {
  sessionStart = ch.msgs.length;
  $("#cAv").innerHTML = avatar(...c.av.slice(0, 3), "", c.av[3]);
  $("#cName").textContent = k === "story" ? "Historia" : c.n;
- $("#cRole").textContent = k === "story" ? (ch.topic || "Cuento") : (c.t || "Free talk") + " · nivel " + S.level;
+ $("#cRole").textContent = k === "story" ? (ch.topic || "Cuento") : (c.t || "Free talk") + " · nivel " + levelFor(k);
  $("#sugs").innerHTML = ""; renderMsgs(); updTools();
  if (view === "world") enterPlace(k); else show("chat");
  if (!hasAI()) { toast(NEED_AI); return; }
@@ -844,7 +941,7 @@ async function generate(speakIt = true) {
  clearInterval(wd);
  saveChats(); if (cur === key) renderMsgs(); addInput(m.t);
  if (inWorld() && cur === key) syncBubble();
- if (speakIt && (S.auto || inWorld()) && !hf) speak(m.t, "en", inWorld() && cur === key ? $("#wText") : null);
+ if (speakIt && (S.auto || inWorld()) && !hf) speak(m.t, "en", inWorld() && cur === key ? $("#wText") : null, key);
  return m;
 }
 /* corrección de una frase del alumno */
@@ -901,7 +998,7 @@ async function msgAction(b, i, a) {
 }
 async function suggestReplies() {
  const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant");
- const out = await oneShot(`In a conversation, ${charOf(cur).n} just said: "${last?.t || ""}"\nWrite 3 short, natural replies an English learner (level ${S.level}) could say next. One per line. No numbers, no quotes.`, 120);
+ const out = await oneShot(`In a conversation, ${charOf(cur).n} just said: "${last?.t || ""}"\nWrite 3 short, natural replies an English learner (level ${levelFor(cur)}) could say next. One per line. No numbers, no quotes.`, 120);
  return out.split("\n").map((s) => s.replace(/^[\s\-•\d.)"]+|"$/g, "").trim()).filter(Boolean).slice(0, 3);
 }
 $("#tools").onclick = async (e) => {
@@ -926,12 +1023,12 @@ $("#inp").oninput = grow;
 $("#inp").onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !matchMedia("(pointer:coarse)").matches) { e.preventDefault(); send($("#inp").value); } };
 $("#micBtn").onclick = toggleMic;
 function leaveChat() {
- speechSynthesis?.cancel(); if (rec) rec.stop();
- const k = cur, said = chats[k] ? chats[k].msgs.slice(sessionStart).filter((m) => m.r === "user" && !m.hidden).length : 0;
- if (viewMode === "world") goHub(false); else goHome();
- cur = k;
- if (S.corr !== "off" && said >= 3 && hasAI()) summarySheet(false);
- else cur = null;
+ hush(); if (rec) rec.stop(); hideCard?.();
+ const k = cur, ms = mission, said = chats[k] ? chats[k].msgs.slice(sessionStart).filter((m) => m.r === "user" && !m.hidden).length : 0;
+ if (ms || viewMode === "world") goPath(); else goHome();
+ cur = k; mission = ms;
+ if ((S.corr !== "off" || ms) && said >= 3 && hasAI()) summarySheet(false);
+ else { if (ms && said < 3) toast("Di al menos 3 frases para completar la misión"); cur = null; mission = null; }
 }
 $("#backBtn").onclick = () => { if (viewMode === "world" && cur) { show("world"); syncBubble(); world?.start(); } else leaveChat(); };
 $("#resetBtn").onclick = () => {
@@ -950,7 +1047,7 @@ async function summarySheet(fromTools) {
  const lines = src.filter((m) => m.r === "user" && !m.hidden).map((m) => m.t).slice(-12);
  if (!lines.length) return toast("Aún no has dicho nada en esta conversación");
  openSheet(`<h3>Resumen de tu charla</h3><p class="note">Tu puntaje y los errores más importantes para practicar. Toca el altavoz para escuchar la versión correcta.</p><div id="sumBody" style="margin-top:12px">${loadingDots}</div><div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn sun" id="sumSave" disabled>Guardar en mis correcciones</button><button class="btn ghost" id="sumClose">Cerrar</button></div>`);
- $("#sumClose").onclick = () => { closeSheet(); if (!$("#chat").classList.contains("on")) cur = null; };
+ $("#sumClose").onclick = () => { closeSheet(); if (!$("#chat").classList.contains("on")) cur = null; if ($("#path").classList.contains("on")) goPath(); };
  let items = [];
  const rend = () => {
   $("#sumBody").innerHTML = items.length ? `<div class="vlist">${items.map((f, i) => `<div class="vi"><div class="sp"><p style="text-decoration:line-through">${esc(f.said)}</p><b>${esc(f.better)}</b>${f.why ? `<p>${esc(f.why)}</p>` : ""}</div><button class="ib" data-sf="${i}" aria-label="Escuchar">${ic("spk")}</button></div>`).join("")}</div>`
@@ -986,6 +1083,8 @@ Consejo: <one encouraging tip in Spanish, max 25 words>`, 120);
    scoreBox.innerHTML = `<div class="stars">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</div><div class="pts">${pts}<small>${record ? "¡Nuevo récord! · " : "puntos · "}${nWords} palabras tuyas</small></div>`
     + sc.map(([n, v]) => `<div class="sc"><span>${n}</span><span class="tr"><i style="width:${v * 10}%"></i></span><b>${v}/10</b></div>`).join("") + (tip ? `<p class="note">${esc(tip)}</p>` : "");
    if (stars >= 2) beep(990);
+   const transcript = chats[k].msgs.slice(sessionStart).filter((m) => !m.hidden).map((m) => (m.r === "user" ? "Learner: " : charOf(k).n + ": ") + m.t).join("\n").slice(-6000);
+   await missionResult(k, stars, scoreBox, transcript);
    stats.evals = [...(stats.evals || []), { d: today(), s: sc.map((x) => x[1]) }].slice(-60); store.set("stats", stats);
   } catch { scoreBox.remove(); return; }
   // memoria: lo que contaste de ti, para que los personajes lo recuerden la próxima vez
@@ -1039,11 +1138,11 @@ async function hfStart() {
  $("#hfHeard").textContent = ""; $("#hfTap").textContent = "Pausar"; $("#hf").classList.toggle("glass", inWorld()); $("#hf").classList.add("on");
  keepAwake();
  const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant");
- if (last) { $("#hfSaid").textContent = last.t; hfState("speak", "Hablando…"); await speak(last.t); }
+ if (last) { $("#hfSaid").textContent = last.t; hfState("speak", "Hablando…"); await speak(last.t, "en", null, cur); }
  hfListen();
 }
 function hfStop() {
- hf = false; try { hfRec?.abort(); } catch {} hfRec = null; speechSynthesis?.cancel();
+ hf = false; try { hfRec?.abort(); } catch {} hfRec = null; hush();
  try { wake?.release(); } catch {} wake = null;
  $("#hf").classList.remove("on"); renderMsgs();
 }
@@ -1075,12 +1174,12 @@ const CMD = {
 async function hfHandle(text) {
  const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant" && !m.hidden);
  if (CMD.stop.test(text)) return hfStop();
- if (CMD.repeat.test(text)) { hfState("speak", "Repitiendo…"); await speak(last?.t || ""); return hfListen(); }
+ if (CMD.repeat.test(text)) { hfState("speak", "Repitiendo…"); await speak(last?.t || "", "en", null, cur); return hfListen(); }
  if (CMD.slower.test(text)) { S.rate = Math.max(0.6, +(S.rate - 0.1).toFixed(2)); saveS(); hfState("speak", "Más despacio…"); await speak(last?.t || ""); return hfListen(); }
  if (CMD.translate.test(text)) {
   hfState("think", "Traduciendo…");
   try { const es = await oneShot(`Translate into natural Latin American Spanish. Output only the translation.\n\n${last?.t || ""}`, 200); hfState("speak", "En español…"); await speak(es, "es"); } catch {}
-  hfState("speak", "Otra vez en inglés…"); await speak(last?.t || ""); return hfListen();
+  hfState("speak", "Otra vez en inglés…"); await speak(last?.t || "", "en", null, cur); return hfListen();
  }
  if (CMD.help.test(text)) {
   hfState("think", "Buscando ideas…");
@@ -1099,13 +1198,13 @@ async function hfHandle(text) {
  const m = await generate(false);
  if (!hf) return;
  if (um.fix) { hfState("speak", "Corrección…"); $("#hfSaid").textContent = "Mejor: " + um.fix; await speak("Quick tip. You can say: " + um.fix); if (!hf) return; }
- if (m) { $("#hfSaid").textContent = m.t; hfState("speak", "Hablando…"); await speak(m.t); }
+ if (m) { $("#hfSaid").textContent = m.t; hfState("speak", "Hablando…"); await speak(m.t, "en", null, cur); }
  hfListen();
 }
 $("#hfExit").onclick = hfStop;
 $("#hfTap").onclick = () => {
  if (hfPaused) { hfPaused = false; silent = 0; $("#hfTap").textContent = "Pausar"; $("#hfHeard").textContent = ""; hfListen(); }
- else { hfPaused = true; try { hfRec?.abort(); } catch {} speechSynthesis?.cancel(); hfState("", "En pausa"); $("#hfTap").textContent = "Seguir"; }
+ else { hfPaused = true; try { hfRec?.abort(); } catch {} hush(); hfState("", "En pausa"); $("#hfTap").textContent = "Seguir"; }
 };
 
 /* ---------- hojas: palabra, vocabulario, historias, escenas, ajustes ---------- */
@@ -1173,10 +1272,12 @@ function settingsSheet() {
  const cm = MODELS.find((m) => m.id === S.model), brain = cloudOn() ? "IA en la nube (tu servidor)" : cm ? `${cm.name} (${cm.size}) · en el teléfono · ${S.f16 ? "precisión f16" : "precisión f32"}` : "Ninguno elegido";
  openSheet(`<h3>Ajustes</h3>
  <div class="field"><label>Correcciones</label><div class="seg" id="corrSeg">${Object.entries(CORR).map(([k, n]) => `<button data-c="${k}" class="${k === S.corr ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">«Siempre»: corrige cada frase bajo tu mensaje (y en manos libres te dice el tip en voz alta). «Solo resumen»: te muestra tus errores al salir de la charla.</p></div>
+ <div class="field"><label>Tu trabajo en el camino</label><div class="seg" id="profSeg" style="grid-template-columns:1fr 1fr">${Object.entries(PROF_PACKS).map(([k, n]) => `<button data-p="${k}" class="${k === profPack() ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Las misiones del barrio «Trabajo».</p></div>
+ ${cloudOn() ? `<div class="field"><label><input type="checkbox" id="cvChk" ${S.cvoice !== false ? "checked" : ""}> Voz natural para cada personaje</label><p class="note">Cada persona tiene su propia voz (usa tu servidor gratuito). Si se acaba el límite del día, se usa la voz del teléfono.</p></div>` : ""}
  <div class="field"><label>Sugerencias de respuesta</label><div class="seg" id="sugSeg">${[["auto", "Siempre"], ["ask", "Si las pido"], ["off", "Nunca"]].map(([k, n]) => `<button data-s="${k}" class="${k === S.sug ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Una frase que puedes decir, con práctica de pronunciación y «Di en español…». «Si las pido»: toca el botón de ayuda.</p></div>
  ${S.facts?.length ? `<div class="field"><label>Lo que la app recuerda de ti</label><p class="note">${S.facts.map(esc).join(" · ")}</p><button class="btn ghost" id="forget">Olvidar todo</button></div>` : ""}
  <div class="field"><label>Calidad gráfica del mundo 3D</label><div class="seg" id="gfxSeg">${[["low", "Baja"], ["high", "Alta"], ["off", "Sin 3D"]].map(([k, n]) => `<button data-g="${k}" class="${k === S.gfx ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Si el teléfono se traba o se calienta, usa «Baja» o «Sin 3D». El cambio se aplica al reabrir la app.</p></div>
- <div class="field"><label>Tu nivel de inglés</label><div class="seg" id="lvSeg">${Object.keys(LEVELS).map((l) => `<button class="${l === S.level ? "sel" : ""}">${l}</button>`).join("")}</div><p class="note">A2 básico · B1 intermedio · B2 intermedio alto.</p></div>
+ <div class="field"><label>Nivel inicial</label><div class="seg" id="lvSeg" style="grid-template-columns:repeat(5,minmax(0,1fr))">${Object.keys(LEVELS).map((l) => `<button class="${l === S.level ? "sel" : ""}">${l}</button>`).join("")}</div><p class="note">El nivel mínimo de las charlas. Cada personaje empieza ahí y sube de nivel a medida que se hacen amigos (hasta C1).</p></div>
  <div class="field"><label for="sName">Tu nombre</label><input type="text" id="sName" value="${esc(S.name)}" placeholder="Tu nombre"></div>
  <div class="field"><label for="sJob">A qué te dedicas</label><input type="text" id="sJob" value="${esc(S.job)}" placeholder="p. ej. médico, camionero, contador"></div>
  <div class="field"><label for="sLike">Temas que te gustan</label><input type="text" id="sLike" value="${esc(S.likes)}" placeholder="p. ej. fútbol, cocina, viajes"></div>
@@ -1187,6 +1288,8 @@ function settingsSheet() {
  ${SR && SR.install ? `<div class="field"><label>Reconocimiento de voz sin internet</label><p class="note">Chrome puede descargar el paquete de inglés para reconocer tu voz sin conexión (necesario para manos libres sin internet).</p><button class="btn ghost" id="srInst">Descargar paquete de voz</button></div>` : ""}
  <button class="btn" id="setOk" style="width:100%;margin-top:8px">Listo</button>`);
  $("#gfxSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.gfx = b.dataset.g; saveS(); [...$("#gfxSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); toast("Cierra y vuelve a abrir la app para aplicar el cambio"); };
+ $("#profSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.prof = b.dataset.p; saveS(); [...$("#profSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
+ if ($("#cvChk")) $("#cvChk").onchange = (e) => { S.cvoice = e.target.checked; saveS(); };
  $("#sugSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.sug = b.dataset.s; saveS(); [...$("#sugSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if (S.sug === "off") hideCard(); };
  if ($("#forget")) $("#forget").onclick = () => { S.facts = []; saveS(); settingsSheet(); };
  $("#corrSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.corr = b.dataset.c; saveS(); [...$("#corrSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
@@ -1225,6 +1328,7 @@ function fadeTo(fn) {
  const f = $("#wFade"); f.classList.add("on");
  setTimeout(() => { fn(); setTimeout(() => f.classList.remove("on"), 60); }, 330);
 }
+let speakTurn = 0;
 const karaokeHTML = (t) => { let h = "", last = 0; for (const m of String(t).matchAll(/[A-Za-z][A-Za-z'’-]*/g)) { h += esc(t.slice(last, m.index)) + `<span class="w" data-o="${m.index}">${esc(m[0])}</span>`; last = m.index + m[0].length; } return h + esc(String(t).slice(last)); };
 function setBubble(text, es) {
  $("#wText").innerHTML = karaokeHTML(text); $("#wEs").hidden = !es; $("#wEs").textContent = es || "";
@@ -1243,7 +1347,7 @@ $("#wText").onclick = (e) => {
  if (hubMode) return speak($("#wText").textContent, "en", $("#wText"));
  const i = lastAssistantIndex(); if (i < 0) return;
  const w = e.target.closest(".w"); if (w && !busy) return wordSheet(w.textContent, chats[cur].msgs[i].t);
- speak(chats[cur].msgs[i].t, "en", $("#wText"));
+ speak(chats[cur].msgs[i].t, "en", $("#wText"), cur);
 };
 function showSaid(m) {
  if (!m || hubMode) { $("#wSaid").innerHTML = ""; return; }
@@ -1260,7 +1364,7 @@ function goHub(greet = true) {
  const w = getWorld();
  if (!w) { goHome(); return; }
  hubMode = true; cur = null; viewMode = "world";
- speechSynthesis?.cancel(); hideCard();
+ hush(); hideCard();
  show("world"); $("#wForm").hidden = true; $("#wCtl").hidden = true; $("#wLog").hidden = true; $("#wHf").hidden = true; $("#wBack").hidden = true; $("#wMenu").hidden = false;
  $("#wName").textContent = "Ollie"; $("#wRole").textContent = "Tu profesor de inglés"; $("#wActs").innerHTML = ""; showSaid(null);
  hubChips();
@@ -1275,23 +1379,23 @@ function enterPlace(k) {
  hubMode = false; const c = charOf(k);
  show("world"); $("#wPacks").hidden = true; $("#wSugs").innerHTML = ""; $("#wCtl").hidden = false; $("#wForm").hidden = true;
  $("#wLog").hidden = false; $("#wHf").hidden = false; $("#wBack").hidden = false; $("#wMenu").hidden = true;
- $("#wName").textContent = c.n; $("#wRole").textContent = `${c.t} · nivel ${S.level}`;
+ $("#wName").textContent = c.n; $("#wRole").textContent = `${c.t} · nivel ${levelFor(k)}`;
  showSaid(null); hideCard(); syncBubble();
  fadeTo(() => w.setScene(sceneFor(k), charFor(k), c.c));
  const i = lastAssistantIndex();
  if (i >= 0 && chats[k].msgs.length - 1 === i) setTimeout(() => {
   if (!inWorld() || cur !== k) return;
-  if (!busy) speak(chats[k].msgs[i].t, "en", $("#wText"));
+  if (!busy) speak(chats[k].msgs[i].t, "en", $("#wText"), k);
   if (hasAI() && !busy) showSuggestions(k);
  }, 900);
 }
 $("#wSugs").onclick = (e) => {
  const go = e.target.closest("[data-go]");
- if (go) { if (!hasAI()) { toast(NEED_AI); return goSetup(); } speechSynthesis?.cancel(); return openChat(go.dataset.go, null, "world"); }
+ if (go) { if (!hasAI()) { toast(NEED_AI); return goSetup(); } hush(); return openChat(go.dataset.go, null, "world"); }
  const b = e.target.closest("button"); if (b && !b.disabled) send(b.textContent);
 };
 $("#wBack").onclick = () => { if (hf) hfStop(); if (wRec) wRec.abort(); leaveChat(); };
-$("#wMenu").onclick = () => { speechSynthesis?.cancel(); hubMode = false; world?.stop(); goHome(); };
+$("#wMenu").onclick = () => { hush(); hubMode = false; world?.stop(); goHome(); };
 $("#wLog").onclick = () => { world?.stop(); renderMsgs(); updTools(); show("chat"); };
 $("#wHf").onclick = () => { if (busy) return toast("Espera un momento…"); hfStart(); };
 $("#wKbd").onclick = () => { $("#wForm").hidden = !$("#wForm").hidden; if (!$("#wForm").hidden) $("#wInp").focus(); };
@@ -1318,7 +1422,8 @@ function renderCard() {
   const p = Math.round(card.pct * 100);
   $("#wCardScore").innerHTML = p >= 90 ? `<span style="color:var(--ok)">¡Excelente pronunciación! ${p} %</span>` : p >= 60 ? `<span style="color:#b7791f">Casi: ${p} %. Toca las palabras en rojo para escucharlas.</span>` : `<span style="color:var(--red)">${p} %. Escúchala y vuelve a intentar.</span>`;
  }
- $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="spk" aria-label="Escuchar">${ic("spk")}</button><button data-c="tr">${ic("tr")}Español</button><button data-c="pr" class="${prRec ? "rec" : ""}">${ic("mic")}${prRec ? "Te escucho…" : "Practicar"}</button>${card.opts.length > 1 ? `<button data-c="next">${ic("next")}Otra</button>` : ""}<button data-c="use" class="go">${ic("check")}Decirlo</button>`;
+ $("#wCardAlts").innerHTML = card.loading ? "" : card.opts.map((o, i) => i === card.i ? "" : `<button data-alt="${i}">${esc(o)}</button>`).join("");
+ $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="spk" aria-label="Escuchar">${ic("spk")}</button><button data-c="tr">${ic("tr")}Español</button><button data-c="pr" class="${prRec ? "rec" : ""}">${ic("mic")}${prRec ? "Te escucho…" : "Practicar"}</button><button data-c="use" class="go">${ic("check")}Decirlo</button>`;
 }
 async function showSuggestions(key, force) {
  if (!inWorld() || hubMode || !key || cur !== key || key === "story") return;
@@ -1345,7 +1450,7 @@ function practice() {
  const target = cardText(); if (!target) return;
  if (!SR) return toast("Tu navegador no reconoce voz. Usa Chrome en Android.");
  if (prRec) { prRec.stop(); return; }
- speechSynthesis?.cancel(); world?.setSpeaking(false);
+ hush(); world?.setSpeaking(false);
  let heard = ""; const r = prRec = newRec();
  r.onresult = (ev) => { heard = ""; for (const x of ev.results) heard += x[0].transcript; };
  r.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
@@ -1358,6 +1463,7 @@ function practice() {
  try { r.start(); } catch { prRec = null; renderCard(); }
 }
 $("#wCardTxt").onclick = (e) => { const w = e.target.closest(".w"); if (w) { const r = S.rate; S.rate = Math.max(0.6, r - 0.2); speak(w.textContent).finally(() => { S.rate = r; }); } else speak(cardText()); };
+$("#wCardAlts").onclick = (e) => { const b = e.target.closest("[data-alt]"); if (!b) return; card.i = +b.dataset.alt; card.es = ""; card.fromEs = false; card.words = null; card.pct = -1; renderCard(); speak(cardText()); };
 $("#wCardActs").onclick = async (e) => {
  const b = e.target.closest("[data-c]"); if (!b) return; const c = b.dataset.c, t = cardText();
  if (c === "spk") return speak(t);
@@ -1390,7 +1496,7 @@ $("#wDi").onclick = () => {
   $("#diGo").innerHTML = loadingDots;
   const last = [...(chats[cur]?.msgs || [])].reverse().find((m) => m.r === "assistant" && !m.hidden);
   try {
-   const en = await oneShot(`In a conversation, the other person said: "${(last?.t || "").slice(0, 200)}"\nThe learner (English level ${S.level}) wants to answer this, said in Spanish: "${es}"\nWrite how a native speaker would naturally say it in simple English. Output only the English sentence.`, 80);
+   const en = await oneShot(`In a conversation, the other person said: "${(last?.t || "").slice(0, 200)}"\nThe learner (English level ${levelFor(cur)}) wants to answer this, said in Spanish: "${es}"\nWrite how a native speaker would naturally say it in simple English. Output only the English sentence.`, 80);
    const clean = en.replace(/^["“]|["”]$/g, "").trim();
    closeSheet();
    card = { opts: [clean, ...card.opts.filter((o) => o !== clean)].slice(0, 4), i: 0, es, fromEs: true, key: cur, words: null, pct: -1 };
@@ -1403,7 +1509,7 @@ $("#wMic").onclick = () => {
  if (!SR) { $("#wForm").hidden = false; $("#wInp").focus(); return toast("Tu navegador no reconoce voz: escribe o usa el micrófono del teclado"); }
  if (wRec) { wRec.stop(); return; }
  if (busy) return toast("Espera a que termine de responder");
- speechSynthesis?.cancel(); world?.setSpeaking(false);
+ hush(); world?.setSpeaking(false);
  let text = "";
  const r = wRec = newRec();
  r.onresult = (ev) => { text = ""; for (const x of ev.results) text += x[0].transcript; $("#wSaid").innerHTML = `<span class="me" style="opacity:.75">${esc(text)}</span>`; };
@@ -1414,13 +1520,171 @@ $("#wMic").onclick = () => {
 };
 $("#icoWorld").innerHTML = ic("flag");
 $("#worldBtn").onclick = () => goHub();
+$("#pathBtn").onclick = () => goPath("path");
+
+/* ---------- el camino: barrios, misiones y amistades ----------
+   · Cada parada es una persona. Al conversar ganas estrellas → puntos de amistad.
+   · La amistad tiene 5 niveles y cada nivel sube la dificultad: A1 → A2 → B1 → B2 → C1.
+   · Cada persona tiene una vida propia (datos secretos) que vas descubriendo al conversar.
+   · Una parada se abre cuando ya conoces a la anterior (nivel «Conocido»). */
+const FLV = [
+ { n: "Desconocido", es: "Primer encuentro" },
+ { n: "Conocido", es: "Ya te saluda" },
+ { n: "Amigo", es: "Te cuenta cosas de su vida" },
+ { n: "Buen amigo", es: "Hablan de planes y opiniones" },
+ { n: "Mejor amigo", es: "Conversación real" }
+];
+const XP_AT = [0, 3, 8, 14, 21]; // puntos de amistad para llegar a cada nivel
+const PORTRAITS = new Set(["cafe"]);
+const PROF_PACKS = { med: "Medicina", truck: "Camiones", acct: "Contabilidad", school: "Escuela" };
+const profPack = () => (PROF_PACKS[S.prof] ? S.prof : "med");
+function ROUTE() {
+ const work = PACKS.find((p) => p.k === profPack()).scenes.map((x) => x.k);
+ return [
+  { k: "arrive", name: "Llegada", es: "Tus primeros días en EE. UU.", img: "img/arrive.webp", stops: ["airport", "cafe", "grocery", "pharmacy"] },
+  { k: "home", name: "Mi barrio", es: "Casa, vecinos y dinero", img: "img/home.webp", stops: ["landlord", "neighbor", "bank", "restaurant"] },
+  { k: "work", name: "Trabajo", es: `Tu empleo · ${PROF_PACKS[profPack()]}`, img: "img/work.webp", stops: ["interview", ...work] },
+  { k: "community", name: "Comunidad", es: "Trámites y gente nueva", img: "img/community.webp", stops: ["dmv", "mechanic", "church"] },
+  { k: "friends", name: "Vida real", es: "Conversaciones de verdad", img: "img/friends.webp", stops: ["free"] }
+ ];
+}
+let rel = store.get("rel", {});
+const saveRel = () => store.set("rel", rel);
+const relOf = (k) => rel[k] || (rel[k] = { xp: 0, visits: 0, bio: [], found: [] });
+function lvlOf(k) { const x = rel[k]?.xp || 0; let l = 0; XP_AT.forEach((v, i) => { if (x >= v) l = i; }); return l; }
+function levelFor(k) { return LV[Math.min(LV.length - 1, Math.max(k && !charOf(k)?.custom ? lvlOf(k) : 0, LV.indexOf(S.level)))] || "A1"; }
+const MISSION_ES = [
+ (c) => `Saluda a ${c.n} y ${c.es.toLowerCase()}. Frases cortas.`,
+ (c) => `${c.es}: termina la tarea y haz una pregunta extra.`,
+ (c) => `Conoce a ${c.n}: pregúntale por su vida y descubre 1 dato.`,
+ (c) => `Habla de planes y opiniones con ${c.n}; descubre 2 datos.`,
+ (c) => `Charla libre como amigos: cuéntale tu semana y pregúntale la suya.`
+];
+const MISSION_EN = [
+ "This is your first time meeting the learner. Do the basic task of the scene using very simple language. Be patient and kind.",
+ "You have met the learner once before. Do the scene task fully, be friendly and ask one extra question.",
+ "You are getting to know the learner. After the task, make small talk. Share one personal detail about your own life when it fits, and invite the learner to ask about you.",
+ "You know each other now. Talk about plans, opinions and experiences. Share personal details from your life when they fit.",
+ "You are good friends. Have a natural, real conversation like with a friend: stories, opinions, a little humor and follow-up questions."
+];
+let mission = null; // { k, lvl, xp0, found0 }
+function relLine(k) {
+ const r = rel[k]; if (!r || charOf(k)?.custom || k === "story") return "";
+ const lvl = lvlOf(k);
+ let t = `\nYour relationship with the learner: ${FLV[lvl].n} (you have talked ${r.visits} time${r.visits === 1 ? "" : "s"} before). ${MISSION_EN[lvl]}`;
+ if (r.bio?.length) t += `\nYour own life (private facts; reveal them naturally, one at a time, only when it fits or when asked; never list them): ${r.bio.join(" | ")}`;
+ return t;
+}
+async function ensureBio(k) {
+ const r = relOf(k), c = charOf(k);
+ if (r.bio?.length || !hasAI() || k === "story" || c.custom) return;
+ const out = await oneShot(`Invent a realistic, friendly personal profile for ${c.n}, a ${c.r}, who lives in the Chicago area.
+Write exactly 8 short facts in simple English (max 9 words each), one per line, no numbering:
+hometown, family, a hobby, favorite food, a pet (or none), a dream for the future, something funny about them, what they do on weekends.`, 220);
+ r.bio = out.split("\n").map((x) => x.replace(/^[\s\-•*\d.)]+/, "").trim()).filter((x) => x && x.length < 90).slice(0, 8);
+ saveRel();
+}
+function stopState(route) {
+ // devuelve un mapa k → "done" | "open" | "locked" siguiendo el orden del camino
+ const st = {}; let open = true;
+ for (const d of route) for (const k of d.stops) {
+  if (!open) { st[k] = "locked"; continue; }
+  st[k] = lvlOf(k) >= 1 ? "done" : "open";
+  if (st[k] !== "done") open = false;
+ }
+ return st;
+}
+const heartsHTML = (k) => `<span class="hearts" aria-label="Amistad ${lvlOf(k) + 1} de 5">${[0, 1, 2, 3, 4].map((i) => `<i class="${i <= lvlOf(k) ? "on" : ""}">♥</i>`).join("")}</span>`;
+function portraitHTML(k, cls = "") {
+ const c = charOf(k);
+ if (PORTRAITS.has(k)) return `<img class="por ${cls}" src="img/p/${k}.webp" alt="${esc(c.n)}" loading="lazy">`;
+ return `<span class="por ${cls}" style="background:${c.c || "#3b1f4a"}">${avatar(...c.av.slice(0, 3), "", c.av[3])}</span>`;
+}
+let pathTab = "path";
+function goPath(tab = pathTab) {
+ pathTab = tab; cur = null; mission = null; hubMode = false; world?.stop?.(); hush();
+ [...$("#pTabs").children].forEach((b) => b.classList.toggle("sel", b.dataset.tab === tab));
+ const route = ROUTE(), st = stopState(route);
+ const total = route.reduce((a, d) => a + d.stops.length, 0), done = Object.values(st).filter((x) => x === "done").length;
+ const t = stats.days[today()] || 0;
+ $("#pStats").innerHTML = `<span>🔥 ${streakDays()} días</span><span>⭐ ${done}/${total} paradas</span><span>🗣 ${Math.round(t / 130)} min hoy</span>`;
+ if (tab === "people") return renderPeople(route), show("path");
+ let idx = 0;
+ $("#pMain").innerHTML = route.map((d) => {
+  const dDone = d.stops.filter((k) => st[k] === "done").length, locked = st[d.stops[0]] === "locked";
+  return `<section class="dist ${locked ? "locked" : ""}"><div class="dban" style="background-image:url('${d.img}')"><div><b>${esc(d.name)}</b><span>${esc(d.es)}</span></div><em>${dDone}/${d.stops.length}</em></div>
+  <div class="trail">${d.stops.map((k) => {
+   const c = charOf(k), s = st[k], side = ["l", "c", "r", "c"][idx++ % 4];
+   return `<button class="stop ${s} ${side}" data-k="${esc(k)}" ${s === "locked" ? 'aria-disabled="true"' : ""}>${portraitHTML(k)}<span class="sl"><b>${esc(c.n)}</b><small>${esc(c.es || c.t)}</small>${s === "locked" ? "<small>🔒 Bloqueado</small>" : heartsHTML(k)}</span>${s === "open" ? `<span class="go">Empezar</span>` : ""}</button>`;
+  }).join("")}</div></section>`;
+ }).join("") + `<p class="note" style="text-align:center;margin:18px 0 90px">Termina una charla con al menos 3 frases tuyas para ganar estrellas y amistad.</p>`;
+ show("path");
+ const nx = $("#pMain .stop.open"); if (nx) setTimeout(() => nx.scrollIntoView({ block: "center", behavior: "smooth" }), 120);
+}
+function streakDays() { let n = 0; const d = new Date(); if (!stats.days[today()]) d.setDate(d.getDate() - 1); while (stats.days[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); } return n; }
+function renderPeople(route) {
+ const ks = route.flatMap((d) => d.stops).filter((k) => rel[k]?.visits);
+ $("#pMain").innerHTML = `<div class="wrap" style="padding-top:12px"><h2 style="font-size:22px">Personas que conoces</h2>${ks.length ? `<div class="people">${ks.map((k) => {
+  const c = charOf(k), r = rel[k];
+  return `<button class="person" data-k="${esc(k)}">${portraitHTML(k)}<span class="sp"><b>${esc(c.n)}</b><small>${FLV[lvlOf(k)].n} · nivel ${levelFor(k)}</small><small>${r.found.length} dato${r.found.length === 1 ? "" : "s"} descubierto${r.found.length === 1 ? "" : "s"}</small></span>${heartsHTML(k)}</button>`;
+ }).join("")}</div>` : `<p class="empty">Aún no conoces a nadie. Empieza tu camino en «Llegada».</p>`}</div>`;
+}
+$("#pMain").onclick = (e) => { const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast("Primero conoce a la persona anterior del camino"); stopSheet(b.dataset.k); };
+$("#pTabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (!b) return; if (b.dataset.tab === "more") { goHome(); return; } goPath(b.dataset.tab); };
+$("#pSet").onclick = settingsSheet;
+function stopSheet(k) {
+ const c = charOf(k), r = relOf(k), lvl = lvlOf(k), next = XP_AT[lvl + 1];
+ const facts = r.found.map((i) => r.bio[i]).filter(Boolean);
+ openSheet(`<div class="ssh">${portraitHTML(k, "big")}<div class="sp"><h3>${esc(c.n)}</h3><p class="note">${esc(c.t)} · ${esc(c.es || "")}</p>${heartsHTML(k)}<p class="note"><b>${FLV[lvl].n}</b> · nivel ${levelFor(k)}${next ? ` · ${r.xp}/${next} puntos para «${FLV[lvl + 1].n}»` : " · ¡Nivel máximo!"}</p></div></div>
+ <div class="mis"><b>🎯 Misión</b><p>${esc(MISSION_ES[lvl](c))}</p></div>
+ <div class="field"><label>Lo que sabes de ${esc(c.n)}</label>${facts.length ? `<ul class="facts">${facts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : `<p class="note">${lvl < 2 ? "Cuando sean más amigos te contará cosas de su vida." : "Pregúntale por su vida para descubrir datos."}</p>`}</div>
+ <div class="row" style="flex-wrap:wrap"><button class="btn" id="msGo">Empezar misión</button><button class="btn ghost" id="msNo">Cerrar</button></div>`);
+ $("#msNo").onclick = closeSheet;
+ $("#msGo").onclick = () => { closeSheet(); startMission(k); };
+}
+async function startMission(k) {
+ if (!hasAI()) { toast(NEED_AI); return goSetup(); }
+ const c = charOf(k), r = relOf(k), lvl = lvlOf(k);
+ if (!r.bio?.length && lvl >= 1) { toast(`Preparando a ${c.n}…`); try { await ensureBio(k); } catch {} }
+ else if (!r.bio?.length) ensureBio(k).catch(() => {});
+ mission = { k, lvl, xp0: r.xp, found0: r.found.length };
+ const first = lvl === 0 && c.o ? null : `Start the conversation now: say your first line in character, following your mission, and ask me something. Keep it at level ${levelFor(k)}.`;
+ chats[k] = { msgs: first ? [{ r: "user", hidden: true, t: first }] : [], topic: "", persona: null, mission: true };
+ saveChats();
+ openChat(k, null, S.gfx === "off" ? "chat" : "world");
+ if (first) { const m = await generate(); if (m && cur === k) showSuggestions(k); }
+}
+// Al terminar la charla: estrellas → puntos de amistad, datos descubiertos y subida de nivel.
+async function missionResult(k, stars, box, transcript) {
+ if (!mission || mission.k !== k) return;
+ const r = relOf(k), c = charOf(k), before = lvlOf(k);
+ r.visits++; r.xp += 1 + stars;
+ let newFacts = [];
+ if (r.bio?.length && !busy) {
+  try {
+   const out = await oneShot(`Private facts about ${c.n}:\n${r.bio.map((f, i) => `${i + 1}. ${f}`).join("\n")}\n\nConversation:\n${transcript}\n\nWhich of the numbered facts did ${c.n} actually reveal in this conversation? Reply only with the numbers separated by commas, or NONE.`, 30);
+   const nums = (out.match(/\d+/g) || []).map((n) => +n - 1).filter((i) => i >= 0 && i < r.bio.length && !r.found.includes(i));
+   r.found.push(...nums); newFacts = nums.map((i) => r.bio[i]); r.xp += nums.length;
+  } catch {}
+ }
+ saveRel();
+ const after = lvlOf(k), next = XP_AT[after + 1];
+ const div = document.createElement("div"); div.className = "relbox";
+ div.innerHTML = `<div class="row" style="gap:10px;align-items:center">${portraitHTML(k)}<div class="sp"><b>Amistad con ${esc(c.n)}</b>${heartsHTML(k)}<small>${FLV[after].n}${next ? ` · ${r.xp}/${next} puntos` : ""}</small></div></div>`
+  + (after > before ? `<p class="lvup">🎉 ¡Ahora son <b>${FLV[after].n}</b>! La próxima charla será nivel <b>${levelFor(k)}</b>.</p>` : "")
+  + (newFacts.length ? `<p class="note"><b>Descubriste:</b><br>${newFacts.map(esc).join("<br>")}</p>` : "");
+ box.before(div);
+ if (after > before) beep(1180);
+ mission = null;
+}
 
 /* ---------- arranque ---------- */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 renderStats();
+if (!S.v2) { S.v2 = true; S.level = "A1"; saveS(); }
 if (!hasAI()) goSetup();
 else {
- goHub();
+ goPath("path");
  if (cloudOn()) setEng("ok", "IA en la nube");
  else hasModelInCache(fullId(S.model)).then((ok) => setEng("", ok ? "Se activa al entrar a un lugar" : "Modelo no descargado")).catch(() => {});
 }

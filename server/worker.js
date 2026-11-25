@@ -40,11 +40,12 @@ export default {
     const cors = corsHeaders(req, env);
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     const url = new URL(req.url);
-    if (req.method === "GET" && url.pathname === "/") return json({ ok: true, app: "try-your-new-language" }, 200, cors);
-    if (req.method !== "POST" || url.pathname !== "/chat") return json({ error: "not found" }, 404, cors);
+    if (req.method === "GET" && url.pathname === "/") return json({ ok: true, app: "try-your-new-language", tts: true }, 200, cors);
+    if (req.method !== "POST" || !["/chat", "/tts"].includes(url.pathname)) return json({ error: "not found" }, 404, cors);
 
     if (!env.AI_KEY) return json({ error: "Falta AI_KEY en el servidor" }, 500, cors);
     if (env.APP_CODE && req.headers.get("X-App-Code") !== env.APP_CODE) return json({ error: "Código de acceso incorrecto" }, 401, cors);
+    if (url.pathname === "/tts") return tts(req, env, cors);
 
     let body;
     try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400, cors); }
@@ -93,3 +94,47 @@ export default {
     });
   }
 };
+
+// ---------- voces: una voz natural distinta para cada personaje (Gemini TTS) ----------
+const VOICES = new Set(["Zephyr", "Puck", "Charon", "Kore", "Fenrir", "Leda", "Orus", "Aoede", "Callirrhoe", "Autonoe", "Enceladus", "Iapetus", "Umbriel", "Algieba", "Despina", "Erinome", "Algenib", "Rasalgethi", "Laomedeia", "Achernar", "Alnilam", "Schedar", "Gacrux", "Pulcherrima", "Achird", "Zubenelgenubi", "Vindemiatrix", "Sadachbia", "Sadaltager", "Sulafat"]);
+const TTS_MODEL = "gemini-3.8-flash-tts";
+const TTS_FALLBACK = "gemini-2.5-flash-preview-tts";
+
+async function tts(req, env, cors) {
+  let b;
+  try { b = await req.json(); } catch { return json({ error: "JSON inválido" }, 400, cors); }
+  const text = String(b.text || "").replace(/[*_#]/g, "").slice(0, 700).trim();
+  if (!text) return json({ error: "Falta texto" }, 400, cors);
+  const voice = VOICES.has(b.voice) ? b.voice : "Kore";
+  const style = String(b.style || "").replace(/[:\n]/g, " ").slice(0, 120).trim();
+  let last = 0;
+  for (const model of [env.TTS_MODEL || TTS_MODEL, env.TTS_MODEL_FALLBACK || TTS_FALLBACK]) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": env.AI_KEY },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: style ? `${style}: ${text}` : text }] }],
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }
+      })
+    });
+    if (!r.ok) { last = r.status; if ([404, 429, 500, 503].includes(r.status)) continue; break; }
+    const j = await r.json();
+    const part = j.candidates?.[0]?.content?.parts?.find((p) => p.inlineData)?.inlineData;
+    if (!part) { last = 502; continue; }
+    let bytes = Uint8Array.from(atob(part.data), (c) => c.charCodeAt(0));
+    if (/L16|pcm/i.test(part.mimeType || "")) bytes = wav(bytes, +((part.mimeType.match(/rate=(\d+)/) || [])[1] || 24000));
+    return new Response(bytes, { status: 200, headers: { ...cors, "Content-Type": "audio/wav", "Cache-Control": "no-store" } });
+  }
+  return json({ error: last === 429 ? "Se acabó el límite gratuito de voces por hoy" : `Voz no disponible (${last})` }, last === 429 ? 429 : 502, cors);
+}
+
+// Envuelve audio PCM de 16 bits (mono) en un archivo WAV que el teléfono puede reproducir.
+function wav(pcm, rate) {
+  const out = new Uint8Array(44 + pcm.length), v = new DataView(out.buffer);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + pcm.length, true); w(8, "WAVE"); w(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, "data"); v.setUint32(40, pcm.length, true); out.set(pcm, 44);
+  return out;
+}
