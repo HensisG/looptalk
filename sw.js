@@ -1,7 +1,7 @@
 // Service worker: guarda la app para que abra sin internet.
 // El modelo de IA lo guarda WebLLM en su propia caché del navegador.
-const VERSION = "looptalk-v3";
-const SHELL = ["./", "./index.html", "./webllm.js", "./worker.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
+const VERSION = "looptalk-v4";
+const SHELL = ["./", "./index.html", "./webllm.js", "./world.js", "./worker.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
