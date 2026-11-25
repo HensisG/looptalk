@@ -299,6 +299,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .lesson .sp{display:flex;flex-direction:column}.lesson small{opacity:.75}
 .lesson em{font-style:normal;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.12);white-space:nowrap}
 .lesson em.due{background:var(--sun);color:#2a1630}.lesson em.ok{background:rgba(31,157,99,.4)}.lesson em.new{background:var(--red)}
+#who{background:linear-gradient(180deg,#2a1636,#3b1f4a 50%,#1b1424);color:#fff;min-height:100%;padding:calc(env(safe-area-inset-top) + 24px) 16px 40px}
+.whotop{text-align:center;margin-bottom:18px}.whotop .brand{font-family:Fredoka,sans-serif;font-size:26px;font-weight:600}.whotop p{font-size:20px;margin:8px 0 0;color:#ffd978;font-weight:800}
+.whomain{max-width:560px;margin:0 auto}
+.wholist{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.who{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px;border-radius:22px;background:rgba(255,255,255,.08);color:#fff;border:2px solid rgba(255,255,255,.12)}
+.who .wav{font-size:44px;line-height:1.1}.who b{font-size:17px}.who small{opacity:.8;font-size:13px}
+.who.add{border-style:dashed}
+#whoFam h2{font-size:20px;margin:26px 0 8px}
+.fam{overflow-x:auto}.fam table{width:100%;border-collapse:collapse;font-size:14px}
+.fam th{text-align:left;font-size:12px;opacity:.75;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,.2)}
+.fam td{padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
+.sheet .fam th,.sheet .fam td{border-color:var(--line)}
+.opt.idk{background:transparent;border-style:dashed;color:#cbb9d6}
+.chips button.sel{border-color:var(--red);background:color-mix(in srgb,var(--red) 15%,transparent)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -342,9 +356,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <!-- INICIO -->
 <section class="screen" id="path">
  <div class="ptop"><div class="row"><div class="sp"><b class="brand">Try Your New Language</b><div class="pstats" id="pStats"></div></div>
-  <button class="ib" id="pSet" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button></div></div>
+  <button class="ib" id="pWho" aria-label="Perfiles" style="margin-right:6px;font-size:20px"></button><button class="ib" id="pSet" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button></div></div>
  <div class="pmain" id="pMain"></div>
  <nav class="ptabs" id="pTabs"><button data-tab="path" class="sel">🗺️<span>Camino</span></button><button data-tab="classes">🧑‍🏫<span>Clases</span></button><button data-tab="people">👥<span>Personas</span></button><button data-tab="more">💬<span>Práctica libre</span></button></nav>
+</section>
+
+<section class="screen" id="who">
+ <div class="whotop"><b class="brand">Try Your New Language</b><p id="whoQ"></p></div>
+ <div class="whomain"><div class="wholist" id="whoList"></div><div id="whoFam"></div></div>
 </section>
 
 <section class="screen" id="lesson">
@@ -548,7 +567,7 @@ const PACKS = [
  ]}
 ];
 const SPECIAL = {
- owl: { k: "owl", t: "Robot guide", n: "Nova", r: "friendly humanoid robot guide who is the learner's personal English coach; curious about humans, a little funny, chat about anything and now and then teach one useful phrase", av: ["#eef1f6", "#9aa3b5", "#5ff5e6", 0], o: "Hi! I'm Nova, your English guide. How are you feeling today?" },
+ owl: { k: "owl", t: "Robot guide", n: "Nova", r: "friendly humanoid robot guide who is the learner's personal language coach; curious about humans, a little funny, chat about anything and now and then teach one useful phrase", av: ["#eef1f6", "#9aa3b5", "#5ff5e6", 0], o: "Hi! I'm Nova, your English guide. How are you feeling today?" },
  free: { k: "free", t: "Free talk", n: "Sam", r: "an easygoing American friend who is curious about the learner's life", av: ["#e9b995", "#4a2c1a", "#3b1f4a", 2], o: "Hey! Good to see you. So, how was your day?" },
  story: { k: "story", t: "Stories", n: "Storyteller", r: "storyteller", av: ["#f1c6a1", "#9ca3af", "#7c3aed", 2] }
 };
@@ -565,7 +584,7 @@ const LEVELS = {
  A1: "Use only very basic, high-frequency words and very short sentences (3 to 7 words). Present tense only. Ask very simple questions, often yes/no or with two options (for example: Coffee or tea?).",
  A2: "Use very simple, common words and short sentences (under 10 words). Mostly present and past tense.",
  B1: "Use everyday words and clear sentences (under 15 words). Avoid rare idioms.",
- B2: "Use natural everyday American English. You may use common idioms and phrasal verbs.",
+ B2: "Use natural everyday language. You may use common idioms and expressions.",
  C1: "Speak like a native speaker with a friend: natural rhythm, idioms, phrasal verbs, light humor, longer turns and open questions."
 };
 const LV = Object.keys(LEVELS);
@@ -577,12 +596,24 @@ const newPersona = () => ({ trait: pickOne(TRAITS), interest: pickOne(INTERESTS)
 const CORR = { always: "Siempre", summary: "Solo resumen", off: "No corregir" };
 
 /* ---------- almacenamiento ---------- */
+/* perfiles: cada persona tiene su propio progreso en el mismo teléfono ("" = perfil principal) */
+const PROFILE = (() => { try { return localStorage.getItem("tynl_profile") || ""; } catch { return ""; } })();
+const PFX = PROFILE ? "lt_" + PROFILE + "_" : "lt_";
 const store = {
- get(k, d) { try { const v = localStorage.getItem("lt_" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
- set(k, v) { try { localStorage.setItem("lt_" + k, JSON.stringify(v)); } catch {} }
+ get(k, d) { try { const v = localStorage.getItem(PFX + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+ set(k, v) { try { localStorage.setItem(PFX + k, JSON.stringify(v)); } catch {} }
 };
 const S = Object.assign({ gfx: "low", name: "", model: null, level: "B1", rate: 0.9, auto: true, voice: "", f16: null, corr: "always", pack: "daily", job: "", likes: "", ai: null, cloudUrl: "", cloudCode: "", sug: "auto", facts: [] }, store.get("settings", {}));
 if (!S.ai) S.ai = S.model ? "local" : "cloud";
+/* idiomas: TL = el que aprendes, NL = el tuyo. Pedro: inglés←español. Anastasiya: español←ruso. */
+const LANGS = {
+ en: { name: "English", code: "en-US", rx: /^en[-_]/i, pref: /en[-_]US/i, tr: "natural American English", city: "the Chicago area" },
+ es: { name: "Spanish", code: "es-MX", rx: /^es[-_]/i, pref: /es[-_](US|MX|419)/i, tr: "natural Latin American Spanish", city: "Lima, Peru" },
+ ru: { name: "Russian", code: "ru-RU", rx: /^ru[-_]/i, pref: /ru[-_]RU/i, tr: "natural Russian", city: "Moscow" }
+};
+const TL = LANGS[S.target] || LANGS.en, NL = LANGS[S.native] || LANGS.es;
+const UIRU = S.native === "ru";
+const T = (es, ru) => (UIRU ? ru : es);
 const saveS = () => store.set("settings", S);
 let chats = store.get("chats", {});
 let vocab = store.get("vocab", []);
@@ -591,7 +622,7 @@ let customs = store.get("customs", []);
 let stats = Object.assign({ days: {}, total: 0 }, store.get("stats", {}));
 const today = () => new Date().toISOString().slice(0, 10);
 function addInput(text) {
- const w = (text.match(/[A-Za-z']+/g) || []).length;
+ const w = (text.match(/[\p{L}']+/gu) || []).length;
  stats.days[today()] = (stats.days[today()] || 0) + w; stats.total += w; store.set("stats", stats); renderStats();
 }
 function renderStats() {
@@ -718,14 +749,14 @@ async function ask(messages, opts = {}, onTok) {
  } finally { busy = false; updTools(); world?.setBusy(false); }
 }
 async function oneShot(prompt, max = 120) {
- return ask([{ role: "system", content: "You are a precise, kind English teacher for a native Spanish speaker. Follow the requested format exactly. No markdown." }, { role: "user", content: prompt }], { temp: 0.2, max });
+ return ask([{ role: "system", content: `You are a precise, kind ${TL.name} teacher for a native ${NL.name} speaker. Follow the requested format exactly. No markdown.` }, { role: "user", content: prompt }], { temp: 0.2, max });
 }
 
 /* ---------- voz ---------- */
 let voices = [], esVoices = [];
-function loadVoices() { const all = window.speechSynthesis?.getVoices() || []; voices = all.filter((v) => /^en[-_]/i.test(v.lang)); esVoices = all.filter((v) => /^es[-_]/i.test(v.lang)); }
+function loadVoices() { const all = window.speechSynthesis?.getVoices() || []; voices = all.filter((v) => TL.rx.test(v.lang)); esVoices = all.filter((v) => NL.rx.test(v.lang)); }
 if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
-function pickVoice() { return voices.find((v) => v.name === S.voice) || voices.find((v) => /en[-_]US/i.test(v.lang) && v.localService) || voices.find((v) => v.localService) || voices[0]; }
+function pickVoice() { return voices.find((v) => v.name === S.voice) || voices.find((v) => TL.pref.test(v.lang) && v.localService) || voices.find((v) => v.localService) || voices[0]; }
 // Voz natural de cada personaje (Gemini, por tu servidor). Si falla, se usa la voz del teléfono.
 const CHAR_VOICE = { cafe: "Leda", airport: "Puck", grocery: "Kore", pharmacy: "Aoede", landlord: "Sulafat", neighbor: "Fenrir", bank: "Orus", restaurant: "Achird", interview: "Despina", church: "Vindemiatrix", dmv: "Schedar", mechanic: "Algenib", free: "Umbriel", owl: "Puck", guide: "Zephyr", clinic: "Callirrhoe", rounds: "Iapetus", results: "Rasalgethi", occ: "Enceladus", weigh: "Alnilam", dispatch: "Autonoe", breakdown: "Sadaltager", truckstop: "Erinome", client: "Algieba", irs: "Laomedeia", close: "Zubenelgenubi", firstday: "Achernar", teacher: "Sadachbia", parents: "Pulcherrima", story: "Gacrux" };
 const VOICE_POOL = ["Kore", "Puck", "Leda", "Orus", "Aoede", "Fenrir", "Despina", "Iapetus", "Autonoe", "Algenib"];
@@ -770,7 +801,7 @@ function speak(text, lang = "en", hl = null, k = null) {
   const clean = String(text).replace(/[*_#]/g, "");
   const u = new SpeechSynthesisUtterance(clean);
   const v = lang === "es" ? (esVoices.find((x) => x.localService) || esVoices[0]) : pickVoice();
-  if (v) u.voice = v; u.lang = v?.lang || (lang === "es" ? "es-US" : "en-US"); u.rate = S.rate;
+  if (v) u.voice = v; u.lang = v?.lang || (lang === "es" ? NL.code : TL.code); u.rate = S.rate;
   let spans = null, gotB = false, est = 0, t0 = 0;
   if (hl) { hl.innerHTML = karaokeHTML(clean); spans = [...hl.querySelectorAll(".w")]; }
   const mark = (ci) => { if (!spans) return; let on = null; for (const s of spans) { if (+s.dataset.o <= ci) on = s; else break; } spans.forEach((s) => s.classList.toggle("on", s === on)); };
@@ -789,8 +820,8 @@ function speak(text, lang = "en", hl = null, k = null) {
 }
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let localSR = false;
-(async () => { try { if (SR?.available) localSR = (await SR.available({ langs: ["en-US"], processLocally: true })) === "available"; } catch {} })();
-function newRec() { const r = new SR(); r.lang = "en-US"; r.interimResults = true; r.continuous = false; try { if (localSR && "processLocally" in r) r.processLocally = true; } catch {} return r; }
+(async () => { try { if (SR?.available) localSR = (await SR.available({ langs: [TL.code], processLocally: true })) === "available"; } catch {} })();
+function newRec() { const r = new SR(); r.lang = TL.code; r.interimResults = true; r.continuous = false; try { if (localSR && "processLocally" in r) r.processLocally = true; } catch {} return r; }
 const srErr = (e) => e === "network" ? "El reconocimiento de voz necesita internet en este teléfono. En Ajustes puedes descargar el paquete de voz, o usa el dictado del teclado." : e === "not-allowed" || e === "service-not-allowed" ? "Permite el uso del micrófono para hablar" : e === "language-not-supported" ? "Descarga el paquete de voz en Ajustes" : "No te escuché bien, intenta otra vez";
 let rec = null;
 function toggleMic() {
@@ -864,7 +895,15 @@ async function goSetup() {
 
 /* ---------- inicio ---------- */
 const allScenes = () => [...PACKS.flatMap((p) => p.scenes), ...customs];
-const charOf = (k) => allScenes().find((p) => p.k === k) || SPECIAL[k];
+const ES_NAMES = { airport: "Tomás", cafe: "María", grocery: "Rosa", pharmacy: "Ana", landlord: "Sra. Vargas", neighbor: "Miguel", bank: "David", restaurant: "Cristian", interview: "Sra. Castillo", church: "Graciela", dmv: "Empleado", mechanic: "Ramón", free: "Samuel", clinic: "Carmen", rounds: "Dr. Paredes", results: "Sr. Jiménez", occ: "Luis", weigh: "Oficial Díaz", dispatch: "Lidia", breakdown: "José", truckstop: "Bety", client: "Sr. Bravo", irs: "Jimena", close: "Marcos", firstday: "Emma", teacher: "Prof. Ruiz", parents: "Sra. Guerra" };
+const RU_SCENE = { airport: "Регистрация на рейс", cafe: "Закажи кофе", grocery: "На кассе", pharmacy: "Забери лекарство", landlord: "Спроси о квартире", neighbor: "Разговор с соседом", bank: "Открой счёт в банке", restaurant: "Закажи ужин", interview: "Собеседование", church: "Знакомство после службы", dmv: "Водительские права", mechanic: "Машина шумит", free: "Свободный разговор", owl: "Твой гид", clinic: "Первый день врача", rounds: "Обход в больнице", results: "Объясни диагноз", occ: "Медосмотр на работе", weigh: "Проверка грузовика", dispatch: "Звонок диспетчера", breakdown: "Поломка в пути", truckstop: "Ужин на стоянке", client: "Клиент с чеками", irs: "Письмо из налоговой", close: "Встреча с начальником", firstday: "Новенький в классе", teacher: "Разговор с учителем", parents: "Родительское собрание" };
+function locChar(c) {
+ if (!c || c.custom) return c;
+ if (TL === LANGS.en) return UIRU ? { ...c, es: RU_SCENE[c.k] || c.es } : c;
+ const r = c.r.replace(/O'Hare airport/g, "Jorge Chávez airport in Lima").replace(/\bChicago\b/g, "Lima").replace(/\bUS\b/g, "Peruvian").replace(/American/g, "Peruvian").replace(/\bIRS\b/g, "SUNAT (tax office)").replace(/DMV \(driver's license office\)/g, "driver's license office").replace(/\bDOT\b/g, "highway");
+ return { ...c, n: ES_NAMES[c.k] || c.n, r, t: c.es, es: UIRU ? (RU_SCENE[c.k] || c.es) : c.es, o: c.k === "owl" ? "¡Hola! Soy Nova, tu guía. ¿Cómo te sientes hoy?" : null };
+}
+const charOf = (k) => locChar(allScenes().find((p) => p.k === k) || SPECIAL[k]);
 function goHome() {
  const packs = [...PACKS.map((p) => [p.k, p.name]), ["mine", "Mis escenas"]];
  if (!packs.some((p) => p[0] === S.pack)) S.pack = "daily";
@@ -890,21 +929,21 @@ function learnerLine() {
  const bits = [];
  if (S.name) bits.push(`name: ${S.name}`);
  if (S.job) bits.push(`works as: ${S.job}`); if (S.likes) bits.push(`likes: ${S.likes}`);
- if (S.facts?.length) bits.push(`things they told you in earlier chats (written in Spanish): ${S.facts.slice(0, 8).join("; ")}`);
+ if (S.facts?.length) bits.push(`things they told you in earlier chats (written in ${NL.name}): ${S.facts.slice(0, 8).join("; ")}`);
  return bits.length ? `\nAbout the learner (${bits.join("; ")}). Bring this up naturally only when it fits the conversation.` : "";
 }
 function sysPrompt(k) {
  const c = charOf(k), L = levelFor(k), lv = LEVELS[L];
- if (k === "story") return `You are a warm storyteller for an English learner whose native language is Spanish (level ${L}). ${lv}
+ if (k === "story") return `You are a warm storyteller for a ${TL.name} learner whose native language is ${NL.name} (level ${L}). Tell the story in ${TL.name}. ${lv}
 Tell stories in short parts of 100-160 words. Keep the same characters and repeat key words often so the learner can pick them up from context. Make the story interesting and easy to follow. When the learner answers or comments, reply kindly in 1-3 sentences, using the correct form of anything they got wrong. No lists, no emojis, no markdown.${learnerLine()}`;
- const role = c.custom ? `the other person in this scene, which the learner described (maybe in Spanish): "${c.r}". Your name is ${c.n}` : `${c.n}, a ${c.r}`;
- return `You are ${role}. You are having a spoken conversation with an English learner whose native language is Spanish (level ${L}).
+ const role = c.custom ? `the other person in this scene, which the learner described (maybe in ${NL.name}): "${c.r}". Your name is ${c.n}` : `${c.n}, a ${c.r}`;
+ return `You are ${role}. You are having a spoken conversation with a ${TL.name} learner whose native language is ${NL.name} (level ${L}).
 Rules:
-- Stay in character and keep the scene realistic. Always speak English.
+- Stay in character and keep the scene realistic. Always speak ${TL.name}${TL === LANGS.es ? " (neutral Latin American Spanish)" : ""}.
 - Reply in 1 to 3 short sentences, then ask one easy question to keep talking.
 - ${lv}
 - Do not stop the conversation to correct the learner (a separate teacher does that). If they make an error, simply use the correct form naturally in your reply.
-- If the learner writes in Spanish, answer in simple English and help them say it.
+- If the learner writes in ${NL.name}, answer in simple ${TL.name} and help them say it.
 - Be warm and encouraging. No lists, no emojis, no markdown.${personaLine(k)}${relLine(k)}${learnerLine()}`;
 }
 function personaLine(k) {
@@ -931,7 +970,7 @@ function openChat(k, storyTopic, view = "chat") {
  else if (ch.msgs.length === 1 && ch.msgs[0].r === "assistant") addInput(ch.msgs[0].t);
 }
 function saveChats() { store.set("chats", chats); }
-const wordsHTML = (t) => esc(t).replace(/[A-Za-z][A-Za-z'’-]*/g, (w) => `<span class="w">${w}</span>`);
+const wordsHTML = (t) => esc(t).replace(/\p{L}[\p{L}'’-]*/gu, (w) => `<span class="w">${w}</span>`);
 function fbHTML(m) {
  if (m.ok) return `<div class="okmark">${ic("check", 3)}Bien dicho</div>`;
  if (!m.fix) return "";
@@ -990,12 +1029,12 @@ async function generate(speakIt = true) {
 async function checkLine(m) {
  const ctx = [...chats[cur].msgs].slice(0, chats[cur].msgs.indexOf(m)).reverse().find((x) => x.r === "assistant" && !x.hidden);
  const out = await oneShot(`Context: the other person said "${(ctx?.t || "").slice(0, 200)}".
-The English learner answered: "${m.t}"
+The ${TL.name} learner answered: "${m.t}"
 Check grammar, word choice and naturalness. Small capitalization or punctuation issues do not count.
 If the answer is correct and natural, reply with only: OK
 Otherwise reply with exactly two lines:
 Better: <the corrected, natural sentence>
-Por qué: <short explanation in Spanish, max 20 words>`, 110);
+Por qué: <short explanation in ${NL.name}, max 20 words>`, 110);
  const better = out.match(/Better:\s*(.+)/i)?.[1]?.trim();
  const why = out.match(/Por qu[eé]:\s*(.+)/i)?.[1]?.trim();
  const same = better && better.toLowerCase().replace(/[^a-z ]/g, "").trim() === m.t.toLowerCase().replace(/[^a-z ]/g, "").trim();
@@ -1032,15 +1071,15 @@ async function msgAction(b, i, a) {
  if (busy) return toast("Espera un momento…");
  const old = b.innerHTML; b.innerHTML = loadingDots;
  try {
-  if (a === "tr") m.x = await oneShot(`Translate into natural Latin American Spanish. Output only the translation.\n\n${m.t}`, 220);
-  if (a === "easy") { m.x = await oneShot(`Rewrite this in much simpler English (A1-A2 level, very short sentences). Output only the rewrite.\n\n${m.t}`, 200); addInput(m.x); }
+  if (a === "tr") m.x = await oneShot(`Translate into ${NL.tr}. Output only the translation.\n\n${m.t}`, 220);
+  if (a === "easy") { m.x = await oneShot(`Rewrite this in much simpler ${TL.name} (A1-A2 level, very short sentences). Output only the rewrite.\n\n${m.t}`, 200); addInput(m.x); }
   if (a === "fb") { await checkLine(m); return; }
   saveChats(); renderMsgs(); if (inWorld()) syncBubble();
  } catch (er) { b.innerHTML = old; toast(er.message); }
 }
 async function suggestReplies() {
  const last = [...chats[cur].msgs].reverse().find((m) => m.r === "assistant");
- const out = await oneShot(`In a conversation, ${charOf(cur).n} just said: "${last?.t || ""}"\nWrite 3 short, natural replies an English learner (level ${levelFor(cur)}) could say next. One per line. No numbers, no quotes.`, 120);
+ const out = await oneShot(`In a conversation, ${charOf(cur).n} just said: "${last?.t || ""}"\nWrite 3 short, natural replies in ${TL.name} that a learner (level ${levelFor(cur)}) could say next. One per line. No numbers, no quotes.`, 120);
  return out.split("\n").map((s) => s.replace(/^[\s\-•\d.)"]+|"$/g, "").trim()).filter(Boolean).slice(0, 3);
 }
 $("#tools").onclick = async (e) => {
@@ -1070,7 +1109,7 @@ function leaveChat() {
  if (ms || viewMode === "world") goPath(); else goHome();
  cur = k; mission = ms;
  if ((S.corr !== "off" || ms) && said >= 3 && hasAI()) summarySheet(false);
- else { if (ms && said < 3) toast("Di al menos 3 frases para completar la misión"); cur = null; mission = null; }
+ else { if (ms && said < 3) toast(T("Di al menos 3 frases para completar la misión", "Скажи хотя бы 3 фразы, чтобы выполнить задание")); cur = null; mission = null; }
 }
 $("#backBtn").onclick = () => { if (viewMode === "world" && cur) { show("world"); syncBubble(); world?.start(); } else leaveChat(); };
 $("#resetBtn").onclick = () => {
@@ -1088,7 +1127,7 @@ async function summarySheet(fromTools) {
  const src = fromTools ? chats[k].msgs : chats[k].msgs.slice(sessionStart);
  const lines = src.filter((m) => m.r === "user" && !m.hidden).map((m) => m.t).slice(-12);
  if (!lines.length) return toast("Aún no has dicho nada en esta conversación");
- openSheet(`<h3>Resumen de tu charla</h3><p class="note">Tu puntaje y los errores más importantes para practicar. Toca el altavoz para escuchar la versión correcta.</p><div id="sumBody" style="margin-top:12px">${loadingDots}</div><div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn sun" id="sumSave" disabled>Guardar en mis correcciones</button><button class="btn ghost" id="sumClose">Cerrar</button></div>`);
+ openSheet(`<h3>${T("Resumen de tu charla", "Итоги разговора")}</h3><p class="note">${T("Tu puntaje y los errores más importantes para practicar. Toca el altavoz para escuchar la versión correcta.", "Твои очки и главные ошибки. Нажми на динамик, чтобы услышать правильный вариант.")}</p><div id="sumBody" style="margin-top:12px">${loadingDots}</div><div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn sun" id="sumSave" disabled>Guardar en mis correcciones</button><button class="btn ghost" id="sumClose">Cerrar</button></div>`);
  $("#sumClose").onclick = () => { closeSheet(); if (!$("#chat").classList.contains("on")) cur = null; if ($("#path").classList.contains("on")) goPath(); };
  let items = [];
  const rend = () => {
@@ -1105,24 +1144,24 @@ async function summarySheet(fromTools) {
  const doScores = async () => {
   if (!hasAI() || busy) { scoreBox.remove(); return; }
   try {
-   const out = await oneShot(`Rate this English learner's sentences from a conversation, each skill from 1 to 10, compared with a native speaker:
+   const out = await oneShot(`Rate this ${TL.name} learner's sentences from a conversation, each skill from 1 to 10, compared with a native speaker:
 ${lines.map((l) => "- " + l).join("\n")}
 Reply with exactly five lines:
 Vocabulary: <number>
 Grammar: <number>
 Fluency: <number>
 Style: <number>
-Consejo: <one encouraging tip in Spanish, max 25 words>`, 120);
+Consejo: <one encouraging tip in ${NL.name}, max 25 words>`, 120);
    const get = (n) => { const v = +(out.match(new RegExp(n + "\\s*:\\s*(\\d+)", "i"))?.[1] || 0); return v ? Math.max(1, Math.min(10, v)) : 0; };
-   const sc = [["Vocabulario", get("Vocabulary")], ["Gramática", get("Grammar")], ["Fluidez", get("Fluency")], ["Estilo", get("Style")]];
+   const sc = [[T("Vocabulario", "Словарь"), get("Vocabulary")], [T("Gramática", "Грамматика"), get("Grammar")], [T("Fluidez", "Беглость"), get("Fluency")], [T("Estilo", "Стиль"), get("Style")]];
    const tip = out.match(/Consejo:\s*(.+)/i)?.[1] || "";
    if (!sc.some((x) => x[1])) { scoreBox.remove(); return; }
    const got = sc.filter((x) => x[1]), avg = got.reduce((a, x) => a + x[1], 0) / got.length;
    const stars = avg >= 8.5 ? 3 : avg >= 6.5 ? 2 : avg >= 4 ? 1 : 0;
-   const nWords = (lines.join(" ").match(/[A-Za-z']+/g) || []).length, pts = Math.round(nWords * avg * 2);
+   const nWords = (lines.join(" ").match(/[\p{L}']+/gu) || []).length, pts = Math.round(nWords * avg * 2);
    const best = stats.best?.[k] || 0, record = pts > best;
    if (record) stats.best = { ...(stats.best || {}), [k]: pts };
-   scoreBox.innerHTML = `<div class="stars">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</div><div class="pts">${pts}<small>${record ? "¡Nuevo récord! · " : "puntos · "}${nWords} palabras tuyas</small></div>`
+   scoreBox.innerHTML = `<div class="stars">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</div><div class="pts">${pts}<small>${record ? T("¡Nuevo récord! · ", "Новый рекорд! · ") : T("puntos · ", "очков · ")}${nWords} ${T("palabras tuyas", "твоих слов")}</small></div>`
     + sc.map(([n, v]) => `<div class="sc"><span>${n}</span><span class="tr"><i style="width:${v * 10}%"></i></span><b>${v}/10</b></div>`).join("") + (tip ? `<p class="note">${esc(tip)}</p>` : "");
    if (stars >= 2) beep(990);
    const transcript = chats[k].msgs.slice(sessionStart).filter((m) => !m.hidden).map((m) => (m.r === "user" ? "Learner: " : charOf(k).n + ": ") + m.t).join("\n").slice(-6000);
@@ -1132,14 +1171,14 @@ Consejo: <one encouraging tip in Spanish, max 25 words>`, 120);
   // memoria: lo que contaste de ti, para que los personajes lo recuerden la próxima vez
   if (busy || k === "story") return;
   try {
-   const fx = await oneShot(`These are sentences an English learner said in a conversation:
+   const fx = await oneShot(`These are sentences a ${TL.name} learner said in a conversation:
 ${lines.map((l) => "- " + l).join("\n")}
-List up to 3 short personal facts the learner shared about themselves (for example: es de Perú; trabaja como médico; tiene dos hijos). Write them in Spanish, one per line, max 8 words each, no numbering. If there are none, write only: NONE`, 80);
+List up to 3 short personal facts the learner shared about themselves (for example: es de Perú; trabaja como médico; tiene dos hijos). Write them in ${NL.name}, one per line, max 8 words each, no numbering. If there are none, write only: NONE`, 80);
    const nf = fx.split("\n").map((x) => x.replace(/^[\s\-•*\d.)]+/, "").trim()).filter((x) => x && !/^none\b/i.test(x) && x.length < 80);
    if (!nf.length) return;
    S.facts = [...new Set([...nf, ...(S.facts || [])])].slice(0, 12); saveS();
    const mem = document.createElement("div"); mem.className = "mem";
-   mem.innerHTML = `<b>Lo recordaré para la próxima:</b><br>${nf.map(esc).join("<br>")}`;
+   mem.innerHTML = `<b>${T("Lo recordaré para la próxima:", "Я запомню на следующий раз:")}</b><br>${nf.map(esc).join("<br>")}`;
    scoreBox.after(mem);
   } catch {}
  };
@@ -1152,13 +1191,13 @@ List up to 3 short personal facts the learner shared about themselves (for examp
  }
  if (busy) { $("#sumBody").innerHTML = `<p class="note">El tutor está ocupado; abre «Mis errores» en un momento.</p>`; return; }
  try {
-  const out = await oneShot(`These are sentences an English learner (native Spanish speaker) said in a conversation:
+  const out = await oneShot(`These are sentences a ${TL.name} learner (native ${NL.name} speaker) said in a conversation:
 ${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}
 Find up to 4 of the most important real mistakes (grammar, word choice, unnatural phrasing). Ignore capitalization and punctuation.
 For each mistake write exactly three lines:
 Said: <the learner's sentence>
 Better: <natural corrected sentence>
-Por qué: <short explanation in Spanish, max 18 words>
+Por qué: <short explanation in ${NL.name}, max 18 words>
 Leave a blank line between mistakes. If there are no real mistakes, write only: NONE`, 420);
   items = out.split(/\n\s*\n/).map((b) => ({ said: b.match(/Said:\s*(.+)/i)?.[1]?.trim(), better: b.match(/Better:\s*(.+)/i)?.[1]?.trim(), why: b.match(/Por qu[eé]:\s*(.+)/i)?.[1]?.trim() || "" }))
    .filter((f) => f.said && f.better && f.said.toLowerCase() !== f.better.toLowerCase());
@@ -1220,7 +1259,7 @@ async function hfHandle(text) {
  if (CMD.slower.test(text)) { S.rate = Math.max(0.6, +(S.rate - 0.1).toFixed(2)); saveS(); hfState("speak", "Más despacio…"); await speak(last?.t || ""); return hfListen(); }
  if (CMD.translate.test(text)) {
   hfState("think", "Traduciendo…");
-  try { const es = await oneShot(`Translate into natural Latin American Spanish. Output only the translation.\n\n${last?.t || ""}`, 200); hfState("speak", "En español…"); await speak(es, "es"); } catch {}
+  try { const es = await oneShot(`Translate into ${NL.tr}. Output only the translation.\n\n${last?.t || ""}`, 200); hfState("speak", "En español…"); await speak(es, "es"); } catch {}
   hfState("speak", "Otra vez en inglés…"); await speak(last?.t || "", "en", null, cur); return hfListen();
  }
  if (CMD.help.test(text)) {
@@ -1260,7 +1299,7 @@ async function wordSheet(word, sentence) {
  if (saved) return;
  if (!hasAI() || busy) { $("#wDef").textContent = busy ? "El tutor está ocupado; vuelve a tocar la palabra en un momento." : "Elige el cerebro del tutor en Ajustes para ver explicaciones."; return; }
  try {
-  def = await oneShot(`Word: "${word}"\nSentence: "${sentence.slice(0, 300)}"\nWrite two lines:\n1) A very simple English definition of the word as used here (max 14 words).\n2) ES: the Spanish translation (1-3 words).`, 70);
+  def = await oneShot(`Word: "${word}"\nSentence: "${sentence.slice(0, 300)}"\nWrite two lines:\n1) A very simple ${TL.name} definition of the word as used here (max 14 words).\n2) ${NL.name === "Spanish" ? "ES" : "RU"}: the ${NL.name} translation (1-3 words).`, 70);
   def = def.replace(/^\s*1\)\s*/m, "").replace(/^\s*2\)\s*/m, "");
   if ($("#wDef")) $("#wDef").textContent = def;
  } catch (e) { if ($("#wDef")) $("#wDef").textContent = e.message; }
@@ -1314,6 +1353,7 @@ function settingsSheet() {
  const cm = MODELS.find((m) => m.id === S.model), brain = cloudOn() ? "IA en la nube (tu servidor)" : cm ? `${cm.name} (${cm.size}) · en el teléfono · ${S.f16 ? "precisión f16" : "precisión f32"}` : "Ninguno elegido";
  openSheet(`<h3>Ajustes</h3>
  <div class="field"><label>Correcciones</label><div class="seg" id="corrSeg">${Object.entries(CORR).map(([k, n]) => `<button data-c="${k}" class="${k === S.corr ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">«Siempre»: corrige cada frase bajo tu mensaje (y en manos libres te dice el tip en voz alta). «Solo resumen»: te muestra tus errores al salir de la charla.</p></div>
+ <div class="field"><label>${T("Familia", "Семья")}</label><div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="setWho">👥 ${T("Perfiles y progreso", "Профили и прогресс")}</button><button class="btn ghost" id="setTest">📝 ${T("Test de nivel", "Тест на уровень")}</button></div></div>
  <div class="field"><label>Tu trabajo en el camino</label><div class="seg" id="profSeg" style="grid-template-columns:1fr 1fr">${Object.entries(PROF_PACKS).map(([k, n]) => `<button data-p="${k}" class="${k === profPack() ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Las misiones del barrio «Trabajo».</p></div>
  ${cloudOn() ? `<div class="field"><label><input type="checkbox" id="cvChk" ${S.cvoice !== false ? "checked" : ""}> Voz natural para cada personaje</label><p class="note">Cada persona tiene su propia voz (usa tu servidor gratuito). Si se acaba el límite del día, se usa la voz del teléfono.</p></div>` : ""}
  <div class="field"><label>Sugerencias de respuesta</label><div class="seg" id="sugSeg">${[["auto", "Siempre"], ["ask", "Si las pido"], ["off", "Nunca"]].map(([k, n]) => `<button data-s="${k}" class="${k === S.sug ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Una frase que puedes decir, con práctica de pronunciación y «Di en español…». «Si las pido»: toca el botón de ayuda.</p></div>
@@ -1330,6 +1370,8 @@ function settingsSheet() {
  ${SR && SR.install ? `<div class="field"><label>Reconocimiento de voz sin internet</label><p class="note">Chrome puede descargar el paquete de inglés para reconocer tu voz sin conexión (necesario para manos libres sin internet).</p><button class="btn ghost" id="srInst">Descargar paquete de voz</button></div>` : ""}
  <button class="btn" id="setOk" style="width:100%;margin-top:8px">Listo</button>`);
  $("#gfxSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.gfx = b.dataset.g; saveS(); [...$("#gfxSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); toast("Cierra y vuelve a abrir la app para aplicar el cambio"); };
+ $("#setWho").onclick = () => { closeSheet(); whoScreen(); };
+ $("#setTest").onclick = () => { closeSheet(); if (!hasAI()) return toast(NEED_AI); startPlacement(); };
  $("#profSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.prof = b.dataset.p; saveS(); [...$("#profSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
  if ($("#cvChk")) $("#cvChk").onchange = (e) => { S.cvoice = e.target.checked; saveS(); };
  $("#sugSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.sug = b.dataset.s; saveS(); [...$("#sugSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if (S.sug === "off") hideCard(); };
@@ -1345,7 +1387,7 @@ function settingsSheet() {
  $("#autoChk").onchange = (e) => { S.auto = e.target.checked; saveS(); };
  $("#chgModel").onclick = () => { closeSheet(); goSetup(); };
  $("#setOk").onclick = closeSheet;
- if ($("#srInst")) $("#srInst").onclick = async () => { try { const ok = await SR.install({ langs: ["en-US"], processLocally: true }); if (ok) localSR = true; toast(ok ? "Paquete de voz instalado" : "Este teléfono no permitió instalarlo"); } catch (e) { toast("No disponible: " + e.message); } };
+ if ($("#srInst")) $("#srInst").onclick = async () => { try { const ok = await SR.install({ langs: [TL.code], processLocally: true }); if (ok) localSR = true; toast(ok ? "Paquete de voz instalado" : "Este teléfono no permitió instalarlo"); } catch (e) { toast("No disponible: " + e.message); } };
 }
 
 /* ---------- mundo 3D ---------- */
@@ -1371,7 +1413,7 @@ function fadeTo(fn) {
  setTimeout(() => { fn(); setTimeout(() => f.classList.remove("on"), 60); }, 330);
 }
 let speakTurn = 0;
-const karaokeHTML = (t) => { let h = "", last = 0; for (const m of String(t).matchAll(/[A-Za-z][A-Za-z'’-]*/g)) { h += esc(t.slice(last, m.index)) + `<span class="w" data-o="${m.index}">${esc(m[0])}</span>`; last = m.index + m[0].length; } return h + esc(String(t).slice(last)); };
+const karaokeHTML = (t) => { let h = "", last = 0; for (const m of String(t).matchAll(/\p{L}[\p{L}'’-]*/gu)) { h += esc(t.slice(last, m.index)) + `<span class="w" data-o="${m.index}">${esc(m[0])}</span>`; last = m.index + m[0].length; } return h + esc(String(t).slice(last)); };
 function setBubble(text, es) {
  $("#wText").innerHTML = karaokeHTML(text); $("#wEs").hidden = !es; $("#wEs").textContent = es || "";
  $("#wBub").hidden = !text && !es; $("#wBub").scrollTop = $("#wBub").scrollHeight;
@@ -1453,8 +1495,8 @@ const cardText = () => card.opts[card.i] || "";
 function hideCard() { $("#wCard").hidden = true; card.key = null; if (prRec) { try { prRec.abort(); } catch {} prRec = null; } }
 function renderCard() {
  const t = cardText(); $("#wCard").hidden = !t && !card.loading;
- $("#wCardHd").textContent = card.es && card.fromEs ? "Así se dice" : "Puedes decir";
- $("#wDi").innerHTML = `${ic("es")}Di en español…`;
+ $("#wCardHd").textContent = card.es && card.fromEs ? T("Así se dice", "Так говорят") : T("Puedes decir", "Можно сказать");
+ $("#wDi").innerHTML = `${ic("es")}${T("Di en español…", "Скажи по-русски…")}`;
  $("#wCardTxt").innerHTML = card.loading ? loadingDots : card.words
   ? card.words.map((p, i) => i % 2 ? `<span class="w ${p.ok ? "good" : "bad"}">${esc(p.t)}</span>` : esc(p.t)).join("")
   : wordsHTML(t);
@@ -1462,10 +1504,10 @@ function renderCard() {
  $("#wCardScore").hidden = card.pct < 0;
  if (card.pct >= 0) {
   const p = Math.round(card.pct * 100);
-  $("#wCardScore").innerHTML = p >= 90 ? `<span style="color:var(--ok)">¡Excelente pronunciación! ${p} %</span>` : p >= 60 ? `<span style="color:#b7791f">Casi: ${p} %. Toca las palabras en rojo para escucharlas.</span>` : `<span style="color:var(--red)">${p} %. Escúchala y vuelve a intentar.</span>`;
+  $("#wCardScore").innerHTML = p >= 90 ? `<span style="color:var(--ok)">${T("¡Excelente pronunciación!", "Отличное произношение!")} ${p} %</span>` : p >= 60 ? `<span style="color:#b7791f">${T("Casi", "Почти")}: ${p} %. ${T("Toca las palabras en rojo para escucharlas.", "Нажми на красные слова, чтобы послушать.")}</span>` : `<span style="color:var(--red)">${p} %. ${T("Escúchala y vuelve a intentar.", "Послушай и попробуй ещё раз.")}</span>`;
  }
  $("#wCardAlts").innerHTML = card.loading ? "" : card.opts.map((o, i) => i === card.i ? "" : `<button data-alt="${i}">${esc(o)}</button>`).join("");
- $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="spk" aria-label="Escuchar">${ic("spk")}</button><button data-c="tr">${ic("tr")}Español</button><button data-c="pr" class="${prRec ? "rec" : ""}">${ic("mic")}${prRec ? "Te escucho…" : "Practicar"}</button><button data-c="use" class="go">${ic("check")}Decirlo</button>`;
+ $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="spk" aria-label="Escuchar">${ic("spk")}</button><button data-c="tr">${ic("tr")}${T("Español", "Перевод")}</button><button data-c="pr" class="${prRec ? "rec" : ""}">${ic("mic")}${prRec ? T("Te escucho…", "Слушаю…") : T("Practicar", "Практика")}</button><button data-c="use" class="go">${ic("check")}${T("Decirlo", "Сказать")}</button>`;
 }
 async function showSuggestions(key, force) {
  if (!inWorld() || hubMode || !key || cur !== key || key === "story") return;
@@ -1477,10 +1519,10 @@ async function showSuggestions(key, force) {
  } catch (e) { hideCard(); if (force) toast(e.message); }
 }
 // Pronunciación: compara palabra por palabra (subsecuencia común más larga) lo que dijiste con la frase.
-const normW = (w) => w.toLowerCase().replace(/’/g, "'").replace(/[^a-z']/g, "").replace(/'/g, "");
+const normW = (w) => w.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/’/g, "'").replace(/[^\p{L}']/gu, "").replace(/'/g, "");
 function scorePron(target, heard) {
- const parts = target.split(/([A-Za-z][A-Za-z'’-]*)/); // pares = separadores, impares = palabras
- const tw = parts.filter((_, i) => i % 2).map(normW), hw = (heard.match(/[A-Za-z][A-Za-z'’-]*/g) || []).map(normW);
+ const parts = target.split(/(\p{L}[\p{L}'’-]*)/u); // pares = separadores, impares = palabras
+ const tw = parts.filter((_, i) => i % 2).map(normW), hw = (heard.match(/\p{L}[\p{L}'’-]*/gu) || []).map(normW);
  const L = Array.from({ length: tw.length + 1 }, () => new Array(hw.length + 1).fill(0));
  for (let i = tw.length - 1; i >= 0; i--) for (let j = hw.length - 1; j >= 0; j--) L[i][j] = tw[i] === hw[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
  const ok = new Array(tw.length).fill(false);
@@ -1516,17 +1558,17 @@ $("#wCardActs").onclick = async (e) => {
   if (card.es) { card.es = ""; return renderCard(); }
   if (busy) return toast("Espera un momento…");
   b.innerHTML = loadingDots;
-  try { card.es = await oneShot(`Translate into natural Latin American Spanish. Output only the translation.\n\n${t}`, 120); } catch (er) { toast(er.message); }
+  try { card.es = await oneShot(`Translate into ${NL.tr}. Output only the translation.\n\n${t}`, 120); } catch (er) { toast(er.message); }
   renderCard();
  }
 };
 $("#wDi").onclick = () => {
- openSheet(`<h3>Dilo en español</h3><p class="note">Escribe o di lo que quieres responder y te digo cómo decirlo en inglés.</p>
- <div class="field"><textarea id="diTxt" placeholder="p. ej. Soy de Perú y llegué hace dos meses"></textarea></div>
- <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="diMic">${ic("mic")} Hablar en español</button><button class="btn" id="diGo">Traducir</button></div>`);
+ openSheet(`<h3>${T("Dilo en español", "Скажи по-русски")}</h3><p class="note">${T(`Escribe o di lo que quieres responder y te digo cómo decirlo en ${TL === LANGS.en ? "inglés" : "español"}.`, "Напиши или скажи, что хочешь ответить, и я скажу, как это по-испански.")}</p>
+ <div class="field"><textarea id="diTxt" placeholder="${T("p. ej. Soy de Perú y llegué hace dos meses", "например: Я из России и живу здесь два года")}"></textarea></div>
+ <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="diMic">${ic("mic")} ${T("Hablar en español", "Сказать по-русски")}</button><button class="btn" id="diGo">${T("Traducir", "Перевести")}</button></div>`);
  $("#diMic").onclick = () => {
   if (!SR) return toast("Tu navegador no reconoce voz");
-  const r = new SR(); r.lang = "es-US"; r.interimResults = true;
+  const r = new SR(); r.lang = NL.code; r.interimResults = true;
   r.onresult = (ev) => { let t = ""; for (const x of ev.results) t += x[0].transcript; $("#diTxt").value = t; };
   r.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
   r.onend = () => { $("#diMic").classList.remove("sun"); };
@@ -1538,7 +1580,7 @@ $("#wDi").onclick = () => {
   $("#diGo").innerHTML = loadingDots;
   const last = [...(chats[cur]?.msgs || [])].reverse().find((m) => m.r === "assistant" && !m.hidden);
   try {
-   const en = await oneShot(`In a conversation, the other person said: "${(last?.t || "").slice(0, 200)}"\nThe learner (English level ${levelFor(cur)}) wants to answer this, said in Spanish: "${es}"\nWrite how a native speaker would naturally say it in simple English. Output only the English sentence.`, 80);
+   const en = await oneShot(`In a conversation, the other person said: "${(last?.t || "").slice(0, 200)}"\nThe learner (${TL.name} level ${levelFor(cur)}) wants to answer this, said in ${NL.name}: "${es}"\nWrite how a native speaker would naturally say it in simple ${TL.name}. Output only the ${TL.name} sentence.`, 80);
    const clean = en.replace(/^["“]|["”]$/g, "").trim();
    closeSheet();
    card = { opts: [clean, ...card.opts.filter((o) => o !== clean)].slice(0, 4), i: 0, es, fromEs: true, key: cur, words: null, pct: -1 };
@@ -1570,11 +1612,11 @@ $("#pathBtn").onclick = () => goPath("path");
    · Cada persona tiene una vida propia (datos secretos) que vas descubriendo al conversar.
    · Una parada se abre cuando ya conoces a la anterior (nivel «Conocido»). */
 const FLV = [
- { n: "Desconocido", es: "Primer encuentro" },
- { n: "Conocido", es: "Ya te saluda" },
- { n: "Amigo", es: "Te cuenta cosas de su vida" },
- { n: "Buen amigo", es: "Hablan de planes y opiniones" },
- { n: "Mejor amigo", es: "Conversación real" }
+ { n: T("Desconocido", "Незнакомец") },
+ { n: T("Conocido", "Знакомый") },
+ { n: T("Amigo", "Друг") },
+ { n: T("Buen amigo", "Хороший друг") },
+ { n: T("Mejor amigo", "Лучший друг") }
 ];
 const XP_AT = [0, 3, 8, 14, 21]; // puntos de amistad para llegar a cada nivel
 const PORTRAITS = new Set(["airport", "bank", "cafe", "church", "clinic", "dmv", "free", "grocery", "interview", "landlord", "mechanic", "neighbor", "occ", "owl", "pharmacy", "restaurant", "results", "rounds"]);
@@ -1583,11 +1625,11 @@ const profPack = () => (PROF_PACKS[S.prof] ? S.prof : "med");
 function ROUTE() {
  const work = PACKS.find((p) => p.k === profPack()).scenes.map((x) => x.k);
  return [
-  { k: "arrive", name: "Llegada", es: "Tus primeros días en EE. UU.", img: "img/arrive.webp", stops: ["airport", "cafe", "grocery", "pharmacy"] },
-  { k: "home", name: "Mi barrio", es: "Casa, vecinos y dinero", img: "img/home.webp", stops: ["landlord", "neighbor", "bank", "restaurant"] },
-  { k: "work", name: "Trabajo", es: `Tu empleo · ${PROF_PACKS[profPack()]}`, img: "img/work.webp", stops: ["interview", ...work] },
-  { k: "community", name: "Comunidad", es: "Trámites y gente nueva", img: "img/community.webp", stops: ["dmv", "mechanic", "church"] },
-  { k: "friends", name: "Vida real", es: "Conversaciones de verdad", img: "img/friends.webp", stops: ["free"] }
+  { k: "arrive", name: T("Llegada", "Прибытие"), es: T(TL === LANGS.en ? "Tus primeros días en EE. UU." : "Tus primeros días", "Твои первые дни"), img: "img/arrive.webp", stops: ["airport", "cafe", "grocery", "pharmacy"] },
+  { k: "home", name: T("Mi barrio", "Мой район"), es: T("Casa, vecinos y dinero", "Дом, соседи и деньги"), img: "img/home.webp", stops: ["landlord", "neighbor", "bank", "restaurant"] },
+  { k: "work", name: T("Trabajo", "Работа"), es: T(`Tu empleo · ${PROF_PACKS[profPack()]}`, "Твоя работа"), img: "img/work.webp", stops: ["interview", ...work] },
+  { k: "community", name: T("Comunidad", "Сообщество"), es: T("Trámites y gente nueva", "Дела и новые люди"), img: "img/community.webp", stops: ["dmv", "mechanic", "church"] },
+  { k: "friends", name: T("Vida real", "Настоящая жизнь"), es: T("Conversaciones de verdad", "Настоящие разговоры"), img: "img/friends.webp", stops: ["free"] }
  ];
 }
 let rel = store.get("rel", {});
@@ -1596,11 +1638,11 @@ const relOf = (k) => rel[k] || (rel[k] = { xp: 0, visits: 0, bio: [], found: [] 
 function lvlOf(k) { const x = rel[k]?.xp || 0; let l = 0; XP_AT.forEach((v, i) => { if (x >= v) l = i; }); return l; }
 function levelFor(k) { return LV[Math.min(LV.length - 1, Math.max(k && !charOf(k)?.custom ? lvlOf(k) : 0, LV.indexOf(S.level)))] || "A1"; }
 const MISSION_ES = [
- (c) => `Saluda a ${c.n} y ${c.es.toLowerCase()}. Frases cortas.`,
- (c) => `${c.es}: termina la tarea y haz una pregunta extra.`,
- (c) => `Conoce a ${c.n}: pregúntale por su vida y descubre 1 dato.`,
- (c) => `Habla de planes y opiniones con ${c.n}; descubre 2 datos.`,
- (c) => `Charla libre como amigos: cuéntale tu semana y pregúntale la suya.`
+ (c) => T(`Saluda a ${c.n} y ${c.es.toLowerCase()}. Frases cortas.`, `Поздоровайся с ${c.n}: ${c.es.toLowerCase()}. Короткие фразы.`),
+ (c) => T(`${c.es}: termina la tarea y haz una pregunta extra.`, `${c.es}: выполни задачу и задай ещё один вопрос.`),
+ (c) => T(`Conoce a ${c.n}: pregúntale por su vida y descubre 1 dato.`, `Познакомься с ${c.n}: спроси о жизни и узнай 1 факт.`),
+ (c) => T(`Habla de planes y opiniones con ${c.n}; descubre 2 datos.`, `Поговори с ${c.n} о планах и мнениях; узнай 2 факта.`),
+ (c) => T(`Charla libre como amigos: cuéntale tu semana y pregúntale la suya.`, `Свободный разговор как с другом: расскажи о своей неделе и спроси о его.`)
 ];
 const MISSION_EN = [
  "This is your first time meeting the learner. Do the basic task of the scene using very simple language. Be patient and kind.",
@@ -1620,8 +1662,8 @@ function relLine(k) {
 async function ensureBio(k) {
  const r = relOf(k), c = charOf(k);
  if (r.bio?.length || !hasAI() || k === "story" || c.custom) return;
- const out = await oneShot(`Invent a realistic, friendly personal profile for ${c.n}, a ${c.r}, who lives in the Chicago area.
-Write exactly 8 short facts in simple English (max 9 words each), one per line, no numbering:
+ const out = await oneShot(`Invent a realistic, friendly personal profile for ${c.n}, a ${c.r}, who lives in ${TL.city}.
+Write exactly 8 short facts in simple ${TL.name} (max 9 words each), one per line, no numbering:
 hometown, family, a hobby, favorite food, a pet (or none), a dream for the future, something funny about them, what they do on weekends.`, 220);
  r.bio = out.split("\n").map((x) => x.replace(/^[\s\-•*\d.)]+/, "").trim()).filter((x) => x && x.length < 90).slice(0, 8);
  saveRel();
@@ -1649,56 +1691,57 @@ function goPath(tab = pathTab) {
  const route = ROUTE(), st = stopState(route);
  const total = route.reduce((a, d) => a + d.stops.length, 0), done = Object.values(st).filter((x) => x === "done").length;
  const t = stats.days[today()] || 0;
- $("#pStats").innerHTML = `<span>🔥 ${streakDays()} días</span><span>⭐ ${done}/${total} paradas</span><span>🗣 ${Math.round(t / 130)} min hoy</span>`;
+ $("#pStats").innerHTML = `<span>🔥 ${streakDays()} ${T("días", "дн.")}</span><span>⭐ ${done}/${total} ${T("paradas", "шагов")}</span><span>🗣 ${Math.round(t / 130)} ${T("min hoy", "мин сегодня")}</span>`;
  if (tab === "people") return renderPeople(route), show("path");
  if (tab === "classes") return renderClasses(), show("path");
  let idx = 0;
  const nextK = Object.keys(st).find((x) => st[x] === "open"), nc = nextK && charOf(nextK);
- const hi = S.name ? `¡Hola, ${esc(S.name)}!` : "¡Hola!";
- const guide = `<div class="guide">${PORTRAITS.has("owl") ? `<img class="por big" src="img/p/owl.webp" alt="Nova">` : portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>${hi}</b> Soy Nova, tu guía. ${nc ? `¿Seguimos? Tu próxima misión es con <b>${esc(nc.n)}</b>: ${esc(nc.es || nc.t)}.` : "¡Completaste el camino! Sigue charlando con tus amigos para subir de nivel."}</p>
-  <div class="gacts">${nc ? `<button class="btn" data-gk="${esc(nextK)}">▶ Continuar</button>` : ""}<button class="btn ghost" data-gclass="1">🧑‍🏫 Clase${dueCount() ? ` (${dueCount()} repaso${dueCount() > 1 ? "s" : ""})` : ""}</button><button class="btn ghost" data-gtalk="1">Charlar con Nova</button><button class="btn ghost" data-gfree="1">Práctica libre</button></div></div></div>`;
+ const hi = S.name ? T(`¡Hola, ${esc(S.name)}!`, `Привет, ${esc(S.name)}!`) : T("¡Hola!", "Привет!");
+ const guide = `<div class="guide">${PORTRAITS.has("owl") ? `<img class="por big" src="img/p/owl.webp" alt="Nova">` : portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>${hi}</b> ${T("Soy Nova, tu guía.", "Я Нова, твой гид.")} ${nc ? T(`¿Seguimos? Tu próxima misión es con <b>${esc(nc.n)}</b>: ${esc(nc.es || nc.t)}.`, `Продолжим? Следующее задание с <b>${esc(nc.n)}</b>: ${esc(nc.es || nc.t)}.`) : T("¡Completaste el camino! Sigue charlando con tus amigos para subir de nivel.", "Ты прошёл(а) весь путь! Общайся с друзьями, чтобы расти дальше.")}</p>
+  <div class="gacts">${nc ? `<button class="btn" data-gk="${esc(nextK)}">▶ ${T("Continuar", "Продолжить")}</button>` : ""}<button class="btn ghost" data-gclass="1">🧑‍🏫 ${T("Clase", "Урок")}${dueCount() ? ` (${dueCount()} ${T("repaso" + (dueCount() > 1 ? "s" : ""), "повтор.")})` : ""}</button><button class="btn ghost" data-gtalk="1">${T("Charlar con Nova", "Поговорить с Новой")}</button>${UIRU ? "" : `<button class="btn ghost" data-gfree="1">Práctica libre</button>`}</div></div></div>`;
  $("#pMain").innerHTML = guide + route.map((d) => {
   const dDone = d.stops.filter((k) => st[k] === "done").length, locked = st[d.stops[0]] === "locked";
   return `<section class="dist ${locked ? "locked" : ""}"><div class="dban" style="background-image:url('${d.img}')"><div><b>${esc(d.name)}</b><span>${esc(d.es)}</span></div><em>${dDone}/${d.stops.length}</em></div>
   <div class="trail">${d.stops.map((k) => {
    const c = charOf(k), s = st[k], side = ["l", "c", "r", "c"][idx++ % 4];
-   return `<button class="stop ${s} ${side}" data-k="${esc(k)}" ${s === "locked" ? 'aria-disabled="true"' : ""}>${portraitHTML(k)}<span class="sl"><b>${esc(c.n)}</b><small>${esc(c.es || c.t)}</small>${s === "locked" ? "<small>🔒 Bloqueado</small>" : heartsHTML(k)}</span>${s === "open" ? `<span class="go">Empezar</span>` : ""}</button>`;
+   return `<button class="stop ${s} ${side}" data-k="${esc(k)}" ${s === "locked" ? 'aria-disabled="true"' : ""}>${portraitHTML(k)}<span class="sl"><b>${esc(c.n)}</b><small>${esc(c.es || c.t)}</small>${s === "locked" ? `<small>🔒 ${T("Bloqueado", "Закрыто")}</small>` : heartsHTML(k)}</span>${s === "open" ? `<span class="go">${T("Empezar", "Начать")}</span>` : ""}</button>`;
   }).join("")}</div></section>`;
- }).join("") + `<p class="note" style="text-align:center;margin:18px 0 90px">Termina una charla con al menos 3 frases tuyas para ganar estrellas y amistad.</p>`;
+ }).join("") + `<p class="note" style="text-align:center;margin:18px 0 90px">${T("Termina una charla con al menos 3 frases tuyas para ganar estrellas y amistad.", "Скажи хотя бы 3 фразы в разговоре, чтобы получить звёзды и дружбу.")}</p>`;
  show("path");
  const nx = $("#pMain .stop.open"); if (nx) setTimeout(() => nx.scrollIntoView({ block: "center", behavior: "smooth" }), 120);
 }
 function streakDays() { let n = 0; const d = new Date(); if (!stats.days[today()]) d.setDate(d.getDate() - 1); while (stats.days[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); } return n; }
 function renderPeople(route) {
  const ks = route.flatMap((d) => d.stops).filter((k) => rel[k]?.visits);
- $("#pMain").innerHTML = `<div class="wrap" style="padding-top:12px"><h2 style="font-size:22px">Personas que conoces</h2>${ks.length ? `<div class="people">${ks.map((k) => {
+ $("#pMain").innerHTML = `<div class="wrap" style="padding-top:12px"><h2 style="font-size:22px">${T("Personas que conoces", "Твои знакомые")}</h2>${ks.length ? `<div class="people">${ks.map((k) => {
   const c = charOf(k), r = rel[k];
-  return `<button class="person" data-k="${esc(k)}">${portraitHTML(k)}<span class="sp"><b>${esc(c.n)}</b><small>${FLV[lvlOf(k)].n} · nivel ${levelFor(k)}</small><small>${r.found.length} dato${r.found.length === 1 ? "" : "s"} descubierto${r.found.length === 1 ? "" : "s"}</small></span>${heartsHTML(k)}</button>`;
- }).join("")}</div>` : `<p class="empty">Aún no conoces a nadie. Empieza tu camino en «Llegada».</p>`}</div>`;
+  return `<button class="person" data-k="${esc(k)}">${portraitHTML(k)}<span class="sp"><b>${esc(c.n)}</b><small>${FLV[lvlOf(k)].n} · ${T("nivel", "уровень")} ${levelFor(k)}</small><small>${T(`${r.found.length} dato${r.found.length === 1 ? "" : "s"} descubierto${r.found.length === 1 ? "" : "s"}`, `Фактов узнано: ${r.found.length}`)}</small></span>${heartsHTML(k)}</button>`;
+ }).join("")}</div>` : `<p class="empty">${T("Aún no conoces a nadie. Empieza tu camino en «Llegada».", "Ты пока ни с кем не знаком. Начни путь с «Прибытия».")}</p>`}</div>`;
 }
 $("#pMain").onclick = (e) => {
  const ls = e.target.closest("[data-lesson]");
- if (ls) { if (ls.getAttribute("aria-disabled") === "true") return toast("Primero termina la clase anterior"); return startLesson(ls.dataset.lesson); }
+ if (ls) { if (ls.getAttribute("aria-disabled") === "true") return toast(T("Primero termina la clase anterior", "Сначала закончи предыдущий урок")); return startLesson(ls.dataset.lesson); }
  if (e.target.closest("[data-gclass]")) return goPath("classes");
  const g = e.target.closest("[data-gk],[data-gtalk],[data-gfree]");
  if (g) { if (g.dataset.gk) return stopSheet(g.dataset.gk); if (g.dataset.gfree) return goHome(); if (!hasAI()) return goSetup(); return openChat("owl", null, S.gfx === "off" ? "chat" : "world"); }
- const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast("Primero conoce a la persona anterior del camino"); stopSheet(b.dataset.k); };
+ const b = e.target.closest("[data-k]"); if (!b) return; if (b.getAttribute("aria-disabled") === "true") return toast(T("Primero conoce a la persona anterior del camino", "Сначала познакомься с предыдущим человеком")); stopSheet(b.dataset.k); };
 $("#pTabs").onclick = (e) => { const b = e.target.closest("[data-tab]"); if (!b) return; if (b.dataset.tab === "more") { goHome(); return; } goPath(b.dataset.tab); };
 $("#pSet").onclick = settingsSheet;
+$("#pWho").onclick = () => whoScreen();
 function stopSheet(k) {
  const c = charOf(k), r = relOf(k), lvl = lvlOf(k), next = XP_AT[lvl + 1];
  const facts = r.found.map((i) => r.bio[i]).filter(Boolean);
- openSheet(`<div class="ssh">${portraitHTML(k, "big")}<div class="sp"><h3>${esc(c.n)}</h3><p class="note">${esc(c.t)} · ${esc(c.es || "")}</p>${heartsHTML(k)}<p class="note"><b>${FLV[lvl].n}</b> · nivel ${levelFor(k)}${next ? ` · ${r.xp}/${next} puntos para «${FLV[lvl + 1].n}»` : " · ¡Nivel máximo!"}</p></div></div>
- <div class="mis"><b>🎯 Misión</b><p>${esc(MISSION_ES[lvl](c))}</p></div>
- <div class="field"><label>Lo que sabes de ${esc(c.n)}</label>${facts.length ? `<ul class="facts">${facts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : `<p class="note">${lvl < 2 ? "Cuando sean más amigos te contará cosas de su vida." : "Pregúntale por su vida para descubrir datos."}</p>`}</div>
- <div class="row" style="flex-wrap:wrap"><button class="btn" id="msGo">Empezar misión</button><button class="btn ghost" id="msNo">Cerrar</button></div>`);
+ openSheet(`<div class="ssh">${portraitHTML(k, "big")}<div class="sp"><h3>${esc(c.n)}</h3><p class="note">${esc(c.t)} · ${esc(c.es || "")}</p>${heartsHTML(k)}<p class="note"><b>${FLV[lvl].n}</b> · ${T("nivel", "уровень")} ${levelFor(k)}${next ? ` · ${r.xp}/${next} ${T("puntos para", "очков до")} «${FLV[lvl + 1].n}»` : T(" · ¡Nivel máximo!", " · Максимум!")}</p></div></div>
+ <div class="mis"><b>🎯 ${T("Misión", "Задание")}</b><p>${esc(MISSION_ES[lvl](c))}</p></div>
+ <div class="field"><label>${T("Lo que sabes de", "Что ты знаешь о")} ${esc(c.n)}</label>${facts.length ? `<ul class="facts">${facts.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : `<p class="note">${lvl < 2 ? T("Cuando sean más amigos te contará cosas de su vida.", "Когда вы подружитесь, он(а) расскажет о своей жизни.") : T("Pregúntale por su vida para descubrir datos.", "Спроси о жизни, чтобы узнать факты.")}</p>`}</div>
+ <div class="row" style="flex-wrap:wrap"><button class="btn" id="msGo">${T("Empezar misión", "Начать задание")}</button><button class="btn ghost" id="msNo">${T("Cerrar", "Закрыть")}</button></div>`);
  $("#msNo").onclick = closeSheet;
  $("#msGo").onclick = () => { closeSheet(); startMission(k); };
 }
 async function startMission(k) {
  if (!hasAI()) { toast(NEED_AI); return goSetup(); }
  const c = charOf(k), r = relOf(k), lvl = lvlOf(k);
- if (!r.bio?.length && lvl >= 1) { toast(`Preparando a ${c.n}…`); try { await ensureBio(k); } catch {} }
+ if (!r.bio?.length && lvl >= 1) { toast(T(`Preparando a ${c.n}…`, `Готовим ${c.n}…`)); try { await ensureBio(k); } catch {} }
  else if (!r.bio?.length) ensureBio(k).catch(() => {});
  mission = { k, lvl, xp0: r.xp, found0: r.found.length };
  const first = lvl === 0 && c.o ? null : `Start the conversation now: say your first line in character, following your mission, and ask me something. Keep it at level ${levelFor(k)}.`;
@@ -1723,9 +1766,9 @@ async function missionResult(k, stars, box, transcript) {
  saveRel();
  const after = lvlOf(k), next = XP_AT[after + 1];
  const div = document.createElement("div"); div.className = "relbox";
- div.innerHTML = `<div class="row" style="gap:10px;align-items:center">${portraitHTML(k)}<div class="sp"><b>Amistad con ${esc(c.n)}</b>${heartsHTML(k)}<small>${FLV[after].n}${next ? ` · ${r.xp}/${next} puntos` : ""}</small></div></div>`
-  + (after > before ? `<p class="lvup">🎉 ¡Ahora son <b>${FLV[after].n}</b>! La próxima charla será nivel <b>${levelFor(k)}</b>.</p>` : "")
-  + (newFacts.length ? `<p class="note"><b>Descubriste:</b><br>${newFacts.map(esc).join("<br>")}</p>` : "");
+ div.innerHTML = `<div class="row" style="gap:10px;align-items:center">${portraitHTML(k)}<div class="sp"><b>${T("Amistad con", "Дружба с")} ${esc(c.n)}</b>${heartsHTML(k)}<small>${FLV[after].n}${next ? ` · ${r.xp}/${next} ${T("puntos", "очков")}` : ""}</small></div></div>`
+  + (after > before ? `<p class="lvup">🎉 ${T("¡Ahora son", "Теперь вы")} <b>${FLV[after].n}</b>! ${T("La próxima charla será nivel", "Следующий разговор: уровень")} <b>${levelFor(k)}</b>.</p>` : "")
+  + (newFacts.length ? `<p class="note"><b>${T("Descubriste:", "Ты узнал(а):")}</b><br>${newFacts.map(esc).join("<br>")}</p>` : "");
  box.before(div);
  if (after > before) beep(1180);
  mission = null;
@@ -1734,7 +1777,7 @@ async function missionResult(k, stars, box, transcript) {
 /* ---------- clases con Nova: pizarra, cuaderno, ejercicios y repaso ----------
    Temario propio por niveles del MCER. Cada clase la arma la IA la primera vez
    y queda guardada para repasarla las veces que quieras (también sin internet). */
-const COURSE = [
+const COURSE_EN = [
  { id: "a1-hello", lvl: "A1", t: "Saludos y presentarte", goal: "greetings, introducing yourself (Hi, my name is..., I'm from..., Nice to meet you)", k: "airport" },
  { id: "a1-be", lvl: "A1", t: "El verbo «to be»", goal: "verb to be: I am / you are / he is, negatives and yes/no questions", k: "airport" },
  { id: "a1-num", lvl: "A1", t: "Números, precios y la hora", goal: "numbers 1-100, prices in dollars, telling the time", k: "cafe" },
@@ -1759,6 +1802,32 @@ const COURSE = [
  { id: "b2-report", lvl: "B2", t: "Lo que otros dijeron", goal: "reported speech (she said that..., he asked if...)", k: "free" },
  { id: "b2-opinion", lvl: "B2", t: "Dar tu opinión y debatir", goal: "giving opinions, agreeing, disagreeing politely, hedging", k: "free" }
 ];
+const COURSE_ES = [
+ { id: "es-a1-hola", lvl: "A1", t: "Приветствия и знакомство", goal: "greetings and introductions in Spanish (hola, me llamo, soy de, mucho gusto, ¿cómo estás?)", k: "airport" },
+ { id: "es-a1-serestar", lvl: "A1", t: "Глаголы ser и estar", goal: "ser vs estar: identity, origin, profession vs state and location", k: "airport" },
+ { id: "es-a1-num", lvl: "A1", t: "Числа, цены и время", goal: "numbers 1-100, prices, ¿cuánto cuesta?, telling the time", k: "cafe" },
+ { id: "es-a1-pedir", lvl: "A1", t: "Вежливые просьбы", goal: "polite requests: quisiera, ¿me da...?, por favor, gracias, ¿me puede...?", k: "cafe" },
+ { id: "es-a1-genero", lvl: "A1", t: "Артикли и род", goal: "gender and articles: el/la/los/las, un/una, noun-adjective agreement", k: "grocery" },
+ { id: "es-a1-presente", lvl: "A1", t: "Настоящее время: правильные глаголы", goal: "present tense of regular -ar, -er, -ir verbs", k: "pharmacy" },
+ { id: "es-a1-irreg", lvl: "A1", t: "Неправильные глаголы: tener, ir, hacer", goal: "present tense of tener, ir, hacer, querer, poder", k: "pharmacy" },
+ { id: "es-a1-hay", lvl: "A1", t: "Hay и estar: где что находится", goal: "hay vs está/están, prepositions of place (en, al lado de, cerca de)", k: "landlord" },
+ { id: "es-a2-gustar", lvl: "A2", t: "Глагол gustar", goal: "gustar, encantar, interesar with me/te/le/nos/les", k: "neighbor" },
+ { id: "es-a2-indef", lvl: "A2", t: "Прошедшее время: pretérito indefinido", goal: "pretérito indefinido of regular and common irregular verbs (fui, tuve, hice)", k: "neighbor" },
+ { id: "es-a2-imperf", lvl: "A2", t: "Прошедшее время: imperfecto", goal: "pretérito imperfecto for habits and descriptions in the past", k: "bank" },
+ { id: "es-a2-futuro", lvl: "A2", t: "Будущее: ir a + инфинитив", goal: "near future with ir a + infinitive and simple future", k: "bank" },
+ { id: "es-a2-comp", lvl: "A2", t: "Сравнения", goal: "comparatives and superlatives (más... que, menos... que, el mejor)", k: "restaurant" },
+ { id: "es-a2-imper", lvl: "A2", t: "Повелительное наклонение", goal: "affirmative imperative (tú/usted) for instructions and requests", k: "interview" },
+ { id: "es-b1-perf", lvl: "B1", t: "Pretérito perfecto", goal: "pretérito perfecto (he comido, ¿has estado...?) vs indefinido", k: "interview" },
+ { id: "es-b1-deber", lvl: "B1", t: "Советы и обязанности", goal: "tener que, deber, hay que, es necesario", k: "clinic" },
+ { id: "es-b1-subj", lvl: "B1", t: "Субхунтив: желания и просьбы", goal: "present subjunctive after quiero que, espero que, ojalá", k: "dmv" },
+ { id: "es-b1-porpara", lvl: "B1", t: "Por и para", goal: "the most common uses of por and para", k: "mechanic" },
+ { id: "es-b1-historia", lvl: "B1", t: "Рассказать историю", goal: "telling a story with connectors (primero, luego, después, al final, porque, así que)", k: "church" },
+ { id: "es-b2-si", lvl: "B2", t: "Условные предложения", goal: "si clauses: si + presente, si + imperfecto de subjuntivo + condicional", k: "free" },
+ { id: "es-b2-subjpas", lvl: "B2", t: "Субхунтив в прошедшем", goal: "imperfect subjunctive (quería que fuera, si tuviera)", k: "free" },
+ { id: "es-b2-indirecto", lvl: "B2", t: "Косвенная речь", goal: "reported speech (dijo que..., me preguntó si...)", k: "free" },
+ { id: "es-b2-opinion", lvl: "B2", t: "Мнения и дискуссия", goal: "giving opinions, agreeing and disagreeing politely (creo que, no estoy de acuerdo)", k: "free" }
+];
+const COURSE = TL === LANGS.es ? COURSE_ES : COURSE_EN;
 const SRS = [1, 3, 7, 14, 30]; // días hasta el siguiente repaso
 let lessons = store.get("lessons", {});
 const saveLessons = () => store.set("lessons", lessons);
@@ -1769,11 +1838,11 @@ function lessonOpen(i) { return i === 0 || lessons[COURSE[i - 1].id]?.done || LV
 
 function renderClasses() {
  let lastLvl = "";
- $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay"><b>Clases con Nova.</b> Saca tu cuaderno ✍️. Te explico en la pizarra, practicamos juntos y repasamos cuando se te olvide.${dueCount() ? ` Tienes <b>${dueCount()} repaso${dueCount() > 1 ? "s" : ""}</b> pendiente${dueCount() > 1 ? "s" : ""}.` : ""}</p></div></div>`
+ $("#pMain").innerHTML = `<div class="guide">${portraitHTML("owl", "big")}<div class="sp"><p class="gsay">${T("<b>Clases con Nova.</b> Saca tu cuaderno ✍️. Te explico en la pizarra, practicamos juntos y repasamos cuando se te olvide.", "<b>Уроки с Новой.</b> Возьми тетрадь ✍️. Я объясню на доске, мы потренируемся и повторим, когда забудешь.")}${dueCount() ? T(` Tienes <b>${dueCount()} repaso${dueCount() > 1 ? "s" : ""}</b> pendiente${dueCount() > 1 ? "s" : ""}.`, ` Повторений на сегодня: <b>${dueCount()}</b>.`) : ""}</p></div></div>`
   + COURSE.map((l, i) => {
-   const st = lessons[l.id], open = lessonOpen(i), head = l.lvl !== lastLvl ? `<h3 class="lvh">Nivel ${l.lvl}</h3>` : ""; lastLvl = l.lvl;
-   const badge = isDue(l.id) ? `<em class="due">🔁 Repasar</em>` : st?.done ? `<em class="ok">✓ ${st.best}%</em>` : open ? `<em class="new">Nueva</em>` : `<em>🔒</em>`;
-   return `${head}<button class="lesson ${open ? "" : "locked"}" data-lesson="${l.id}" ${open ? "" : 'aria-disabled="true"'}><span class="ln">${i + 1}</span><span class="sp"><b>${esc(l.t)}</b><small>Prepara tu charla con ${esc(charOf(l.k).n)}</small></span>${badge}</button>`;
+   const st = lessons[l.id], open = lessonOpen(i), head = l.lvl !== lastLvl ? `<h3 class="lvh">${T("Nivel", "Уровень")} ${l.lvl}</h3>` : ""; lastLvl = l.lvl;
+   const badge = isDue(l.id) ? `<em class="due">🔁 ${T("Repasar", "Повторить")}</em>` : st?.done ? `<em class="ok">✓ ${st.best}%</em>` : open ? `<em class="new">${T("Nueva", "Новый")}</em>` : `<em>🔒</em>`;
+   return `${head}<button class="lesson ${open ? "" : "locked"}" data-lesson="${l.id}" ${open ? "" : 'aria-disabled="true"'}><span class="ln">${i + 1}</span><span class="sp"><b>${esc(l.t)}</b><small>${T("Prepara tu charla con", "Подготовка к разговору с")} ${esc(charOf(l.k).n)}</small></span>${badge}</button>`;
   }).join("") + `<div style="height:96px"></div>`;
 }
 
@@ -1783,28 +1852,28 @@ async function startLesson(id, fresh = false) {
  if (!hasAI() && !lessons[id]?.data) { toast(NEED_AI); return goSetup(); }
  const l = COURSE.find((x) => x.id === id), st = lessonState(id);
  L = { l, data: st.data, i: 0, score: 0, total: 0, answered: false };
- $("#lsTitle").textContent = l.t; $("#lsLvl").textContent = "Nivel " + l.lvl;
- $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsSay").innerHTML = `<b>Nova:</b> Preparando la clase en la pizarra…`; $("#lsAct").innerHTML = ""; $("#lsDots").innerHTML = "";
+ $("#lsTitle").textContent = l.t; $("#lsLvl").textContent = T("Nivel ", "Уровень ") + l.lvl;
+ $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Preparando la clase en la pizarra…", "Готовлю урок на доске…")}`; $("#lsAct").innerHTML = ""; $("#lsDots").innerHTML = "";
  show("lesson"); hush();
  if (!L.data || fresh) {
   try { L.data = await makeLesson(l); st.data = L.data; saveLessons(); }
-  catch (e) { $("#lsSay").innerHTML = `<b>Nova:</b> No pude preparar la clase: ${esc(e.message)}`; $("#lsAct").innerHTML = `<button class="btn" id="lsRetry">Intentar otra vez</button>`; $("#lsRetry").onclick = () => startLesson(id, true); return; }
+  catch (e) { $("#lsSay").innerHTML = `<b>Nova:</b> ${T("No pude preparar la clase", "Не получилось подготовить урок")}: ${esc(e.message)}`; $("#lsAct").innerHTML = `<button class="btn" id="lsRetry">${T("Intentar otra vez", "Попробовать снова")}</button>`; $("#lsRetry").onclick = () => startLesson(id, true); return; }
  }
  renderStep();
 }
 async function makeLesson(l) {
  const job = S.job ? ` The learner works as: ${S.job}; use examples from their life when natural.` : "";
- const out = await oneShot(`You are Nova, a friendly robot English teacher. Your student is an adult native Spanish speaker from Latin America who lives in the USA.${job}
+ const out = await oneShot(`You are Nova, a friendly robot ${TL.name} teacher. Your student is an adult native ${NL.name} speaker. You explain in ${NL.name} and teach ${TL.name}${TL === LANGS.es ? " (neutral Latin American Spanish)" : ""}.${job}
 Create a short, clear lesson.
-Lesson title (Spanish): "${l.t}". Grammar/vocabulary focus: ${l.goal}. Level: ${l.lvl}.
+Lesson title (${NL.name}): "${l.t}". Grammar/vocabulary focus: ${l.goal}. Level: ${l.lvl}.
 Return ONLY valid JSON (no markdown, no comments) with this shape:
 {"steps":[
- {"type":"explain","es":"short explanation in simple Spanish, max 45 words","board":["short board line","..."],"say":["English example to read aloud"]},
- {"type":"notebook","es":"tell the student what to copy, in Spanish","board":["line to copy","..."]},
- {"type":"choice","es":"instruction in Spanish","q":"English sentence with ___ or a question","options":["option A","option B","option C"],"answer":"the correct option, copied exactly","why":"why, in Spanish, max 20 words"},
- {"type":"write","es":"instruction in Spanish","q":"a Spanish sentence to translate, or a question to answer in English","answer":"a model answer in English","why":"tip in Spanish, max 20 words"}
+ {"type":"explain","es":"short explanation in simple ${NL.name}, max 45 words","board":["short board line","..."],"say":["${TL.name} example to read aloud"]},
+ {"type":"notebook","es":"tell the student what to copy, in ${NL.name}","board":["line to copy","..."]},
+ {"type":"choice","es":"instruction in ${NL.name}","q":"${TL.name} sentence with ___ or a question","options":["option A","option B","option C"],"answer":"the correct option, copied exactly","why":"why, in ${NL.name}, max 20 words"},
+ {"type":"write","es":"instruction in ${NL.name}","q":"a ${NL.name} sentence to translate, or a question to answer in ${TL.name}","answer":"a model answer in ${TL.name}","why":"tip in ${NL.name}, max 20 words"}
 ]}
-Rules: 9 to 11 steps. Alternate: explain a little, then practice it. Board lines: max 38 characters each, max 5 lines per step, English examples with the key part in CAPITALS. Include exactly 2 notebook steps, at least 3 choice and at least 2 write steps. Everyday examples from life in the USA. The last step is an explain step that summarizes the lesson.`, 1400);
+Rules: 9 to 11 steps. Alternate: explain a little, then practice it. Board lines: max 38 characters each, max 5 lines per step, ${TL.name} examples with the key part in CAPITALS. Include exactly 2 notebook steps, at least 3 choice and at least 2 write steps. Everyday examples from real life. The last step is an explain step that summarizes the lesson.`, 1400);
  const j = JSON.parse(out.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
  const steps = (j.steps || []).filter((s) => s && s.type && (s.es || s.q)).slice(0, 12);
  if (steps.length < 4) throw new Error("la clase salió incompleta");
@@ -1818,20 +1887,21 @@ function renderStep() {
  const nova = (t) => { $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(t)}`; };
  let board = "", act = "";
  if (st.type === "explain" || st.type === "notebook") {
-  board = (st.type === "notebook" ? `<p class="chalk nb">✍️ Cópialo en tu cuaderno</p>` : "") + chalk(st.board);
+  board = (st.type === "notebook" ? `<p class="chalk nb">✍️ ${T("Cópialo en tu cuaderno", "Запиши в тетрадь")}</p>` : "") + chalk(st.board);
   nova(st.es || "");
-  act = `${(st.say || st.board || []).length ? `<button class="btn ghost" id="lsHear">🔊 Escuchar</button>` : ""}<button class="btn" id="lsNext">${st.type === "notebook" ? "Ya lo copié ✓" : L.i === n - 1 ? "Terminar clase" : "Siguiente"}</button>`;
+  act = `${(st.say || st.board || []).length ? `<button class="btn ghost" id="lsHear">🔊 ${T("Escuchar", "Слушать")}</button>` : ""}<button class="btn" id="lsNext">${st.type === "notebook" ? T("Ya lo copié ✓", "Записал(а) ✓") : L.i === n - 1 ? T("Terminar clase", "Закончить урок") : T("Siguiente", "Дальше")}</button>`;
  } else if (st.type === "choice") {
   board = `<p class="chalk q">${esc(st.q || st.es || "")}</p>`;
-  nova(st.es || "Elige la opción correcta.");
+  nova(st.es || T("Elige la opción correcta.", "Выбери правильный вариант."));
   act = `<div class="opts">${(st.options || []).map((o, i) => `<button class="opt" data-o="${i}">${esc(o)}</button>`).join("")}</div>`;
  } else {
   board = `<p class="chalk q">${esc(st.q || st.es || "")}</p>`;
-  nova(st.q ? (st.es || "Escribe tu respuesta en inglés.") : "Escribe tu respuesta en inglés.");
-  act = `<div class="wans"><button class="ib" id="lsMic" aria-label="Hablar">${ic("mic")}</button><input id="lsIn" placeholder="Escribe o di tu respuesta en inglés" autocomplete="off" enterkeyhint="send"><button class="btn" id="lsCheck">Comprobar</button></div>`;
+  const wr = T(`Escribe tu respuesta en ${TL === LANGS.en ? "inglés" : "español"}.`, "Напиши ответ по-испански.");
+  nova(st.q ? (st.es || wr) : wr);
+  act = `<div class="wans"><button class="ib" id="lsMic" aria-label="Hablar">${ic("mic")}</button><input id="lsIn" placeholder="${T("Escribe o di tu respuesta", "Напиши или скажи ответ")}" autocomplete="off" enterkeyhint="send"><button class="btn" id="lsCheck">${T("Comprobar", "Проверить")}</button></div>`;
  }
  $("#lsBoard").innerHTML = board;
- $("#lsAct").innerHTML = act + `<button class="lsask" id="lsAsk">🙋 Tengo una duda</button>`;
+ $("#lsAct").innerHTML = act + `<button class="lsask" id="lsAsk">🙋 ${T("Tengo una duda", "У меня вопрос")}</button>`;
  $("#lsBoard").scrollTop = 0;
  // Nova lee la explicación y luego los ejemplos en inglés
  if (st.type === "explain" || st.type === "notebook") readStep(st);
@@ -1846,10 +1916,10 @@ let readTurn = 0;
 function feedback(ok, st, extra = "") {
  L.total++; if (ok) L.score++;
  L.answered = true;
- $("#lsSay").innerHTML = `<b>Nova:</b> ${ok ? "✅ ¡Muy bien!" : `❌ Casi. La respuesta: <b>${esc(st.answer)}</b>.`} ${esc(st.why || "")} ${esc(extra)}`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${ok ? T("✅ ¡Muy bien!", "✅ Отлично!") : `❌ ${T("Casi. La respuesta:", "Почти. Ответ:")} <b>${esc(st.answer)}</b>.`} ${esc(st.why || "")} ${esc(extra)}`;
  beep(ok ? 990 : 330);
  if (!ok) speak(st.answer, "en", null, "owl");
- const next = document.createElement("button"); next.className = "btn"; next.id = "lsNext"; next.textContent = "Siguiente";
+ const next = document.createElement("button"); next.className = "btn"; next.id = "lsNext"; next.textContent = T("Siguiente", "Дальше");
  $("#lsAct").querySelector(".lsask").before(next);
 }
 $("#lsAct").onclick = async (e) => {
@@ -1874,27 +1944,27 @@ $("#lsAct").onclick = async (e) => {
   return;
  }
  if (t.closest("#lsCheck") && !L.answered) {
-  const ans = $("#lsIn").value.trim(); if (!ans) return toast("Escribe o di tu respuesta");
+  const ans = $("#lsIn").value.trim(); if (!ans) return toast(T("Escribe o di tu respuesta", "Напиши или скажи ответ"));
   if (norm(ans) === norm(st.answer)) return feedback(true, st);
   $("#lsCheck").innerHTML = loadingDots;
   try {
-   const out = await oneShot(`Exercise for a Spanish-speaking English learner (level ${L.l.lvl}): ${st.q || st.es}\nModel answer: ${st.answer}\nLearner's answer: ${ans}\nIs the learner's answer correct and natural enough? Small typos and capitalization are fine, and other correct wordings are fine. Reply with exactly two lines:\nYES or NO\nA short tip in Spanish (max 20 words).`, 60);
+   const out = await oneShot(`Exercise for a ${NL.name}-speaking ${TL.name} learner (level ${L.l.lvl}): ${st.q || st.es}\nModel answer: ${st.answer}\nLearner's answer: ${ans}\nIs the learner's answer correct and natural enough? Small typos and capitalization are fine, and other correct wordings are fine. Reply with exactly two lines:\nYES or NO\nA short tip in ${NL.name} (max 20 words).`, 60);
    const ok = /^\s*YES/i.test(out), tip = out.split("\n").slice(1).join(" ").trim();
    feedback(ok, st, tip);
   } catch (er) { feedback(norm(ans) === norm(st.answer), st); }
  }
 };
-const norm = (s) => String(s || "").toLowerCase().replace(/[’']/g, "'").replace(/[^a-z0-9' ]/g, " ").replace(/\s+/g, " ").trim();
+const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’']/g, "'").replace(/[^\p{L}\p{N}' ]/gu, " ").replace(/\s+/g, " ").trim();
 document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target?.id === "lsIn") { e.preventDefault(); $("#lsCheck")?.click(); } });
 function askNova(st) {
- openSheet(`<h3>Pregúntale a Nova</h3><p class="note">Escribe tu duda sobre esta parte de la clase (en español o inglés).</p><div class="field"><textarea id="dqTxt" placeholder="p. ej. ¿Cuándo uso «an» en vez de «a»?"></textarea></div><p class="note" id="dqOut"></p><div class="row"><button class="btn" id="dqGo">Preguntar</button><button class="btn ghost" id="dqNo">Cerrar</button></div>`);
+ openSheet(`<h3>${T("Pregúntale a Nova", "Спроси Нову")}</h3><p class="note">${T("Escribe tu duda sobre esta parte de la clase.", "Напиши свой вопрос об этой части урока.")}</p><div class="field"><textarea id="dqTxt" placeholder="${T("p. ej. ¿Cuándo uso «an» en vez de «a»?", "например: когда ser, а когда estar?")}"></textarea></div><p class="note" id="dqOut"></p><div class="row"><button class="btn" id="dqGo">${T("Preguntar", "Спросить")}</button><button class="btn ghost" id="dqNo">${T("Cerrar", "Закрыть")}</button></div>`);
  $("#dqNo").onclick = closeSheet;
  $("#dqGo").onclick = async () => {
   const q = $("#dqTxt").value.trim(); if (!q) return;
   if (busy) return toast("Espera un momento…");
   $("#dqOut").innerHTML = loadingDots;
   try {
-   const a = await oneShot(`You are Nova, a patient English teacher. Lesson: "${L.l.t}" (${L.l.goal}), level ${L.l.lvl}. Current board: ${(st.board || [st.q]).join(" / ")}.\nThe student (native Spanish speaker) asks: "${q}"\nAnswer in simple Spanish, max 70 words, with 1 or 2 short English examples.`, 220);
+   const a = await oneShot(`You are Nova, a patient ${TL.name} teacher. Lesson: "${L.l.t}" (${L.l.goal}), level ${L.l.lvl}. Current board: ${(st.board || [st.q]).join(" / ")}.\nThe student (native ${NL.name} speaker) asks: "${q}"\nAnswer in simple ${NL.name}, max 70 words, with 1 or 2 short ${TL.name} examples.`, 220);
    $("#dqOut").textContent = a; speak(a, "es", null, "owl");
   } catch (e) { $("#dqOut").textContent = e.message; }
  };
@@ -1907,25 +1977,168 @@ function finishLesson() {
  else if (st.done) st.due = Date.now() + 86400000;
  saveLessons();
  const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0, ch = charOf(L.l.k);
- $("#lsBoard").innerHTML = `<p class="chalk q">${passed ? "¡Clase completada!" : "¡Buen intento!"}</p><p class="chalk">${L.score} de ${L.total} ejercicios bien (${pct} %)</p>${passed ? `<p class="chalk">Próximo repaso: en ${SRS[st.reps - 1]} día${SRS[st.reps - 1] > 1 ? "s" : ""}</p>` : `<p class="chalk">Repite la clase cuando quieras.</p>`}`;
+ $("#lsBoard").innerHTML = `<p class="chalk q">${passed ? T("¡Clase completada!", "Урок пройден!") : T("¡Buen intento!", "Хорошая попытка!")}</p><p class="chalk">${L.score} ${T("de", "из")} ${L.total} ${T("ejercicios bien", "упражнений верно")} (${pct} %)</p>${passed ? `<p class="chalk">${T("Próximo repaso: en", "Следующее повторение через")} ${SRS[st.reps - 1]} ${T("día" + (SRS[st.reps - 1] > 1 ? "s" : ""), "дн.")}</p>` : `<p class="chalk">${T("Repite la clase cuando quieras.", "Повтори урок, когда захочешь.")}</p>`}`;
  $("#lsDots").innerHTML = "";
- $("#lsSay").innerHTML = `<b>Nova:</b> <span class="stars" style="font-size:30px;justify-content:flex-start">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</span> ${passed ? `Ahora practica lo aprendido conversando con <b>${esc(ch.n)}</b>.` : "Repasa la pizarra y vuelve a intentarlo. ¡Tú puedes!"}`;
- $("#lsAct").innerHTML = `${passed ? `<button class="btn" id="lsGoTalk">Practicar con ${esc(ch.n)}</button>` : ""}<button class="btn ghost" id="lsAgain">Repetir clase</button><button class="btn ghost" id="lsNew">Nueva versión</button><button class="btn ghost" id="lsList">Volver a clases</button>`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> <span class="stars" style="font-size:30px;justify-content:flex-start">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</span> ${passed ? T(`Ahora practica lo aprendido conversando con <b>${esc(ch.n)}</b>.`, `Теперь потренируйся в разговоре с <b>${esc(ch.n)}</b>.`) : T("Repasa la pizarra y vuelve a intentarlo. ¡Tú puedes!", "Повтори доску и попробуй ещё раз. У тебя получится!")}`;
+ $("#lsAct").innerHTML = `${passed ? `<button class="btn" id="lsGoTalk">${T("Practicar con", "Практика с")} ${esc(ch.n)}</button>` : ""}<button class="btn ghost" id="lsAgain">${T("Repetir clase", "Повторить урок")}</button><button class="btn ghost" id="lsNew">${T("Nueva versión", "Новая версия")}</button><button class="btn ghost" id="lsList">${T("Volver a clases", "К урокам")}</button>`;
  if (passed) beep(1180);
  const k = L.l.k, id = L.l.id;
  $("#lsAct").querySelector("#lsAgain").onclick = (e) => { e.stopPropagation(); startLesson(id); };
  $("#lsAct").querySelector("#lsNew").onclick = (e) => { e.stopPropagation(); startLesson(id, true); };
  $("#lsAct").querySelector("#lsList").onclick = (e) => { e.stopPropagation(); goPath("classes"); };
- const gt = $("#lsAct").querySelector("#lsGoTalk"); if (gt) gt.onclick = (e) => { e.stopPropagation(); const s = stopState(ROUTE())[k]; if (s === "locked") { toast("Esa persona aún está bloqueada en tu camino"); return goPath("path"); } goPath("path"); stopSheet(k); };
+ const gt = $("#lsAct").querySelector("#lsGoTalk"); if (gt) gt.onclick = (e) => { e.stopPropagation(); const s = stopState(ROUTE())[k]; if (s === "locked") { toast(T("Esa persona aún está bloqueada en tu camino", "Этот человек пока закрыт на твоём пути")); return goPath("path"); } goPath("path"); stopSheet(k); };
  addInput(L.data.steps.map((s) => (s.board || []).join(" ")).join(" ").slice(0, 400));
 }
-$("#lsBack").onclick = () => { readTurn++; hush(); goPath("classes"); };
+$("#lsBack").onclick = () => { readTurn++; hush(); const wasTest = !!P; P = null; goPath(wasTest ? "path" : "classes"); };
+
+/* ---------- familia: perfiles, quién eres y tabla de progreso ----------
+   Cada persona tiene su perfil en el teléfono (con PIN opcional) y su propio idioma.
+   La tabla compara el progreso de todos los perfiles de este teléfono. */
+const RU_TITLES = { "a1-hello": "Приветствия и знакомство", "a1-be": "Глагол «to be»", "a1-num": "Числа, цены и время", "a1-polite": "Вежливые просьбы", "a1-art": "Артикли и множественное число", "a1-pres": "Present Simple", "a1-do": "Вопросы с do / does", "a1-there": "There is / there are", "a2-past1": "Прошедшее: правильные глаголы", "a2-past2": "Прошедшее: неправильные глаголы", "a2-future": "Будущее: going to и will", "a2-can": "Can и could: просьбы", "a2-comp": "Сравнения", "a2-cont": "Present Continuous", "b1-perf": "Present Perfect", "b1-advice": "Советы и обязанности", "b1-if1": "Условные предложения 1", "b1-phrasal": "Фразовые глаголы", "b1-story": "Рассказать историю", "b2-if23": "Условные предложения 2 и 3", "b2-passive": "Пассивный залог", "b2-report": "Косвенная речь", "b2-opinion": "Мнения и дискуссия" };
+if (UIRU && TL === LANGS.en) COURSE.forEach((l) => { l.t = RU_TITLES[l.id] || l.t; });
+const LANG_LABEL = { en: { es: "Inglés", ru: "Английский" }, es: { es: "Español", ru: "Испанский" }, ru: { es: "Ruso", ru: "Русский" } };
+const FLAG = { en: "🇺🇸", es: "🇵🇪", ru: "🇷🇺" };
+function profiles() {
+ let list = [];
+ try { list = JSON.parse(localStorage.getItem("tynl_profiles") || "[]"); } catch {}
+ if (!list.length) list = [{ id: "", name: S.name || "Yo", emoji: "🙂" }];
+ return list;
+}
+function saveProfiles(list) { try { localStorage.setItem("tynl_profiles", JSON.stringify(list)); } catch {} }
+function readOf(id, key, d) { try { const v = localStorage.getItem((id ? "lt_" + id + "_" : "lt_") + key); return v ? JSON.parse(v) : d; } catch { return d; } }
+function profileStats(p) {
+ const st = readOf(p.id, "settings", {}), stats = readOf(p.id, "stats", { days: {}, total: 0 }), rl = readOf(p.id, "rel", {}), ls = readOf(p.id, "lessons", {});
+ let streak = 0; const d = new Date(), key = (x) => x.toISOString().slice(0, 10);
+ if (!stats.days?.[key(d)]) d.setDate(d.getDate() - 1);
+ while (stats.days?.[key(d)]) { streak++; d.setDate(d.getDate() - 1); }
+ const week = Object.entries(stats.days || {}).filter(([k]) => Date.now() - new Date(k).getTime() < 7 * 86400000).reduce((a, [, v]) => a + v, 0);
+ return {
+  name: p.name, emoji: p.emoji || "🙂", target: st.target || "en", level: st.level || "A1",
+  streak, weekMin: Math.round(week / 130), totalH: +(((stats.total || 0) / 130) / 60).toFixed(1),
+  friends: Object.values(rl).filter((r) => r.xp >= 3).length, classes: Object.values(ls).filter((x) => x.done).length
+ };
+}
+function familyHTML() {
+ const rows = profiles().map(profileStats).sort((a, b) => b.weekMin - a.weekMin || b.streak - a.streak);
+ return `<div class="fam"><table><thead><tr><th></th><th>${T("Quién", "Кто")}</th><th>${T("Idioma", "Язык")}</th><th>${T("Nivel", "Ур.")}</th><th>🔥</th><th>${T("Min/sem", "Мин/нед")}</th><th>👥</th><th>📚</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${["🥇", "🥈", "🥉"][i] || ""}</td><td><b>${r.emoji} ${esc(r.name)}</b></td><td>${FLAG[r.target]}</td><td>${r.level}</td><td>${r.streak}</td><td>${r.weekMin}</td><td>${r.friends}</td><td>${r.classes}</td></tr>`).join("")}</tbody></table>
+ <p class="note">🔥 ${T("días seguidos", "дней подряд")} · 👥 ${T("amigos en el camino", "друзей на пути")} · 📚 ${T("clases terminadas", "уроков пройдено")}</p></div>`;
+}
+function whoScreen() {
+ const list = profiles();
+ $("#whoList").innerHTML = list.map((p) => { const ps = profileStats(p); return `<button class="who" data-pid="${esc(p.id)}"><span class="wav">${p.emoji || "🙂"}</span><b>${esc(p.name)}</b><small>${FLAG[ps.target]} ${LANG_LABEL[ps.target][UIRU ? "ru" : "es"]} · ${ps.level}${p.pin ? " · 🔒" : ""}</small></button>`; }).join("")
+  + `<button class="who add" data-new="1"><span class="wav">＋</span><b>${T("Nuevo perfil", "Новый профиль")}</b><small>${T("Para otra persona", "Для другого человека")}</small></button>`;
+ $("#whoFam").innerHTML = list.length > 1 ? `<h2>${T("Progreso de la familia", "Прогресс семьи")}</h2>${familyHTML()}` : "";
+ show("who");
+}
+function switchProfile(id) {
+ try { localStorage.setItem("tynl_profile", id); sessionStorage.setItem("tynl_unlocked", id || "main"); } catch {}
+ location.reload();
+}
+$("#whoList").onclick = (e) => {
+ if (e.target.closest("[data-new]")) return newProfileSheet();
+ const b = e.target.closest("[data-pid]"); if (!b) return;
+ const p = profiles().find((x) => x.id === b.dataset.pid); if (!p) return;
+ if (!p.pin) return switchProfile(p.id);
+ openSheet(`<h3>${esc(p.emoji)} ${esc(p.name)}</h3><div class="field"><label for="pinIn">PIN</label><input type="password" inputmode="numeric" maxlength="4" id="pinIn" autocomplete="off"></div><div class="row"><button class="btn" id="pinGo">${T("Entrar", "Войти")}</button><button class="btn ghost" id="pinNo">${T("Cancelar", "Отмена")}</button></div>`);
+ $("#pinNo").onclick = closeSheet; $("#pinIn").focus();
+ $("#pinGo").onclick = () => { if ($("#pinIn").value === p.pin) switchProfile(p.id); else toast(T("PIN incorrecto", "Неверный PIN")); };
+};
+function newProfileSheet() {
+ const em = ["👨", "👩", "👴", "👵", "👦", "👧", "🧑", "🦸"];
+ openSheet(`<h3>${T("Nuevo perfil", "Новый профиль")}</h3>
+ <div class="field"><label for="npName">${T("Nombre", "Имя")}</label><input type="text" id="npName" placeholder="${T("p. ej. Mamá", "например: Анастасия")}"></div>
+ <div class="field"><label>${T("Ícono", "Значок")}</label><div class="chips" id="npEm">${em.map((x, i) => `<button class="${i ? "" : "sel"}">${x}</button>`).join("")}</div></div>
+ <div class="field"><label>${T("¿Qué idioma habla?", "Родной язык")}</label><div class="seg" id="npNat" style="grid-template-columns:1fr 1fr"><button data-v="es" class="sel">🇵🇪 Español</button><button data-v="ru">🇷🇺 Русский</button></div></div>
+ <div class="field"><label>${T("¿Qué idioma quiere aprender?", "Какой язык учить?")}</label><div class="seg" id="npTar" style="grid-template-columns:1fr 1fr"><button data-v="en" class="sel">🇺🇸 English</button><button data-v="es">🇵🇪 Español</button></div></div>
+ <div class="field"><label for="npPin">${T("PIN de 4 números (opcional)", "PIN из 4 цифр (необязательно)")}</label><input type="password" inputmode="numeric" maxlength="4" id="npPin" autocomplete="off"></div>
+ <button class="btn" id="npGo" style="width:100%">${T("Crear y empezar", "Создать и начать")}</button>`);
+ const segPick = (id) => { $(id).onclick = (e) => { const b = e.target.closest("button"); if (!b) return; [...$(id).children].forEach((x) => x.classList.toggle("sel", x === b)); }; };
+ segPick("#npNat"); segPick("#npTar"); segPick("#npEm");
+ $("#npGo").onclick = () => {
+  const name = $("#npName").value.trim(); if (!name) return toast(T("Escribe un nombre", "Напиши имя"));
+  const nat = $("#npNat .sel").dataset.v, tar = $("#npTar .sel").dataset.v, pin = $("#npPin").value.trim();
+  if (nat === tar) return toast(T("Elige un idioma distinto al suyo", "Выбери язык, отличный от родного"));
+  if (pin && !/^\d{4}$/.test(pin)) return toast(T("El PIN debe tener 4 números", "PIN — 4 цифры"));
+  const id = "p" + Date.now().toString(36), list = profiles();
+  list.push({ id, name, emoji: $("#npEm .sel").textContent, pin: pin || "" }); saveProfiles(list);
+  try { localStorage.setItem("lt_" + id + "_settings", JSON.stringify({ name, target: tar, native: nat, level: "A1", v2: true, ai: S.ai, cloudUrl: S.cloudUrl, cloudCode: S.cloudCode, model: S.model, f16: S.f16, gfx: S.gfx, sug: "auto" })); } catch {}
+  switchProfile(id);
+ };
+}
+
+/* ---------- test de nivel (solo contesta lo que sabes) ---------- */
+let P = null; // { items, i, wrongRun, res: {A1:{ok,n},...} }
+async function startPlacement() {
+ L = null; P = { items: null, i: 0, wrongRun: 0, res: {} };
+ $("#lsTitle").textContent = T("Test de nivel", "Тест на уровень"); $("#lsLvl").textContent = LANG_LABEL[S.target || "en"][UIRU ? "ru" : "es"];
+ $("#lsDots").innerHTML = "";
+ $("#lsBoard").innerHTML = `<p class="chalk q">${T("Antes de empezar, veamos qué sabes.", "Сначала узнаем, что ты уже знаешь.")}</p><p class="chalk">${T("Contesta SOLO lo que sabes.", "Отвечай ТОЛЬКО то, что знаешь.")}</p><p class="chalk">${T("Si no lo sabes, toca «No lo sé». ¡No adivines!", "Если не знаешь — нажми «Не знаю». Не угадывай!")}</p><p class="chalk">${T("Así empiezas en tu nivel real.", "Так ты начнёшь со своего настоящего уровня.")}</p>`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Son unas 15 preguntas, de fácil a difícil. El test se detiene solo cuando ya no sabes más.", "Около 15 вопросов, от лёгких к трудным. Тест остановится сам, когда станет слишком сложно.")}`;
+ $("#lsAct").innerHTML = `<button class="btn" id="ptGo">${T("Empezar el test", "Начать тест")}</button><button class="btn ghost" id="ptSkip">${T("Empezar desde cero (A1)", "Начать с нуля (A1)")}</button>`;
+ show("lesson");
+ speak(T("Contesta solo lo que sabes. Si no lo sabes, toca No lo sé.", "Отвечай только то, что знаешь. Если не знаешь, нажми «Не знаю»."), "es", null, "owl");
+}
+async function loadPlacement() {
+ $("#lsBoard").innerHTML = `<p class="chalk">${loadingDots}</p>`; $("#lsAct").innerHTML = "";
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Preparando tus preguntas…", "Готовлю вопросы…")}`;
+ const out = await oneShot(`Create a placement test of ${TL.name} for a native ${NL.name} speaker.
+Return ONLY valid JSON: {"items":[{"lvl":"A1","q":"question","options":["a","b","c"],"answer":"the correct option copied exactly"}]}
+Exactly 15 items ordered from easy to hard: 3 A1, 3 A2, 3 B1, 3 B2, 3 C1. Mix grammar, vocabulary and reading comprehension of a short ${TL.name} sentence.
+The question can include a short instruction in ${NL.name}, but the tested language is ${TL.name}. Options must be plausible. No explanations.`, 1400);
+ const j = JSON.parse(out.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+ P.items = (j.items || []).filter((x) => x.q && x.options?.length >= 2 && x.answer && LV.includes(x.lvl)).slice(0, 18);
+ if (P.items.length < 8) throw new Error("test incompleto");
+ renderPlacement();
+}
+function renderPlacement() {
+ const it = P.items[P.i];
+ $("#lsDots").innerHTML = P.items.map((_, i) => `<i class="${i < P.i ? "d" : i === P.i ? "c" : ""}"></i>`).join("");
+ $("#lsBoard").innerHTML = `<p class="chalk nb">${it.lvl}</p><p class="chalk q">${esc(it.q)}</p>`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${T("Elige la respuesta, o toca «No lo sé».", "Выбери ответ или нажми «Не знаю».")}`;
+ $("#lsAct").innerHTML = `<div class="opts">${it.options.map((o, i) => `<button class="opt" data-po="${i}">${esc(o)}</button>`).join("")}<button class="opt idk" data-po="-1">🤷 ${T("No lo sé", "Не знаю")}</button></div>`;
+}
+function placementAnswer(idx) {
+ const it = P.items[P.i], ok = idx >= 0 && norm(it.options[idx]) === norm(it.answer);
+ const r = P.res[it.lvl] || (P.res[it.lvl] = { ok: 0, n: 0 }); r.n++; if (ok) r.ok++;
+ P.wrongRun = ok ? 0 : P.wrongRun + 1;
+ P.i++;
+ if (P.wrongRun >= 3 || P.i >= P.items.length) return finishPlacement();
+ renderPlacement();
+}
+function finishPlacement() {
+ let level = "A1";
+ for (const l of LV) { const r = P.res[l]; if (r && r.n && r.ok / r.n >= 0.66) level = l; else if (r && r.n) break; }
+ const total = Object.values(P.res).reduce((a, r) => a + r.ok, 0), asked = Object.values(P.res).reduce((a, r) => a + r.n, 0);
+ S.level = level; S.tested = true; saveS(); P = null;
+ $("#lsDots").innerHTML = "";
+ $("#lsBoard").innerHTML = `<p class="chalk q">${T("Tu nivel:", "Твой уровень:")} ${level}</p><p class="chalk">${total} ${T("de", "из")} ${asked} ${T("respuestas correctas", "верных ответов")}</p><p class="chalk">${T("Las charlas y clases empiezan aquí.", "Разговоры и уроки начнутся отсюда.")}</p>`;
+ $("#lsSay").innerHTML = `<b>Nova:</b> ${T("¡Gracias por contestar con honestidad! Así aprendes más rápido. Puedes repetir el test en Ajustes.", "Спасибо за честные ответы! Так ты научишься быстрее. Тест можно пройти заново в настройках.")}`;
+ $("#lsAct").innerHTML = `<button class="btn" id="ptDone">${T("Ir a mi camino", "К моему пути")}</button>`;
+ beep(1180);
+}
+const _lsActClick = $("#lsAct").onclick;
+$("#lsAct").onclick = async (e) => {
+ if (e.target.closest("#ptDone")) return goPath("path");
+ if (e.target.closest("#ptSkip")) { S.level = "A1"; S.tested = true; saveS(); P = null; return goPath("path"); }
+ if (e.target.closest("#ptGo")) { try { await loadPlacement(); } catch (er) { $("#lsSay").innerHTML = `<b>Nova:</b> ${esc(er.message)}`; $("#lsAct").innerHTML = `<button class="btn" id="ptGo">${T("Intentar otra vez", "Попробовать снова")}</button>`; } return; }
+ const po = e.target.closest("[data-po]"); if (P && po) return placementAnswer(+po.dataset.po);
+ if (P) return;
+ return _lsActClick(e);
+};
 
 /* ---------- arranque ---------- */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
 renderStats();
 if (!S.v2) { S.v2 = true; S.level = "A1"; saveS(); }
-if (!hasAI()) goSetup();
+{ const list = profiles(); if (!localStorage.getItem("tynl_profiles")) saveProfiles(list); const me = list.find((x) => x.id === PROFILE); $("#pWho").textContent = me?.emoji || "👤"; }
+$("#whoQ").textContent = T("¿Quién va a practicar?", "Кто будет заниматься?");
+[["path", T("Camino", "Путь")], ["classes", T("Clases", "Уроки")], ["people", T("Personas", "Люди")], ["more", T("Práctica libre", "Свободно")]].forEach(([k, n]) => { const b = document.querySelector(`#pTabs [data-tab="${k}"] span`); if (b) b.textContent = n; });
+if (UIRU) document.querySelector('#pTabs [data-tab="more"]').hidden = true;
+$("#inp").placeholder = T(`Escribe o habla en ${TL === LANGS.en ? "inglés" : "español"}…`, "Пиши или говори по-испански…"); $("#wInp").placeholder = $("#inp").placeholder;
+const needWho = profiles().length > 1 && (() => { try { return sessionStorage.getItem("tynl_unlocked") !== (PROFILE || "main"); } catch { return false; } })();
+if (needWho) whoScreen();
+else if (!hasAI()) goSetup();
+else if (S.v2 && PROFILE && !S.tested) startPlacement();
 else {
  goPath("path");
  if (cloudOn()) setEng("ok", "IA en la nube");
