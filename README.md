@@ -1,42 +1,71 @@
-LOOPTALK — inglés con IA sin internet
-=====================================
+TRY YOUR NEW LANGUAGE — inglés conversando, gratis
+===================================================
 
 Qué es
-- Una app web instalable (PWA). La IA (Llama 3.2 o Qwen 2.5) corre DENTRO del teléfono con WebGPU.
-- Se descarga una sola vez (0.9–2.3 GB). Después abre y conversa sin internet.
-- Nada de lo que escribes sale del teléfono. Sin suscripciones.
-
-Cómo publicarla (una sola vez, gratis). Necesita HTTPS para instalarse:
-Opción A — Netlify Drop (lo más fácil, desde la computadora)
-  1. Descomprime el zip.
-  2. Entra a https://app.netlify.com/drop y arrastra la carpeta "looptalk".
-  3. Te da un enlace https://algo.netlify.app → ábrelo en el teléfono.
-Opción B — GitHub Pages
-  1. Crea un repositorio, sube TODOS los archivos de la carpeta (sin la carpeta).
-  2. Settings → Pages → Deploy from branch → main / root.
-  3. Abre https://TU_USUARIO.github.io/NOMBRE_REPO/ en el teléfono.
-
-Instalar en el teléfono
-- Android (Chrome actualizado): abre el enlace → menú ⋮ → "Instalar app" / "Agregar a pantalla principal".
-- iPhone (iOS 26 o superior, Safari): Compartir → "Agregar a inicio". Usa el modelo "Ligero".
-- Abre la app, elige modelo, pulsa "Descargar y empezar" con wifi. Cuando llegue al 100 % ya funciona en modo avión.
+- Una app web instalable (PWA) para practicar inglés conversando con personajes en un mundo 3D.
+- Dos "cerebros" para el tutor:
+  · EN LA NUBE (recomendado): conversación natural y rápida. Usa tu propio servidor gratuito
+    (Cloudflare Workers) conectado a Google Gemini (plan gratuito). Necesita internet.
+  · EN EL TELÉFONO: la IA (Llama 3.2 o Qwen 2.5) corre dentro del teléfono con WebGPU, sin internet.
+    Si la nube falla por falta de internet y tienes un modelo descargado, la app lo usa como respaldo.
 
 Qué trae
-- Mundo 3D: Ollie, el búho profesor, te recibe en una calle de noche; cada lugar tiene su escenario y
-  su personaje animado (parpadea, mueve la boca al hablar, saluda). Todo se dibuja en el teléfono (three.js).
-- Cada visita trae una personalidad distinta del personaje, para que las charlas no se repitan.
-- Al salir: evaluación de vocabulario, gramática, fluidez y estilo, tus errores y la transcripción.
-- Paquetes de escenas: Día a día, Medicina, Camiones, Contabilidad, Escuela, Vida en EE. UU. y "Mis escenas"
-  (describe cualquier situación y el tutor hace el otro papel).
-- Correcciones (Ajustes): "Siempre" (bajo cada frase tuya), "Solo resumen" (al salir) o "No corregir".
-  El personaje no corta la charla; la corrección aparece aparte. Guarda tus errores en "Mis correcciones".
-- Perfil: tu trabajo y tus gustos; el tutor y las historias los usan.
-- Manos libres: conversas solo con la voz. Comandos: "repeat", "slower", "translate", "help", "stop".
-  Mantiene la pantalla encendida; si la bloqueas, el navegador detiene el micrófono.
+- Mundo 3D: Ollie, el búho profesor, y un personaje animado en cada lugar.
+- Tarjeta de sugerencias bajo cada respuesta: una frase que puedes decir, con
+  · Escuchar · Español (traducción) · Otra opción
+  · Practicar: lees la frase en voz alta y cada palabra se pone verde (bien) o roja (repítela).
+    Toca una palabra roja para escucharla despacio.
+  · "Di en español…": escribes o dices tu idea en español y te dice cómo decirla en inglés.
+  · Decirlo: la envía al personaje.
+- El texto del personaje se resalta palabra por palabra mientras habla. Toca cualquier palabra para ver
+  qué significa y guardarla.
+- Al salir: estrellas, puntos (con récord por lugar), evaluación de vocabulario, gramática, fluidez y
+  estilo, tus errores, y lo que contaste de ti (los personajes lo recuerdan la próxima vez).
+- Paquetes de escenas: Día a día, Medicina, Camiones, Contabilidad, Escuela, Vida en EE. UU. y "Mis escenas".
+- Manos libres: conversas solo con la voz ("repeat", "slower", "translate", "help", "stop").
 
-Notas
+
+CÓMO CONECTAR LA IA GRATIS EN LA NUBE (una sola vez, ~15 minutos)
+-----------------------------------------------------------------
+Necesitas una cuenta de Google y una cuenta gratuita de Cloudflare. No hace falta tarjeta de crédito
+para el plan gratuito de ninguna de las dos (revisa las condiciones al registrarte, pueden cambiar).
+Nota: en el plan gratuito de Gemini, Google puede usar tus conversaciones para mejorar sus modelos.
+
+1) Clave de Google Gemini
+   - Entra a https://aistudio.google.com con tu cuenta de Google.
+   - Busca "Get API key" → "Create API key". Copia la clave (empieza con "AIza…").
+   - No la compartas con nadie ni la pegues en la app: va solo en Cloudflare.
+
+2) Servidor en Cloudflare
+   - Crea una cuenta en https://dash.cloudflare.com (plan Free).
+   - Ve a "Workers & Pages" → "Create" → "Create Worker" (plantilla "Hello World").
+     Ponle un nombre, por ejemplo: tynl-ia → "Deploy".
+   - "Edit code": borra todo, pega el contenido de server/worker.js de este repositorio → "Deploy".
+
+3) Variables del servidor (en tu Worker → "Settings" → "Variables and Secrets" → "Add")
+   - AI_KEY        tipo Secret  → la clave de Gemini del paso 1
+   - APP_CODE      tipo Secret  → un código que tú inventes (p. ej. una frase larga). Evita que otros
+                                  usen tu servidor y gasten tu límite gratuito.
+   - ALLOW_ORIGIN  tipo Text    → https://hensisg.github.io
+   Guarda y vuelve a desplegar ("Deploy").
+   Opcional: AI_MODEL (por defecto gemini-2.5-flash) si Google cambia el nombre del modelo gratuito.
+
+4) En la app
+   - Ajustes → "Cambiar cerebro de la IA" → "En la nube".
+   - Dirección: la que te dio Cloudflare, p. ej. https://tynl-ia.TU-NOMBRE.workers.dev
+   - Código de acceso: el mismo APP_CODE → "Conectar y empezar".
+
+Si aparece "Se acabó el límite gratuito", espera un minuto (o hasta el día siguiente).
+
+
+Publicar la app
+- Está en GitHub Pages: https://hensisg.github.io/looptalk/ (Settings → Pages → main / root).
+- Ábrela en Chrome del teléfono → menú ⋮ → "Instalar app" / "Agregar a pantalla principal".
+
+Notas sobre la IA dentro del teléfono
 - Requiere WebGPU: Chrome Android reciente en teléfonos de gama media/alta, o iPhone con iOS 26+.
-- Voz que habla: usa las voces del sistema (funcionan sin internet si están instaladas en el teléfono).
-- Micrófono: el reconocimiento de voz del navegador a veces necesita internet. Sin conexión, usa el
-  dictado del teclado (botón de micrófono del teclado) o, en Chrome, Ajustes → "Descargar paquete de voz".
-- Si el teléfono se queda sin memoria al cargar, cambia al modelo "Ligero".
+- La app bloquea los modelos que no caben en la tarjeta gráfica del teléfono (si no, escriben texto sin
+  sentido) y corta la espera si la tarjeta gráfica se traba.
+- Abre la app en UNA sola pestaña: dos pestañas usando la tarjeta gráfica a la vez la traban.
+- Si se traba: cierra Chrome por completo desde apps recientes y vuelve a abrir.
+- Voz: usa las voces del sistema. El reconocimiento de voz del navegador a veces necesita internet.
