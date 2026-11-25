@@ -2,7 +2,11 @@
 // Todo se dibuja con figuras simples (sin imágenes), funciona sin internet.
 import * as THREE from "three";
 
-const M = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85, metalness: 0, ...o });
+let LOW = true;
+const M = (c, o = {}) => LOW
+  ? new THREE.MeshLambertMaterial({ color: c, flatShading: true, ...(o.side ? { side: o.side } : {}), ...(o.transparent ? { transparent: true, opacity: o.opacity } : {}) })
+  : new THREE.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85, metalness: 0, ...o });
+const addLight = (scene, l) => { if (!LOW) scene.add(l); };
 const B = (c) => new THREE.MeshBasicMaterial({ color: c });
 function mesh(geo, mat, x = 0, y = 0, z = 0, shadow = true) {
   const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z);
@@ -101,7 +105,7 @@ function makePerson(o) {
 function lights(scene, o) {
   scene.add(new THREE.HemisphereLight(o.sky, o.ground, o.hemi));
   const d = new THREE.DirectionalLight(o.sun, o.sunI); d.position.set(4, 9, 6);
-  d.castShadow = true; d.shadow.mapSize.set(1024, 1024);
+  d.castShadow = !LOW; d.shadow.mapSize.set(1024, 1024);
   Object.assign(d.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 30 });
   scene.add(d);
   const f = new THREE.DirectionalLight("#fff1de", o.fill ?? 0.9); f.position.set(0, 4, 14); scene.add(f);
@@ -114,20 +118,25 @@ function street(scene) {
   scene.add(mesh(box(60, 0.1, 6), M("#2c2e38"), 0, -0.15, -5));
   for (let x = -24; x < 24; x += 4) scene.add(mesh(box(1.6, 0.02, 0.15), B("#d8c46a"), x, -0.08, -5, false));
   const winOn = B("#ffd27a"), winOff = B("#2a2d46");
+  const wins = { on: [], off: [] };
   const colors = ["#8a3b2e", "#6b4a3a", "#4a5168", "#7a5a44", "#93463a", "#5b4a6b"];
   for (let i = -5; i <= 5; i++) {
     const w = rnd(3.6, 4.4), h = rnd(6, 12), x = i * 4.6, z = -10.5;
     const b = mesh(box(w, h, 4), M(colors[(i + 10) % colors.length]), x, h / 2, z); scene.add(b);
     scene.add(mesh(box(w + 0.2, 0.3, 4.2), M("#3a2a2a"), x, h, z));
-    for (let y = 1.6; y < h - 0.8; y += 1.5) for (let k = -1; k <= 1; k++) {
-      scene.add(mesh(new THREE.PlaneGeometry(0.7, 0.9), Math.random() < 0.55 ? winOn : winOff, x + k * 1.1, y, z + 2.01, false));
-    }
+    for (let y = 1.6; y < h - 0.8; y += 1.5) for (let k = -1; k <= 1; k++) (Math.random() < 0.55 ? wins.on : wins.off).push([x + k * 1.1, y, z + 2.01]);
     if (i % 2 === 0) scene.add(mesh(box(1.1, 1.9, 0.1), M("#2a1a14"), x, 0.95, z + 2.02));
+  }
+  const wg = new THREE.PlaneGeometry(0.7, 0.9), dummy = new THREE.Object3D();
+  for (const [list, mat] of [[wins.on, winOn], [wins.off, winOff]]) {
+    const im = new THREE.InstancedMesh(wg, mat, list.length);
+    list.forEach((pos, i) => { dummy.position.set(...pos); dummy.updateMatrix(); im.setMatrixAt(i, dummy.matrix); });
+    scene.add(im);
   }
   for (const x of [-4.2, 4.6]) { // farolas
     scene.add(mesh(cyl(0.07, 0.1, 4.2, 6), M("#23252e"), x, 2.1, -1.2));
     scene.add(mesh(ico(0.28, 1), B("#ffe4a3"), x, 4.25, -1.2, false));
-    const l = new THREE.PointLight("#ffcf7a", 14, 9, 1.6); l.position.set(x, 4, -1.2); scene.add(l);
+    const l = new THREE.PointLight("#ffcf7a", 14, 9, 1.6); l.position.set(x, 4, -1.2); addLight(scene, l);
   }
   for (const x of [-7.5, 8]) { // árboles
     scene.add(mesh(cyl(0.15, 0.2, 1.6, 6), M("#5a3b26"), x, 0.8, -0.8));
@@ -172,7 +181,7 @@ function cafe(scene, tint) {
     scene.add(mesh(cyl(0.01, 0.01, 2.2, 4), M("#222"), x, 6.1, 0.4, false));
     const sh = mesh(new THREE.ConeGeometry(0.4, 0.4, 8, 1, true), M("#2b2b2b", { side: THREE.DoubleSide }), x, 4.9, 0.4); scene.add(sh);
     scene.add(mesh(ico(0.14, 1), B("#ffe7b0"), x, 4.72, 0.4, false));
-    const l = new THREE.PointLight("#ffd08a", 7, 7, 1.6); l.position.set(x, 4.6, 0.4); scene.add(l);
+    const l = new THREE.PointLight("#ffd08a", 7, 7, 1.6); l.position.set(x, 4.6, 0.4); addLight(scene, l);
   }
   // plantas y ventana
   for (const x of [-5.6, 5.6]) { scene.add(mesh(cyl(0.35, 0.28, 0.7, 8), M("#c4703c"), x, 0.35, -2.8)); scene.add(mesh(ico(0.7, 0), M("#3f7d4f"), x, 1.2, -2.8)); }
@@ -215,12 +224,14 @@ function room(scene, tint, kind) {
 }
 
 /* ---------- motor ---------- */
-export function createWorld(canvas) {
+export function createWorld(canvas, opts = {}) {
+  LOW = opts.quality !== "high";
   let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "low-power" }); }
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !LOW, powerPreference: "low-power" }); }
   catch (e) { return null; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setPixelRatio(LOW ? Math.min(window.devicePixelRatio || 1, 1) : Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.shadowMap.enabled = !LOW; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  let busy = false, last = 0;
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 120);
   let scene = new THREE.Scene(), actor = null, conf = null, running = false, speaking = false;
   let waveUntil = 0, nodUntil = 0, nextBlink = 2, blinkEnd = 0, raf = 0, talkPhase = 0;
@@ -249,8 +260,12 @@ export function createWorld(canvas) {
     resize(); waveUntil = clock.getElapsedTime() + 1.6;
     if (!running) start();
   }
-  function animate() {
+  function animate(now) {
     raf = requestAnimationFrame(animate);
+    // límite de cuadros: 30 fps normal (24 en modo liviano), casi en pausa mientras la IA piensa
+    const fps = busy && !speaking ? 6 : LOW ? 24 : 30;
+    if (now - last < 1000 / fps) return;
+    last = now;
     const t = clock.getElapsedTime();
     if (actor) {
       const u = actor.userData;
@@ -281,12 +296,13 @@ export function createWorld(canvas) {
     }
     renderer.render(scene, camera);
   }
-  function start() { if (!running) { running = true; clock.start(); animate(); } }
+  function start() { if (!running) { running = true; clock.start(); raf = requestAnimationFrame(animate); } }
   function stop() { running = false; cancelAnimationFrame(raf); }
   document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); else if (conf && canvas.offsetParent) start(); });
   return {
     setScene, start, stop,
     setSpeaking(v) { speaking = !!v; },
+    setBusy(v) { busy = !!v; },
     wave() { waveUntil = clock.getElapsedTime() + 1.6; },
     nod() { nodUntil = clock.getElapsedTime() + 0.6; },
     get ok() { return true; }

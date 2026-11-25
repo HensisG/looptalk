@@ -434,7 +434,7 @@ const store = {
  get(k, d) { try { const v = localStorage.getItem("lt_" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
  set(k, v) { try { localStorage.setItem("lt_" + k, JSON.stringify(v)); } catch {} }
 };
-const S = Object.assign({ name: "", model: null, level: "B1", rate: 0.9, auto: true, voice: "", f16: null, corr: "always", pack: "daily", job: "", likes: "" }, store.get("settings", {}));
+const S = Object.assign({ gfx: "low", name: "", model: null, level: "B1", rate: 0.9, auto: true, voice: "", f16: null, corr: "always", pack: "daily", job: "", likes: "" }, store.get("settings", {}));
 const saveS = () => store.set("settings", S);
 let chats = store.get("chats", {});
 let vocab = store.get("vocab", []);
@@ -491,13 +491,13 @@ async function loadEngine(onProg) {
 }
 async function ask(messages, opts = {}, onTok) {
  const e = await loadEngine();
- busy = true; updTools();
+ busy = true; updTools(); world?.setBusy(true);
  try {
   const stream = await e.chat.completions.create({ messages, stream: true, temperature: opts.temp ?? 0.7, max_tokens: opts.max ?? 180, top_p: 0.9 });
   let out = "";
   for await (const ch of stream) { const d = ch.choices[0]?.delta?.content || ""; if (d) { out += d; onTok && onTok(out); } }
   return out.trim();
- } finally { busy = false; updTools(); }
+ } finally { busy = false; updTools(); world?.setBusy(false); }
 }
 async function oneShot(prompt, max = 120) {
  return ask([{ role: "system", content: "You are a precise, kind English teacher for a native Spanish speaker. Follow the requested format exactly. No markdown." }, { role: "user", content: prompt }], { temp: 0.2, max });
@@ -985,6 +985,7 @@ function settingsSheet() {
  const cm = MODELS.find((m) => m.id === S.model);
  openSheet(`<h3>Ajustes</h3>
  <div class="field"><label>Correcciones</label><div class="seg" id="corrSeg">${Object.entries(CORR).map(([k, n]) => `<button data-c="${k}" class="${k === S.corr ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">«Siempre»: corrige cada frase bajo tu mensaje (y en manos libres te dice el tip en voz alta). «Solo resumen»: te muestra tus errores al salir de la charla.</p></div>
+ <div class="field"><label>Calidad gráfica del mundo 3D</label><div class="seg" id="gfxSeg">${[["low", "Baja"], ["high", "Alta"], ["off", "Sin 3D"]].map(([k, n]) => `<button data-g="${k}" class="${k === S.gfx ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Si el teléfono se traba o se calienta, usa «Baja» o «Sin 3D». El cambio se aplica al reabrir la app.</p></div>
  <div class="field"><label>Tu nivel de inglés</label><div class="seg" id="lvSeg">${Object.keys(LEVELS).map((l) => `<button class="${l === S.level ? "sel" : ""}">${l}</button>`).join("")}</div><p class="note">A2 básico · B1 intermedio · B2 intermedio alto.</p></div>
  <div class="field"><label for="sName">Tu nombre</label><input type="text" id="sName" value="${esc(S.name)}" placeholder="Tu nombre"></div>
  <div class="field"><label for="sJob">A qué te dedicas</label><input type="text" id="sJob" value="${esc(S.job)}" placeholder="p. ej. médico, camionero, contador"></div>
@@ -995,6 +996,7 @@ function settingsSheet() {
  <div class="field"><label>Modelo de IA</label><p class="note">${cm ? `${cm.name} (${cm.size}) · ${S.f16 ? "precisión f16" : "precisión f32"}` : "Ninguno descargado"}</p><button class="btn ghost" id="chgModel">Cambiar o descargar modelo</button></div>
  ${SR && SR.install ? `<div class="field"><label>Reconocimiento de voz sin internet</label><p class="note">Chrome puede descargar el paquete de inglés para reconocer tu voz sin conexión (necesario para manos libres sin internet).</p><button class="btn ghost" id="srInst">Descargar paquete de voz</button></div>` : ""}
  <button class="btn" id="setOk" style="width:100%;margin-top:8px">Listo</button>`);
+ $("#gfxSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.gfx = b.dataset.g; saveS(); [...$("#gfxSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); toast("Cierra y vuelve a abrir la app para aplicar el cambio"); };
  $("#corrSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.corr = b.dataset.c; saveS(); [...$("#corrSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
  $("#lvSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.level = b.textContent; saveS(); [...$("#lvSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
  $("#sName").oninput = (e) => { S.name = e.target.value.trim(); saveS(); };
@@ -1013,7 +1015,7 @@ function settingsSheet() {
 let world = null, worldTried = false, hubMode = false, wPack = S.pack === "mine" ? "daily" : S.pack;
 function inWorld() { return $("#world").classList.contains("on"); }
 function getWorld() {
- if (!worldTried) { worldTried = true; try { world = createWorld($("#wc")); } catch { world = null; } }
+ if (!worldTried) { worldTried = true; if (S.gfx === "off") return null; try { world = createWorld($("#wc"), { quality: S.gfx }); } catch { world = null; } }
  return world;
 }
 function sceneFor(k) {
