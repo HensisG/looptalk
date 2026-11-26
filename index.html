@@ -380,6 +380,11 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
 .wctl .mic.rec{flex-direction:column}
 .wctl .ib.send{background:var(--ok);color:#fff;font-size:24px;font-weight:800}
 #wCancel{font-size:20px}
+#world.dimode .wctl .mic{background:#1e4f8f;box-shadow:0 6px 20px rgba(30,79,143,.55)}
+#world.dimode #wDi{background:#1e4f8f!important;color:#fff!important}
+.wcard .acts button.nextarrow.prev{right:auto;left:-6px;transform:translate(-100%,-50%)}
+@media (max-width:520px){.wcard .acts button.nextarrow.prev{left:auto;right:42px;transform:translateY(-130%)}}
+#wSkip{font-size:20px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -517,6 +522,7 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
   <div class="wctl" id="wCtl">
    <button class="ib" id="wKbd" aria-label="Escribir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></button>
    <button class="mic" id="wMic" aria-label="Hablar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+   <button class="ib" id="wSkip" aria-label="Saltar turno">⏭</button>
    <button class="ib" id="wCancel" aria-label="Cancelar" hidden>🗑</button>
    <button class="ib send" id="wSend" aria-label="Enviar" hidden>✓</button>
    <button class="ib" id="wHelp" aria-label="¿Qué digo?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg></button>
@@ -1436,6 +1442,7 @@ function settingsSheet() {
  <div class="field"><label>${T("Tamaño de letra", "Размер текста")}</label><div class="seg" id="zoomSeg">${[[1, T("Normal", "Обычный")], [1.2, T("Grande", "Крупный")], [1.4, T("Muy grande", "Очень крупный")]].map(([z, n]) => `<button data-z="${z}" class="${(S.zoom || 1) == z ? "sel" : ""}">${n}</button>`).join("")}</div></div>
  <div class="field"><label>Tu trabajo en el camino</label><div class="seg" id="profSeg" style="grid-template-columns:1fr 1fr">${Object.entries(PROF_PACKS).map(([k, n]) => `<button data-p="${k}" class="${k === profPack() ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Las misiones del barrio «Trabajo».</p></div>
  ${cloudOn() ? `<div class="field"><label><input type="checkbox" id="cvChk" ${S.cvoice !== false ? "checked" : ""}> Voz natural para cada personaje</label><p class="note">Cada persona tiene su propia voz (usa tu servidor gratuito). Si se acaba el límite del día, se usa la voz del teléfono.</p></div>` : ""}
+ <div class="field"><label>${T("Espera antes de la sugerencia", "Пауза перед подсказкой")}</label><div class="seg" id="waitSeg">${[[0, "0 s"], [4, "4 s"], [8, "8 s"]].map(([v, n]) => `<button data-w="${v}" class="${(S.sugWait ?? 4) == v ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">${T("Primero intenta responder tú; si te quedas en blanco, aparece la ayuda.", "Сначала попробуй ответить сам; если не получится — появится подсказка.")}</p></div>
  <div class="field"><label>Sugerencias de respuesta</label><div class="seg" id="sugSeg">${[["auto", "Siempre"], ["ask", "Si las pido"], ["off", "Nunca"]].map(([k, n]) => `<button data-s="${k}" class="${k === S.sug ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Una frase que puedes decir, con práctica de pronunciación y «Di en español…». «Si las pido»: toca el botón de ayuda.</p></div>
  ${S.facts?.length ? `<div class="field"><label>Lo que la app recuerda de ti</label><p class="note">${S.facts.map(esc).join(" · ")}</p><button class="btn ghost" id="forget">Olvidar todo</button></div>` : ""}
  <div class="field"><label>Calidad gráfica del mundo 3D</label><div class="seg" id="gfxSeg">${[["low", "Baja"], ["high", "Alta"], ["off", "Sin 3D"]].map(([k, n]) => `<button data-g="${k}" class="${k === S.gfx ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Si el teléfono se traba o se calienta, usa «Baja» o «Sin 3D». El cambio se aplica al reabrir la app.</p></div>
@@ -1459,6 +1466,7 @@ function settingsSheet() {
  $("#setTest").onclick = () => { closeSheet(); if (!hasAI()) return toast(NEED_AI); startPlacement(); };
  $("#profSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.prof = b.dataset.p; saveS(); [...$("#profSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
  if ($("#cvChk")) $("#cvChk").onchange = (e) => { S.cvoice = e.target.checked; saveS(); };
+ $("#waitSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.sugWait = +b.dataset.w; saveS(); [...$("#waitSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
  $("#sugSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.sug = b.dataset.s; saveS(); [...$("#sugSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if (S.sug === "off") hideCard(); };
  if ($("#forget")) $("#forget").onclick = () => { S.facts = []; saveS(); settingsSheet(); };
  $("#corrSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.corr = b.dataset.c; saveS(); [...$("#corrSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
@@ -1612,14 +1620,17 @@ function renderCard() {
  $("#wCardAlts").innerHTML = "";
  $("#wCard").classList.toggle("multi", card.opts.length > 1);
  $("#wCardActs").innerHTML = card.loading ? "" : `<button data-c="pr" class="pill ${prRec ? "rec" : ""}">${ic("mic")}${prRec ? T("Te escucho…", "Слушаю…") : T("Practicar", "Практика")}</button><span class="sp"></span><button data-c="spk" class="round" aria-label="${T("Escuchar", "Слушать")}">${ic("spk")}</button><button data-c="tr" class="round" aria-label="${T("Traducir", "Перевод")}">${ic("tr")}</button><button data-c="use" class="go" aria-label="${T("Decirlo", "Сказать")}">${ic("check")}${T("Decirlo", "Сказать")}</button>`
-  + (card.opts.length > 1 ? `<button data-c="next" class="nextarrow" aria-label="${T("Otra respuesta", "Другой ответ")}">›</button>` : "");
+  + (card.opts.length > 1 ? `<button data-c="prev" class="nextarrow prev" aria-label="${T("Respuesta anterior", "Предыдущий ответ")}">‹</button><button data-c="next" class="nextarrow" aria-label="${T("Otra respuesta", "Другой ответ")}">›</button>` : "");
 }
 async function showSuggestions(key, force) {
  if (!inWorld() || hubMode || !key || cur !== key || key === "story") return;
  if (!force && S.sug !== "auto") return;
- card = { opts: [], i: 0, es: "", key, words: null, pct: -1, loading: true }; renderCard();
+ card = { opts: [], i: 0, es: "", key, words: null, pct: -1, loading: !(!force && (S.sugWait ?? 4) > 0) }; if (card.loading) renderCard(); else $("#wCard").hidden = true;
  try {
-  const o = await suggestReplies(); if (cur !== key || card.key !== key) return;
+  const t0 = Date.now(), o = await suggestReplies(); if (cur !== key || card.key !== key) return;
+  // Primero intenta tú: la sugerencia aparece después de unos segundos (como pide la práctica de producción).
+  const wait = force ? 0 : Math.max(0, (S.sugWait ?? 4) * 1000 - (Date.now() - t0));
+  if (wait) { $("#wCard").hidden = true; await new Promise((r) => setTimeout(r, wait)); if (cur !== key || card.key !== key || wRec || busy) return; }
   card.opts = o; card.loading = false; renderCard();
  } catch (e) { hideCard(); if (force) toast(e.message); }
 }
@@ -1657,6 +1668,7 @@ $("#wCardActs").onclick = async (e) => {
  const b = e.target.closest("[data-c]"); if (!b) return; const c = b.dataset.c, t = cardText();
  if (c === "spk") return speak(t);
  if (c === "pr") return practice();
+ if (c === "prev") { card.i = (card.i - 1 + card.opts.length) % card.opts.length; card.es = ""; card.fromEs = false; card.words = null; card.pct = -1; return renderCard(); }
  if (c === "next") { card.i = (card.i + 1) % card.opts.length; card.es = ""; card.fromEs = false; card.words = null; card.pct = -1; return renderCard(); }
  if (c === "use") { if (busy) return toast("Espera a que termine de responder"); hideCard(); return send(t); }
  if (c === "tr") {
@@ -1667,7 +1679,12 @@ $("#wCardActs").onclick = async (e) => {
   renderCard();
  }
 };
+let diMode = false;
 $("#wDi").onclick = () => {
+ if (SR) { diMode = !diMode; $("#world").classList.toggle("dimode", diMode); toast(diMode ? T("Habla en español y te digo cómo decirlo. Toca de nuevo «Di…» para salir.", "Говори по-русски, я скажу, как это сказать. Нажми «Скажи…» ещё раз, чтобы выйти.") : T("Volviste a hablar en el idioma que aprendes", "Снова говоришь на изучаемом языке")); return; }
+ diSheet();
+};
+function diSheet() {
  openSheet(`<h3>${T("Dilo en español", "Скажи по-русски")}</h3><p class="note">${T(`Escribe o di lo que quieres responder y te digo cómo decirlo en ${TL === LANGS.en ? "inglés" : "español"}.`, "Напиши или скажи, что хочешь ответить, и я скажу, как это по-испански.")}</p>
  <div class="field"><textarea id="diTxt" placeholder="${T("p. ej. Soy de Perú y llegué hace dos meses", "например: Я из России и живу здесь два года")}"></textarea></div>
  <div class="row" style="flex-wrap:wrap"><button class="btn ghost" id="diMic">${ic("mic")} ${T("Hablar en español", "Сказать по-русски")}</button><button class="btn" id="diGo">${T("Traducir", "Перевести")}</button></div>`);
@@ -1700,7 +1717,7 @@ function recUI(state) {
  const m = $("#wMic"), sec = Math.floor((Date.now() - rcT0) / 1000);
  m.classList.toggle("rec", state === "rec");
  m.innerHTML = state === "rec" ? `<span class="stopsq"></span><small>${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}</small>` : micSVG;
- $("#wKbd").hidden = state !== "idle"; $("#wHelp").hidden = state !== "idle";
+ $("#wKbd").hidden = state !== "idle"; $("#wHelp").hidden = state !== "idle"; $("#wSkip").hidden = state !== "idle";
  $("#wCancel").hidden = state === "idle"; $("#wSend").hidden = state !== "paused";
 }
 const micSVG = $("#wMic").innerHTML;
@@ -1710,7 +1727,7 @@ function recStart() {
  hush(); talkAnim(false);
  if (!rcT0) { rcT0 = Date.now(); rcBase = ""; rcText = ""; }
  rcBase = rcText ? rcText + " " : "";
- const r = wRec = newRec(); r.continuous = true;
+ const r = wRec = newRec(); r.continuous = true; if (diMode) r.lang = NL.code;
  r.onresult = (ev) => { let t = ""; for (const x of ev.results) t += x[0].transcript; rcText = (rcBase + t).trim(); $("#wSaid").innerHTML = `<span class="me" style="opacity:.8">${esc(rcText)}</span>`; };
  r.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
  r.onend = () => { wRec = null; clearInterval(rcTick); if (rcT0) { recUI(rcText ? "paused" : "idle"); if (!rcText) rcT0 = 0; else toast(T(`En pausa. Toca el micrófono para seguir o envía lo que dijiste.`, "Пауза. Нажми микрофон, чтобы продолжить, или отправь сказанное.")); } };
@@ -1720,7 +1737,25 @@ function recStart() {
 function recReset() { rcT0 = 0; rcText = ""; rcBase = ""; clearInterval(rcTick); try { wRec?.abort(); } catch {} wRec = null; recUI("idle"); }
 $("#wMic").onclick = () => { if (wRec) { try { wRec.stop(); } catch {} return; } recStart(); };
 $("#wCancel").onclick = () => { recReset(); $("#wSaid").innerHTML = ""; };
-$("#wSend").onclick = () => { const t = rcText.trim(); recReset(); if (t) send(t); };
+$("#wSkip").onclick = async () => {
+ if (!cur || busy) return; hush(); hideCard(); $("#wSaid").innerHTML = "";
+ const key = cur;
+ chats[key].msgs.push({ r: "user", hidden: true, t: "(The learner stays quiet this turn. Keep the conversation going naturally: say something short and ask a new easy question, ideally about one of the learner's interests.)" });
+ const m = await generate(); if (m && cur === key) showSuggestions(key);
+};
+$("#wSend").onclick = async () => {
+ const t = rcText.trim(); recReset(); if (!t) return;
+ if (!diMode) return send(t);
+ // modo «Di…»: traduce lo que dijiste en tu idioma y lo pone como frase para practicar
+ diMode = false; $("#world").classList.remove("dimode"); $("#wSaid").innerHTML = "";
+ const last = [...(chats[cur]?.msgs || [])].reverse().find((m) => m.r === "assistant" && !m.hidden);
+ card = { opts: [], i: 0, es: t, fromEs: true, key: cur, words: null, pct: -1, loading: true }; renderCard();
+ try {
+  const en = await oneShot(`In a conversation, the other person said: "${(last?.t || "").slice(0, 200)}"\nThe learner (${TL.name} level ${levelFor(cur)}) wants to answer this, said in ${NL.name}: "${t}"\nWrite how a native speaker would naturally say it in simple ${TL.name}. Output only the ${TL.name} sentence.`, 80);
+  const clean = en.replace(/^["“]|["”]$/g, "").trim();
+  card.opts = [clean]; card.loading = false; renderCard(); speak(clean);
+ } catch (er) { hideCard(); toast(er.message); }
+};
 $("#icoWorld").innerHTML = ic("flag");
 $("#worldBtn").onclick = () => goHub();
 $("#pathBtn").onclick = () => goPath("path");
