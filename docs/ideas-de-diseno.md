@@ -11,7 +11,10 @@ Notas de la revisión de LingoLooper del 25/11/2026: solo se observó la experie
 - Tarjetita de palabra con pronunciación (IPA), significado, tipo de palabra, guardar y traducir.
 - Grabar con tiempo visible, pausa, Cancelar y Enviar.
 - Texto que se resalta mientras habla el personaje; traducción debajo.
-- Resumen con estrellas, fluidez/vocabulario, memoria de lo que contaste.
+- Resumen con estrellas, fluidez/vocabulario, memoria de lo que contaste, y confeti.
+- Pantalla limpia mientras hablas y mientras el personaje responde.
+- Barra de meta en cada misión; al cumplirla el personaje se despide y aparece «Ver mi resultado».
+- Meta diaria de minutos (5/10/20) con su barra en el camino.
 
 ## Pendiente (buenas ideas para después)
 - Música suave y sonido ambiente por escena (calle, cafetería, hospital) con controles de volumen.

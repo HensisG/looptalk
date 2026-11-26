@@ -385,6 +385,21 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
 .wcard .acts button.nextarrow.prev{right:auto;left:-6px;transform:translate(-100%,-50%)}
 @media (max-width:520px){.wcard .acts button.nextarrow.prev{left:auto;right:42px;transform:translateY(-130%)}}
 #wSkip{font-size:20px}
+/* pantalla limpia mientras hablas o esperas */
+#world.focus .wcard,#world.focus .wsugs,#world.focus .wbub .acts,#world.focus .wpop{display:none!important}
+/* meta de la charla */
+.wgoal{position:relative;display:flex!important;align-items:center;gap:6px;margin-top:4px;width:min(180px,46vw);height:10px;border-radius:999px;background:rgba(255,255,255,.22);overflow:visible}
+.wgoal[hidden]{display:none!important}
+.wgoal i{display:block;height:100%;border-radius:999px;background:var(--sun);transition:width .4s}
+.wgoal em{position:absolute;right:-30px;top:-5px;font-style:normal;font-size:12px;font-weight:800;color:#fff}
+.wgoal.done i{background:#5ff5e6}.wgoal.done em{color:#5ff5e6;font-size:16px}
+/* confeti */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{top:105%;transform:rotate(720deg) translateX(40px)}}
+/* meta diaria */
+.dgoal{display:inline-block;width:56px;height:8px;border-radius:999px;background:rgba(255,255,255,.2);overflow:hidden;align-self:center}
+.dgoal b{display:block;height:100%;background:#5ff5e6;border-radius:999px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -498,7 +513,7 @@ span.gok{color:#9ff0b9}span.gbad{color:#ffb3aa;text-decoration:underline wavy}
  <div class="fade" id="wFade"></div>
  <div class="wtop">
   <button class="ib" id="wBack" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <div class="sp"><b id="wName">Try Your New Language</b><span id="wRole"></span><span id="wStat" class="wstat"></span></div>
+  <div class="sp"><b id="wName">Try Your New Language</b><span id="wRole"></span><span id="wStat" class="wstat"></span><div class="wgoal" id="wGoal" hidden><i></i><em></em></div></div>
   <button class="ib" id="wLog" aria-label="Ver la conversación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
   <button class="ib" id="wCam" aria-label="Cámara" hidden>📷</button>
   <button class="ib" id="wHf" aria-label="Manos libres"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H4zM17 14h3v6h-3z"/></svg></button>
@@ -1024,7 +1039,7 @@ Rules:
 - ${lv}
 - Do not stop the conversation to correct the learner (a separate teacher does that). If they make an error, simply use the correct form naturally in your reply.
 - If the learner writes in ${NL.name}, answer in simple ${TL.name} and help them say it.
-- Be warm and encouraging. No lists, no emojis, no markdown.${personaLine(k)}${relLine(k)}${learnerLine()}`;
+- Be warm and encouraging. No lists, no emojis, no markdown.${personaLine(k)}${relLine(k)}${learnerLine()}${goalLine(k)}`;
 }
 function personaLine(k) {
  const p = chats[k]?.persona; if (!p || k === "owl") return "";
@@ -1130,11 +1145,12 @@ async function send(text) {
  if (!hasAI()) return toast(NEED_AI);
  if (rec) rec.stop();
  const um = { r: "user", t: text }, key = cur;
- chats[cur].msgs.push(um); $("#inp").value = ""; grow(); $("#sugs").innerHTML = ""; if (inWorld()) { showSaid(um); $("#wSugs").innerHTML = ""; hideCard(); }
+ chats[cur].msgs.push(um); $("#inp").value = ""; grow(); $("#sugs").innerHTML = ""; if (inWorld()) { showSaid(um); $("#wSugs").innerHTML = ""; hideCard(); $("#world").classList.add("focus"); }
  renderMsgs(); saveChats();
  const reply = await generate();
  if (reply && S.corr === "always" && cur !== "story") { try { await checkLine(um); } catch {} }
- if (reply && cur === key) showSuggestions(key);
+ updGoal(); $("#world").classList.remove("focus");
+ if (reply && cur === key) { if (goalN(key) && saidCount(key) >= goalN(key)) showFinish(key); else showSuggestions(key); }
 }
 function continueStory(first) {
  const t = chats.story.topic || "daily life";
@@ -1246,6 +1262,7 @@ Consejo: <one encouraging tip in ${NL.name}, max 25 words>`, 120);
    scoreBox.innerHTML = `<div class="stars">${[1, 2, 3].map((n) => `<span class="${n <= stars ? "on" : ""}">★</span>`).join("")}</div><div class="pts">${pts}<small>${record ? T("¡Nuevo récord! · ", "Новый рекорд! · ") : T("puntos · ", "очков · ")}${nWords} ${T("palabras tuyas", "твоих слов")}</small></div>`
     + sc.map(([n, v]) => `<div class="sc"><span>${n}</span><span class="tr"><i style="width:${v * 10}%"></i></span><b>${v}/10</b></div>`).join("") + (tip ? `<p class="note">${esc(tip)}</p>` : "");
    if (stars >= 2) beep(990);
+   if (stars >= 1) confetti();
    const transcript = chats[k].msgs.slice(sessionStart).filter((m) => !m.hidden).map((m) => (m.r === "user" ? "Learner: " : charOf(k).n + ": ") + m.t).join("\n").slice(-6000);
    await missionResult(k, stars, scoreBox, transcript);
    stats.evals = [...(stats.evals || []), { d: today(), s: sc.map((x) => x[1]) }].slice(-60); store.set("stats", stats);
@@ -1442,6 +1459,7 @@ function settingsSheet() {
  <div class="field"><label>${T("Tamaño de letra", "Размер текста")}</label><div class="seg" id="zoomSeg">${[[1, T("Normal", "Обычный")], [1.2, T("Grande", "Крупный")], [1.4, T("Muy grande", "Очень крупный")]].map(([z, n]) => `<button data-z="${z}" class="${(S.zoom || 1) == z ? "sel" : ""}">${n}</button>`).join("")}</div></div>
  <div class="field"><label>Tu trabajo en el camino</label><div class="seg" id="profSeg" style="grid-template-columns:1fr 1fr">${Object.entries(PROF_PACKS).map(([k, n]) => `<button data-p="${k}" class="${k === profPack() ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Las misiones del barrio «Trabajo».</p></div>
  ${cloudOn() ? `<div class="field"><label><input type="checkbox" id="cvChk" ${S.cvoice !== false ? "checked" : ""}> Voz natural para cada personaje</label><p class="note">Cada persona tiene su propia voz (usa tu servidor gratuito). Si se acaba el límite del día, se usa la voz del teléfono.</p></div>` : ""}
+ <div class="field"><label>${T("Meta diaria", "Цель на день")}</label><div class="seg" id="dailySeg">${[[5, T("Relajado · 5 min", "Легко · 5 мин")], [10, T("Regular · 10 min", "Обычно · 10 мин")], [20, T("Serio · 20 min", "Серьёзно · 20 мин")]].map(([v, n]) => `<button data-d="${v}" class="${(S.dailyMin || 10) == v ? "sel" : ""}">${n}</button>`).join("")}</div></div>
  <div class="field"><label>${T("Espera antes de la sugerencia", "Пауза перед подсказкой")}</label><div class="seg" id="waitSeg">${[[0, "0 s"], [4, "4 s"], [8, "8 s"]].map(([v, n]) => `<button data-w="${v}" class="${(S.sugWait ?? 4) == v ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">${T("Primero intenta responder tú; si te quedas en blanco, aparece la ayuda.", "Сначала попробуй ответить сам; если не получится — появится подсказка.")}</p></div>
  <div class="field"><label>Sugerencias de respuesta</label><div class="seg" id="sugSeg">${[["auto", "Siempre"], ["ask", "Si las pido"], ["off", "Nunca"]].map(([k, n]) => `<button data-s="${k}" class="${k === S.sug ? "sel" : ""}">${n}</button>`).join("")}</div><p class="note">Una frase que puedes decir, con práctica de pronunciación y «Di en español…». «Si las pido»: toca el botón de ayuda.</p></div>
  ${S.facts?.length ? `<div class="field"><label>Lo que la app recuerda de ti</label><p class="note">${S.facts.map(esc).join(" · ")}</p><button class="btn ghost" id="forget">Olvidar todo</button></div>` : ""}
@@ -1466,6 +1484,7 @@ function settingsSheet() {
  $("#setTest").onclick = () => { closeSheet(); if (!hasAI()) return toast(NEED_AI); startPlacement(); };
  $("#profSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.prof = b.dataset.p; saveS(); [...$("#profSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
  if ($("#cvChk")) $("#cvChk").onchange = (e) => { S.cvoice = e.target.checked; saveS(); };
+ $("#dailySeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.dailyMin = +b.dataset.d; saveS(); [...$("#dailySeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if ($("#path").classList.contains("on")) goPath(); };
  $("#waitSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.sugWait = +b.dataset.w; saveS(); [...$("#waitSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); };
  $("#sugSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; S.sug = b.dataset.s; saveS(); [...$("#sugSeg").children].forEach((x) => x.classList.toggle("sel", x === b)); if (S.sug === "off") hideCard(); };
  if ($("#forget")) $("#forget").onclick = () => { S.facts = []; saveS(); settingsSheet(); };
@@ -1574,7 +1593,7 @@ function enterPlace(k) {
  show("world"); $("#wPacks").hidden = true; $("#wSugs").innerHTML = ""; $("#wCtl").hidden = false; $("#wForm").hidden = true;
  $("#wLog").hidden = false; $("#wHf").hidden = false; $("#wBack").hidden = false; $("#wMenu").hidden = true;
  $("#wName").textContent = c.n; $("#wRole").textContent = `${c.t} · nivel ${levelFor(k)}`;
- showSaid(null); hideCard(); syncBubble();
+ showSaid(null); hideCard(); syncBubble(); setTimeout(updGoal, 0);
  if (call) startCall(k); else fadeTo(() => w.setScene(sceneFor(k), charFor(k), c.c));
  const i = lastAssistantIndex();
  if (i >= 0 && chats[k].msgs.length - 1 === i) setTimeout(() => {
@@ -1670,6 +1689,7 @@ $("#wCardActs").onclick = async (e) => {
  if (c === "pr") return practice();
  if (c === "prev") { card.i = (card.i - 1 + card.opts.length) % card.opts.length; card.es = ""; card.fromEs = false; card.words = null; card.pct = -1; return renderCard(); }
  if (c === "next") { card.i = (card.i + 1) % card.opts.length; card.es = ""; card.fromEs = false; card.words = null; card.pct = -1; return renderCard(); }
+ if (c === "finish") { $("#world").classList.remove("focus"); return $("#wBack").click(); }
  if (c === "use") { if (busy) return toast("Espera a que termine de responder"); hideCard(); return send(t); }
  if (c === "tr") {
   if (card.es) { card.es = ""; return renderCard(); }
@@ -1731,10 +1751,10 @@ function recStart() {
  r.onresult = (ev) => { let t = ""; for (const x of ev.results) t += x[0].transcript; rcText = (rcBase + t).trim(); $("#wSaid").innerHTML = `<span class="me" style="opacity:.8">${esc(rcText)}</span>`; };
  r.onerror = (ev) => { if (ev.error !== "no-speech" && ev.error !== "aborted") toast(srErr(ev.error)); };
  r.onend = () => { wRec = null; clearInterval(rcTick); if (rcT0) { recUI(rcText ? "paused" : "idle"); if (!rcText) rcT0 = 0; else toast(T(`En pausa. Toca el micrófono para seguir o envía lo que dijiste.`, "Пауза. Нажми микрофон, чтобы продолжить, или отправь сказанное.")); } };
- recUI("rec"); rcTick = setInterval(() => recUI("rec"), 500);
+ recUI("rec"); rcTick = setInterval(() => recUI("rec"), 500); $("#world").classList.add("focus");
  try { r.start(); } catch { wRec = null; clearInterval(rcTick); recUI("idle"); }
 }
-function recReset() { rcT0 = 0; rcText = ""; rcBase = ""; clearInterval(rcTick); try { wRec?.abort(); } catch {} wRec = null; recUI("idle"); }
+function recReset() { $("#world").classList.remove("focus"); rcT0 = 0; rcText = ""; rcBase = ""; clearInterval(rcTick); try { wRec?.abort(); } catch {} wRec = null; recUI("idle"); }
 $("#wMic").onclick = () => { if (wRec) { try { wRec.stop(); } catch {} return; } recStart(); };
 $("#wCancel").onclick = () => { recReset(); $("#wSaid").innerHTML = ""; };
 $("#wSkip").onclick = async () => {
@@ -1845,7 +1865,9 @@ function goPath(tab = pathTab) {
  const route = ROUTE(), st = stopState(route);
  const total = route.reduce((a, d) => a + d.stops.length, 0), done = Object.values(st).filter((x) => x === "done").length;
  const t = stats.days[today()] || 0;
- $("#pStats").innerHTML = `<span>🔥 ${streakDays()} ${T("días", "дн.")}</span><span>⭐ ${done}/${total} ${T("paradas", "шагов")}</span><span>🗣 ${Math.round(t / 130)} ${T("min hoy", "мин сегодня")}</span>`;
+ const goalMin = S.dailyMin || 10, todayMin = Math.round((stats.days[today()] || 0) / 130);
+ if (todayMin >= goalMin && S.goalDay !== today()) { S.goalDay = today(); saveS(); setTimeout(() => { toast(T(`🎉 ¡Cumpliste tu meta de hoy: ${goalMin} minutos!`, `🎉 Цель на сегодня выполнена: ${goalMin} мин!`)); confetti(); }, 400); }
+ $("#pStats").innerHTML = `<span class="dgoal" title="${T("Meta de hoy", "Цель на сегодня")}"><b style="width:${Math.min(100, todayMin / goalMin * 100)}%"></b></span>` + `<span>🔥 ${streakDays()} ${T("días", "дн.")}</span><span>⭐ ${done}/${total} ${T("paradas", "шагов")}</span><span>🗣 ${todayMin}/${goalMin} ${T("min hoy", "мин сегодня")}</span>`;
  if (tab === "people") return renderPeople(route), show("path");
  if (tab === "classes") return renderClasses(), show("path");
  if (tab === "exam") return renderExam(), show("path");
@@ -2344,6 +2366,40 @@ Return ONLY valid JSON: {"ipa":"IPA pronunciation","pos":"part of speech in ${TL
   wordInfo[key] = info; store.set("wordinfo", wordInfo);
  } catch { info = { def: T("No pude buscar la palabra ahora.", "Не удалось найти слово.") }; }
  if (!box.hidden && el.classList.contains("pick")) draw();
+}
+
+function confetti() {
+ const box = document.createElement("div"); box.className = "confetti";
+ const colors = ["#e8483b", "#ffc83d", "#5ff5e6", "#3b1f4a", "#1f9d63", "#ff8fab"];
+ for (let i = 0; i < 60; i++) {
+  const b = document.createElement("i");
+  b.style.left = Math.random() * 100 + "%"; b.style.background = colors[i % colors.length];
+  b.style.animationDelay = Math.random() * 0.6 + "s"; b.style.animationDuration = 1.6 + Math.random() * 1.4 + "s";
+  b.style.transform = `rotate(${Math.random() * 360}deg)`; box.appendChild(b);
+ }
+ document.body.appendChild(box); setTimeout(() => box.remove(), 3600);
+}
+/* ---------- meta de la charla: barra de progreso y despedida automática ---------- */
+function goalN(k) { return mission && mission.k === k ? 4 + Math.min(4, mission.lvl) : 0; }
+function saidCount(k) { return chats[k] ? chats[k].msgs.slice(sessionStart).filter((m) => m.r === "user" && !m.hidden).length : 0; }
+function updGoal() {
+ const k = cur, n = goalN(k), g = $("#wGoal"); if (!g) return;
+ if (!n || !inWorld()) { g.hidden = true; return; }
+ const c = Math.min(n, saidCount(k)); g.hidden = false;
+ g.querySelector("i").style.width = (c / n * 100) + "%";
+ g.querySelector("em").textContent = c >= n ? "✓" : `${c}/${n}`;
+ g.classList.toggle("done", c >= n);
+}
+function goalLine(k) {
+ const n = goalN(k); if (!n) return "";
+ return saidCount(k) >= n ? "\nThe learner has reached the goal of this conversation. In this reply, wrap up warmly in 1-2 short sentences and say goodbye. Do not ask a new question." : "";
+}
+function showFinish(k) {
+ $("#wCard").hidden = false; card = { opts: [], i: 0, es: "", key: k, words: null, pct: -1, loading: false };
+ $("#wCardHd").textContent = T("¡Meta cumplida!", "Цель выполнена!"); $("#wDi").innerHTML = "";
+ $("#wCardTxt").innerHTML = `🏁 ${T("Terminaste esta charla", "Разговор окончен")}`; $("#wCardEs").hidden = true; $("#wCardScore").hidden = true; $("#wCardAlts").innerHTML = "";
+ $("#wCardActs").innerHTML = `<span class="sp"></span><button data-c="finish" class="go">${T("Ver mi resultado", "Мой результат")} ▶</button>`;
+ beep(1180);
 }
 
 /* ---------- videollamada: el personaje a pantalla completa y tu cámara ---------- */
